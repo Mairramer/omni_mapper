@@ -5,7 +5,7 @@ import 'package:code_builder/code_builder.dart';
 import 'package:source_gen/source_gen.dart';
 
 class MapperGenerator extends Generator {
-  final typeChecker = const TypeChecker.fromUrl('package:mapper_annotation/mapper_annotation.dart#Mapper');
+  final typeChecker = const TypeChecker.fromUrl('package:omni_mapper/omni_mapper.dart#OmniMapper');
 
   @override
   String generate(LibraryReader library, BuildStep buildStep) {
@@ -44,7 +44,7 @@ class MapperGenerator extends Generator {
       return _generateAbstractClassMapper(element, annotation);
     } else {
       throw InvalidGenerationSourceError(
-        '`@Mapper` on a concrete class must specify a `target` or `from` type.',
+        '`@OmniMapper` on a concrete class must specify a `target` or `from` type.',
         element: element,
       );
     }

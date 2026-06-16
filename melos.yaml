@@ -1,0 +1,10 @@
+name: omni_mapper_workspace
+
+packages:
+  - "omni_mapper"
+  - "omni_mapper_generator"
+  - "example"
+
+command:
+  bootstrap:
+    usePubspecOverrides: true

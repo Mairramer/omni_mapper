@@ -2,35 +2,35 @@ library;
 
 /// Annotation used to generate mapping code for a class.
 ///
-/// The `mapper_generator` supports two main approaches:
+/// The `omni_mapper_generator` supports two main approaches:
 ///
 /// ### 1. Decentralized Extensions (Recommended)
-/// You can add multiple `@Mapper` annotations on your Model class to generate
+/// You can add multiple `@OmniMapper` annotations on your Model class to generate
 /// extension methods that convert between layers.
 ///
 /// **Mapping TO a target (Model -> Entity):**
 /// ```dart
-/// @Mapper(target: SolidesUser) // Default method is 'toEntity'
-/// class SolidesUserModel { ... }
+/// @OmniMapper(target: UserEntity) // Default method is 'toEntity'
+/// class UserModel { ... }
 /// ```
-/// Generates: `extension on SolidesUserModel { SolidesUser toEntity() { ... } }`
+/// Generates: `extension on UserModel { UserEntity toEntity() { ... } }`
 ///
 /// **Mapping FROM a source (Entity -> Model):**
 /// ```dart
-/// @Mapper(from: SolidesUser, methodName: 'toModel')
-/// class SolidesUserModel { ... }
+/// @OmniMapper(from: UserEntity, methodName: 'toModel')
+/// class UserModel { ... }
 /// ```
-/// Generates: `extension on SolidesUser { SolidesUserModel toModel() { ... } }`
+/// Generates: `extension on UserEntity { UserModel toModel() { ... } }`
 ///
-/// ### 2. Centralized Abstract Class (SmartStruct style)
+/// ### 2. Centralized Abstract Class
 /// If you prefer a centralized mapper, annotate an abstract class without target/from:
 /// ```dart
-/// @Mapper()
-/// abstract class SolidesUserMapper {
-///   SolidesUser toEntity(SolidesUserModel model);
+/// @OmniMapper()
+/// abstract class UserMapper {
+///   UserEntity toEntity(UserModel model);
 /// }
 /// ```
-class Mapper {
+class OmniMapper {
   /// The target type to convert the annotated class INTO.
   /// Use this when generating an extension ON the annotated class.
   final Type? target;
@@ -46,11 +46,11 @@ class Mapper {
   /// Useful when the target has a field that the source doesn't, or when you want to skip a specific field.
   final List<String> ignoreFields;
 
-  const Mapper({
+  const OmniMapper({
     this.target,
     this.from,
     this.methodName = 'toEntity',
     this.ignoreFields = const [],
   }) : assert(!(target != null && from != null),
-            'You cannot specify both `target` and `from` in the same annotation. Use multiple @Mapper annotations instead.');
+            'You cannot specify both `target` and `from` in the same annotation. Use multiple @OmniMapper annotations instead.');
 }

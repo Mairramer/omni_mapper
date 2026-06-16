@@ -1,7 +1,8 @@
 name: omni_mapper
-description: Annotations for the custom mapper code generator.
-version: 1.0.0
-publish_to: 'none'
+description: Annotations for the Omni Mapper code generator. Use this package to annotate your classes for mapping generation.
+version: 0.1.0
+homepage: https://github.com/Mairramer/omni_mapper
+repository: https://github.com/Mairramer/omni_mapper
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
