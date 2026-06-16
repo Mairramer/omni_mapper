@@ -1,16 +1,16 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'example.dart';
+part of 'approach_c_extension_from.dart';
 
 // **************************************************************************
 // MapperGenerator
 // **************************************************************************
 
-extension UserModelToEntity on UserModel {
-  UserEntity toEntity() {
-    return UserEntity(
+extension EntityCToModel on EntityC {
+  ModelC toModel() {
+    return ModelC(
       id: this.id,
-      name: this.name,
+      title: this.title,
     );
   }
 }

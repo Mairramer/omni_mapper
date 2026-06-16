@@ -1,31 +1,24 @@
 import 'package:analyzer/dart/element/element.dart';
 import 'package:build/build.dart';
+import 'package:omni_mapper/omni_mapper.dart';
 import 'package:source_gen/source_gen.dart';
 import 'generators/abstract_class_generator.dart';
 import 'generators/extension_generator.dart';
 
-class MapperGenerator extends Generator {
-  final typeChecker = const TypeChecker.fromUrl('package:omni_mapper/omni_mapper.dart#OmniMapper');
-
+class MapperGenerator extends GeneratorForAnnotation<OmniMapper> {
   @override
-  String generate(LibraryReader library, BuildStep buildStep) {
-    final values = <String>[];
-    for (final element in library.allElements) {
-      if (element is ClassElement) {
-        final annotations = typeChecker.annotationsOf(element);
-        for (final annotation in annotations) {
-          values.add(generateForAnnotatedElement(element, ConstantReader(annotation), buildStep));
-        }
-      }
-    }
-    return values.join('\n\n');
-  }
-
   String generateForAnnotatedElement(
-    ClassElement element,
+    Element element,
     ConstantReader annotation,
     BuildStep buildStep,
   ) {
+    if (element is! ClassElement) {
+      throw InvalidGenerationSourceError(
+        '`@OmniMapper` can only be applied to classes.',
+        element: element,
+      );
+    }
+
     final targetType = annotation.peek('target')?.typeValue;
     final fromType = annotation.peek('from')?.typeValue;
 
@@ -63,3 +56,4 @@ class MapperGenerator extends Generator {
     }
   }
 }
+
