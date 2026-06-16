@@ -13,3 +13,7 @@ dev_dependencies:
   build_runner: ^2.4.0
   omni_mapper_generator:
     path: ../omni_mapper_generator
+
+dependency_overrides:
+  omni_mapper:
+    path: ../omni_mapper
