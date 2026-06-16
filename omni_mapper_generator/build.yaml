@@ -1,0 +1,15 @@
+targets:
+  $default:
+    builders:
+      omni_mapper_generator|mapper_builder:
+        enabled: true
+
+builders:
+  mapper_builder:
+    target: ":omni_mapper_generator"
+    import: "package:omni_mapper_generator/omni_mapper_generator.dart"
+    builder_factories: ["mapperBuilder"]
+    build_extensions: { ".dart": [".mapper.g.part"] }
+    auto_apply: dependents
+    build_to: cache
+    applies_builders: ["source_gen|combining_builder"]
