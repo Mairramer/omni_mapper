@@ -9,9 +9,7 @@ part of 'approach_a_abstract_class.dart';
 class MapperAImpl extends MapperA {
   @override
   EntityA toEntity(ModelA model) {
-    return EntityA(
-      id: model.id,
-      title: model.title,
-    );
+    final target = EntityA(id: model.id, title: model.title);
+    return target;
   }
 }

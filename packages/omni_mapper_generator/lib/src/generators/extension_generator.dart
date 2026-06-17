@@ -1,5 +1,6 @@
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
+import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:code_builder/code_builder.dart';
 import 'package:source_gen/source_gen.dart';
 import '../core/mapping_body_builder.dart';
@@ -59,6 +60,9 @@ class ExtensionGenerator {
 
     final generateListMapper = annotation.peek('generateListMapper')?.boolValue ?? true;
     final generateUpdateMethod = annotation.peek('generateUpdateMethod')?.boolValue ?? true;
+    final strictMode = annotation.peek('strictMode')?.boolValue ?? false;
+    final ignoreIfNull = annotation.peek('ignoreIfNull')?.boolValue ?? false;
+    final hookType = annotation.peek('hook')?.typeValue;
 
     final codeBody = MappingBodyBuilder.build(
       sourceClass: sourceClass,
@@ -71,6 +75,8 @@ class ExtensionGenerator {
       fieldMaps: fieldMaps,
       defaultValues: defaultValues,
       converters: converters,
+      strictMode: strictMode,
+      hookType: hookType,
     );
 
     final extensionBuilder = Extension((e) {
@@ -90,14 +96,17 @@ class ExtensionGenerator {
         final updateBodyBuffer = StringBuffer();
 
         final sourceFieldNames = <String>{};
+        final sourceFieldTypes = <String, DartType>{};
         for (final f in sourceClass.fields) {
           if (!f.isStatic && f.name != null) {
             sourceFieldNames.add(f.name!);
+            sourceFieldTypes[f.name!] = f.type;
           }
         }
         for (final g in sourceClass.getters) {
           if (!g.isStatic && g.name != null) {
             sourceFieldNames.add(g.name!);
+            sourceFieldTypes[g.name!] = g.returnType;
           }
         }
 
@@ -119,7 +128,14 @@ class ExtensionGenerator {
           }
 
           if (sourceFieldNames.contains(sourceFieldName)) {
-            updateBodyBuffer.writeln('target.$fieldName = this.$sourceFieldName;');
+            final isNullable = sourceFieldTypes[sourceFieldName]?.nullabilitySuffix == NullabilitySuffix.question;
+            if (ignoreIfNull && isNullable) {
+              updateBodyBuffer.writeln(
+                'if (this.$sourceFieldName != null) target.$fieldName = this.$sourceFieldName!;',
+              );
+            } else {
+              updateBodyBuffer.writeln('target.$fieldName = this.$sourceFieldName;');
+            }
           } else if (defaultValues.containsKey(fieldName)) {
             updateBodyBuffer.writeln('target.$fieldName = ${defaultValues[fieldName]};');
           }

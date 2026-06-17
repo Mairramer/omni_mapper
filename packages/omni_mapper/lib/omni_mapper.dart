@@ -1,5 +1,8 @@
 library;
 
+export 'src/omni_converter.dart';
+export 'src/omni_hook.dart';
+
 /// Annotation used to generate mapping code for a class.
 ///
 /// The `omni_mapper_generator` supports two main approaches:
@@ -67,6 +70,21 @@ class OmniMapper {
   /// If true, generates an extension like `void updateTarget(Target target)`.
   final bool generateUpdateMethod;
 
+  /// Enables strict mode for mapping.
+  /// If true, the generator will throw an error if any field in the target class
+  /// is left unmapped (i.e. neither mapped from source, nor ignored, nor having a default value).
+  /// This helps prevent silent bugs when target classes are updated but mappers are not.
+  final bool strictMode;
+
+  /// If true, fields in the source object that are null will be ignored during an update.
+  /// This is useful for "PATCH" semantics where you only want to update fields that are provided.
+  /// Only affects the generated `updateTarget` method.
+  final bool ignoreIfNull;
+
+  /// A hook class that implements `OmniHook<Source, Target>`.
+  /// Provides `before` and `after` callbacks to inject custom logic during the mapping process.
+  final Type? hook;
+
   const OmniMapper({
     this.target,
     this.from,
@@ -77,6 +95,9 @@ class OmniMapper {
     this.converters = const [],
     this.generateListMapper = true,
     this.generateUpdateMethod = true,
+    this.strictMode = false,
+    this.ignoreIfNull = false,
+    this.hook,
   }) : assert(
          !(target != null && from != null),
          'You cannot specify both `target` and `from` in the same annotation. Use multiple @OmniMapper annotations instead.',
@@ -96,11 +117,4 @@ class OmniMapper {
 class OmniMappers {
   final List<OmniMapper> mappers;
   const OmniMappers(this.mappers);
-}
-
-/// Interface for custom type converters.
-/// Implement this class and pass its type to [OmniMapper.converters].
-abstract class OmniConverter<S, T> {
-  const OmniConverter();
-  T convert(S source);
 }

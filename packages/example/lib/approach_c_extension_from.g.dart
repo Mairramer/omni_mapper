@@ -8,10 +8,8 @@ part of 'approach_c_extension_from.dart';
 
 extension EntityCToModel on EntityC {
   ModelC toModel() {
-    return ModelC(
-      id: id,
-      title: title,
-    );
+    final target = ModelC(id: id, title: title);
+    return target;
   }
 
   void updateModelC(ModelC target) {}

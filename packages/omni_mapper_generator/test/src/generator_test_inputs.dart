@@ -18,7 +18,8 @@ class ModelA {
 class MapperAImpl extends MapperA {
   @override
   EntityA toEntity(ModelA model) {
-    return EntityA(id: model.id, title: model.title);
+    final target = EntityA(id: model.id, title: model.title);
+    return target;
   }
 }
 ''')
@@ -37,7 +38,8 @@ class EntityB {
 @ShouldGenerate(r'''
 extension ModelBToEntity on ModelB {
   EntityB toEntity() {
-    return EntityB(id: id, title: title);
+    final target = EntityB(id: id, title: title);
+    return target;
   }
 
   void updateEntityB(EntityB target) {}
@@ -66,7 +68,8 @@ class EntityC {
 @ShouldGenerate(r'''
 extension EntityCToModel on EntityC {
   ModelC toModel() {
-    return ModelC(id: id, title: title);
+    final target = ModelC(id: id, title: title);
+    return target;
   }
 
   void updateModelC(ModelC target) {}
@@ -102,11 +105,12 @@ class StringDateConverter extends OmniConverter<String, DateTime> {
 @ShouldGenerate(r'''
 extension ModelDToEntity on ModelD {
   EntityD toEntity() {
-    return EntityD(
+    final target = EntityD(
       id: userId,
       status: "active",
       createdAt: const StringDateConverter().convert(createdAt),
     );
+    return target;
   }
 
   void updateEntityD(EntityD target) {}
@@ -140,7 +144,8 @@ class MutableEntityE {
 @ShouldGenerate(r'''
 extension ModelEToMutableEntityE on ModelE {
   MutableEntityE toMutableEntityE() {
-    return MutableEntityE(id: id, name: name);
+    final target = MutableEntityE(id: id, name: name);
+    return target;
   }
 
   void updateMutableEntityE(MutableEntityE target) {
@@ -168,4 +173,123 @@ class ModelE {
 class InvalidConcreteClass {
   final int id;
   InvalidConcreteClass({required this.id});
+}
+
+// --- APPROACH F (Strict Mode - Success with Initializer & Default) ---
+class TargetF {
+  final int id;
+  final int rating;
+  int count = 0; // has initializer
+
+  TargetF({required this.id, this.rating = 5}); // rating has default value
+}
+
+@ShouldGenerate(r'''
+extension ModelFToTargetF on ModelF {
+  TargetF toTargetF() {
+    final target = TargetF(id: id);
+    return target;
+  }
+
+  void updateTargetF(TargetF target) {}
+}
+
+extension ModelFToTargetFList on Iterable<ModelF> {
+  List<TargetF> toTargetFList() {
+    return map((e) => e.toTargetF()).toList();
+  }
+}
+''')
+@OmniMapper(target: TargetF, strictMode: true, methodName: 'toTargetF')
+class ModelF {
+  final int id;
+  ModelF({required this.id});
+}
+
+// --- APPROACH G (Strict Mode - Error) ---
+class TargetG {
+  final int id;
+  String? unmapped;
+  TargetG({required this.id});
+}
+
+@ShouldThrow(
+  'Strict mode is enabled, but the following target properties are unmapped: unmapped.\n'
+  'To fix this, map them from the source, provide a defaultValue, or add them to ignoreFields.',
+)
+@OmniMapper(target: TargetG, strictMode: true, methodName: 'toTargetG')
+class ModelG {
+  final int id;
+  ModelG({required this.id});
+}
+
+// --- APPROACH H (Ignore If Null) ---
+class TargetH {
+  int? id;
+  String? name;
+  TargetH({this.id, this.name});
+}
+
+@ShouldGenerate(r'''
+extension ModelHToTargetH on ModelH {
+  TargetH toTargetH() {
+    final target = TargetH(id: id, name: name);
+    return target;
+  }
+
+  void updateTargetH(TargetH target) {
+    if (this.id != null) target.id = this.id!;
+    target.name = this.name;
+  }
+}
+
+extension ModelHToTargetHList on Iterable<ModelH> {
+  List<TargetH> toTargetHList() {
+    return map((e) => e.toTargetH()).toList();
+  }
+}
+''')
+@OmniMapper(target: TargetH, ignoreIfNull: true, methodName: 'toTargetH')
+class ModelH {
+  final int? id; // Nullable
+  final String name; // Non-nullable
+  ModelH({this.id, required this.name});
+}
+
+// --- APPROACH I (Hooks) ---
+class TargetI {
+  final int id;
+  TargetI({required this.id});
+}
+
+class MyHook extends OmniHook<ModelI, TargetI> {
+  const MyHook();
+  @override
+  void before(ModelI source) {}
+  @override
+  void after(ModelI source, TargetI target) {}
+}
+
+@ShouldGenerate(r'''
+extension ModelIToTargetI on ModelI {
+  TargetI toTargetI() {
+    MyHook().before(this);
+    final target = TargetI(id: id);
+    MyHook().after(this, target);
+    return target;
+  }
+
+  void updateTargetI(TargetI target) {}
+}
+
+extension ModelIToTargetIList on Iterable<ModelI> {
+  List<TargetI> toTargetIList() {
+    return map((e) => e.toTargetI()).toList();
+  }
+}
+''')
+@OmniMapper(target: TargetI, hook: MyHook, methodName: 'toTargetI')
+class ModelI {
+  final int id;
+  ModelI({required this.id});
 }

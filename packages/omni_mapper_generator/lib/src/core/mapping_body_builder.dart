@@ -14,6 +14,8 @@ class MappingBodyBuilder {
     Map<String, String> fieldMaps = const {},
     Map<String, String> defaultValues = const {},
     List<DartType> converters = const [],
+    bool strictMode = false,
+    DartType? hookType,
   }) {
     final sourceFieldNames = <String>{};
     final sourceFieldTypes = <String, DartType>{};
@@ -43,7 +45,15 @@ class MappingBodyBuilder {
 
     final assignedParams = <String>[];
     final codeBuffer = StringBuffer();
-    codeBuffer.writeln('return ${targetClass.name}(');
+
+    final hookName = hookType?.element?.name;
+
+    // Before Hook
+    if (hookName != null) {
+      codeBuffer.writeln('$hookName().before(${sourceVarName == 'this' ? 'this' : sourceVarName});');
+    }
+
+    codeBuffer.writeln('final target = ${targetClass.name}(');
 
     final targetParams = targetConstructor.formalParameters;
     for (final param in targetParams) {
@@ -172,10 +182,49 @@ class MappingBodyBuilder {
       }
       if (sourceFieldNames.contains(fieldName)) {
         codeBuffer.write('..$fieldName = ${sourceFieldAccess(fieldName)}');
+        assignedParams.add(fieldName);
       }
     }
 
     codeBuffer.writeln(';');
+
+    // After Hook
+    if (hookName != null) {
+      codeBuffer.writeln('$hookName().after(${sourceVarName == 'this' ? 'this' : sourceVarName}, target);');
+    }
+
+    if (strictMode) {
+      final unmappedFields = <String>{};
+
+      for (final param in targetParams) {
+        if (param.name != null &&
+            !assignedParams.contains(param.name) &&
+            !ignoreFields.contains(param.name) &&
+            !param.hasDefaultValue) {
+          unmappedFields.add(param.name!);
+        }
+      }
+
+      for (final field in targetClass.fields) {
+        final fieldName = field.name;
+        if (fieldName == null || field.isStatic || field.isFinal || field.setter == null) {
+          continue;
+        }
+        if (!assignedParams.contains(fieldName) && !ignoreFields.contains(fieldName) && !field.hasInitializer) {
+          unmappedFields.add(fieldName);
+        }
+      }
+
+      if (unmappedFields.isNotEmpty) {
+        throw InvalidGenerationSourceError(
+          'Strict mode is enabled, but the following target properties are unmapped: ${unmappedFields.join(', ')}.\n'
+          'To fix this, map them from the source, provide a defaultValue, or add them to ignoreFields.',
+          element: elementContext,
+        );
+      }
+    }
+
+    codeBuffer.writeln('return target;');
     return codeBuffer.toString();
   }
 }
