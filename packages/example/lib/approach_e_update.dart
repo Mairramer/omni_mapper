@@ -16,7 +16,6 @@ class MutableEntity {
 
 @OmniMapper(
   target: MutableEntity,
-  generateUpdateMethod: true, // This is true by default, but we are making it explicit
 )
 class FormModel {
   final int id;

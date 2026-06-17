@@ -84,16 +84,24 @@ class ExtensionGenerator {
         
         final sourceFieldNames = <String>{};
         for (final f in sourceClass.fields) {
-          if (!f.isStatic && f.name != null) sourceFieldNames.add(f.name!);
+          if (!f.isStatic && f.name != null) {
+            sourceFieldNames.add(f.name!);
+          }
         }
         for (final g in sourceClass.getters) {
-          if (!g.isStatic && g.name != null) sourceFieldNames.add(g.name!);
+          if (!g.isStatic && g.name != null) {
+            sourceFieldNames.add(g.name!);
+          }
         }
 
         for (final field in targetClass.fields) {
           final fieldName = field.name;
-          if (fieldName == null || field.isStatic || field.isFinal || field.setter == null) continue;
-          if (ignoreFields.contains(fieldName)) continue;
+          if (fieldName == null || field.isStatic || field.isFinal || field.setter == null) {
+            continue;
+          }
+          if (ignoreFields.contains(fieldName)) {
+            continue;
+          }
 
           String sourceFieldName = fieldName;
           for (final entry in fieldMaps.entries) {

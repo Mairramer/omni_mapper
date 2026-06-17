@@ -1,30 +1,54 @@
-# This file configures the static analysis results for your project (errors,
-# warnings, and lints).
-#
-# This enables the 'recommended' set of lints from `package:lints`.
-# This set helps identify many issues that may lead to problems when running
-# or consuming Dart code, and enforces writing Dart using a single, idiomatic
-# style and format.
-#
-# If you want a smaller set of lints you can change this to specify
-# 'package:lints/core.yaml'. These are just the most critical lints
-# (the recommended set includes the core lints).
-# The core lints are also what is used by pub.dev for scoring packages.
-
 include: package:lints/recommended.yaml
 
-# Uncomment the following section to specify additional rules.
+linter: 
+  rules: 
+    always_declare_return_types: true
+    depend_on_referenced_packages: false
+    prefer_relative_imports: true
+    prefer_const_constructors: true
+    prefer_final_locals: true
+    require_trailing_commas: false
+    sort_child_properties_last: true
+    use_named_constants: true
+    use_raw_strings: true
+    collection_methods_unrelated_type: true
+    avoid_returning_null_for_void: true
 
-# linter:
-#   rules:
-#     - camel_case_types
+    lines_longer_than_80_chars: true
+    directives_ordering: true
 
-# analyzer:
-#   exclude:
-#     - path/to/excluded/files/**
+    unnecessary_string_escapes: true
+    avoid_redundant_argument_values: true
+    prefer_single_quotes: true
+    avoid_escaping_inner_quotes: true
+    avoid_multiple_declarations_per_line: true
+    avoid_single_cascade_in_expression_statements: true
+    always_put_control_body_on_new_line: true
+    sort_unnamed_constructors_first: true
+    prefer_const_constructors_in_immutables: true
+    prefer_const_declarations: true
+    prefer_const_literals_to_create_immutables: true
+    unnecessary_breaks: true
+    unnecessary_getters_setters: true
+    unnecessary_const: true
+    unnecessary_constructor_name: true
 
-# For more information about the core and recommended set of lints, see
-# https://dart.dev/go/core-lints
+    prefer_contains: true
+    use_null_aware_elements: true
+    unnecessary_underscores: true
+    strict_top_level_inference: true
+    join_return_with_assignment: true
 
-# For additional information about configuring this file, see
-# https://dart.dev/tools/analysis
+formatter:
+  page_width: 120
+  trailing_commas: preserve
+
+analyzer:
+  exclude:
+    - "**/*.g.dart"
+    - "build/**"
+
+  errors:
+    missing_return: error
+    public_member_api_docs: ignore
+    lines_longer_than_80_chars: ignore

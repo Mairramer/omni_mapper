@@ -82,10 +82,14 @@ class MultiMapperGenerator extends GeneratorForAnnotation<OmniMappers> {
     for (final mapper in mappers) {
       final mapperReader = ConstantReader(mapper);
       final code = MapperGenerator()._generateFor(element, mapperReader);
-      if (code != null) codeBuffer.writeln(code);
+      if (code != null) {
+        codeBuffer.writeln(code);
+      }
     }
 
-    if (codeBuffer.isEmpty) return null;
+    if (codeBuffer.isEmpty) {
+      return null;
+    }
     return codeBuffer.toString();
   }
 }

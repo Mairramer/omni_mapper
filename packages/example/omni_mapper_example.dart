@@ -50,7 +50,7 @@ void main() {
   print('  createdAt=${backToModel.createdAt} (from converter)\n');
 
   print('--- Approach E (In-Place Update) ---');
-  final existingMutableEntity = MutableEntity(id: 1, name: 'Old Name', isActive: false);
+  final existingMutableEntity = MutableEntity(id: 1, name: 'Old Name');
   print('Before update: id=${existingMutableEntity.id}, name=${existingMutableEntity.name}, isActive=${existingMutableEntity.isActive}');
 
   final formModel = FormModel(id: 99, name: 'New Name', isActive: true);

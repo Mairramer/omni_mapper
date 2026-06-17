@@ -48,9 +48,13 @@ class MappingBodyBuilder {
     final targetParams = targetConstructor.formalParameters;
     for (final param in targetParams) {
       final paramName = param.name;
-      if (paramName == null) continue;
+      if (paramName == null) {
+        continue;
+      }
 
-      if (ignoreFields.contains(paramName)) continue;
+      if (ignoreFields.contains(paramName)) {
+        continue;
+      }
 
       // Find mapped source field if provided in fieldMaps
       String sourceFieldName = paramName;
@@ -152,7 +156,9 @@ class MappingBodyBuilder {
 
     for (final field in targetClass.fields) {
       final fieldName = field.name;
-      if (fieldName == null) continue;
+      if (fieldName == null) {
+        continue;
+      }
       if (field.isStatic ||
           field.isFinal ||
           field.setter == null ||

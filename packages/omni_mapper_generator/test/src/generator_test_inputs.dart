@@ -123,8 +123,6 @@ extension ModelDToEntityList on Iterable<ModelD> {
   fieldMaps: {'userId': 'id'},
   defaultValues: {'status': '"active"'},
   converters: [StringDateConverter],
-  generateListMapper: true,
-  generateUpdateMethod: true,
 )
 class ModelD {
   final int userId;
