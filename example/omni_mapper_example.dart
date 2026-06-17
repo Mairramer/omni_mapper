@@ -2,6 +2,7 @@ import 'package:example/approach_a_abstract_class.dart';
 import 'package:example/approach_b_extension_to.dart';
 import 'package:example/approach_c_extension_from.dart';
 import 'package:example/approach_d_advanced.dart';
+import 'package:example/approach_e_update.dart';
 
 void main() {
   print('--- Approach A (Abstract Class) ---');
@@ -47,4 +48,13 @@ void main() {
   print('  userId=${backToModel.userId} (from id)');
   print('  title=${backToModel.title}');
   print('  createdAt=${backToModel.createdAt} (from converter)\n');
+
+  print('--- Approach E (In-Place Update) ---');
+  final existingMutableEntity = MutableEntity(id: 1, name: 'Old Name', isActive: false);
+  print('Before update: id=${existingMutableEntity.id}, name=${existingMutableEntity.name}, isActive=${existingMutableEntity.isActive}');
+
+  final formModel = FormModel(id: 99, name: 'New Name', isActive: true);
+  formModel.updateMutableEntity(existingMutableEntity);
+
+  print('After update: id=${existingMutableEntity.id}, name=${existingMutableEntity.name}, isActive=${existingMutableEntity.isActive}\n');
 }

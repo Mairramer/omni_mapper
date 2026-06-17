@@ -37,7 +37,15 @@ class EntityB {
 @ShouldGenerate(r'''
 extension ModelBToEntity on ModelB {
   EntityB toEntity() {
-    return EntityB(id: this.id, title: this.title);
+    return EntityB(id: id, title: title);
+  }
+
+  void updateEntityB(EntityB target) {}
+}
+
+extension ModelBToEntityList on Iterable<ModelB> {
+  List<EntityB> toEntityList() {
+    return map((e) => e.toEntity()).toList();
   }
 }
 ''')
@@ -58,7 +66,15 @@ class EntityC {
 @ShouldGenerate(r'''
 extension EntityCToModel on EntityC {
   ModelC toModel() {
-    return ModelC(id: this.id, title: this.title);
+    return ModelC(id: id, title: title);
+  }
+
+  void updateModelC(ModelC target) {}
+}
+
+extension EntityCToModelList on Iterable<EntityC> {
+  List<ModelC> toModelList() {
+    return map((e) => e.toModel()).toList();
   }
 }
 ''')
@@ -67,6 +83,85 @@ class ModelC {
   final int id;
   final String title;
   ModelC({required this.id, required this.title});
+}
+
+// --- APPROACH D (Advanced Features) ---
+class EntityD {
+  final int id;
+  final String status;
+  final DateTime createdAt;
+  EntityD({required this.id, required this.status, required this.createdAt});
+}
+
+class StringDateConverter extends OmniConverter<String, DateTime> {
+  const StringDateConverter();
+  @override
+  DateTime convert(String source) => DateTime.parse(source);
+}
+
+@ShouldGenerate(r'''
+extension ModelDToEntity on ModelD {
+  EntityD toEntity() {
+    return EntityD(
+      id: userId,
+      status: "active",
+      createdAt: const StringDateConverter().convert(createdAt),
+    );
+  }
+
+  void updateEntityD(EntityD target) {}
+}
+
+extension ModelDToEntityList on Iterable<ModelD> {
+  List<EntityD> toEntityList() {
+    return map((e) => e.toEntity()).toList();
+  }
+}
+''')
+@OmniMapper(
+  target: EntityD,
+  fieldMaps: {'userId': 'id'},
+  defaultValues: {'status': '"active"'},
+  converters: [StringDateConverter],
+  generateListMapper: true,
+  generateUpdateMethod: true,
+)
+class ModelD {
+  final int userId;
+  final String createdAt;
+  ModelD({required this.userId, required this.createdAt});
+}
+
+// --- APPROACH E (In-Place Update) ---
+class MutableEntityE {
+  int id;
+  String name;
+  MutableEntityE({required this.id, required this.name});
+}
+
+@ShouldGenerate(r'''
+extension ModelEToMutableEntityE on ModelE {
+  MutableEntityE toMutableEntityE() {
+    return MutableEntityE(id: id, name: name);
+  }
+
+  void updateMutableEntityE(MutableEntityE target) {
+    target.id = this.id;
+    target.name = this.name;
+  }
+}
+
+extension ModelEToMutableEntityEList on Iterable<ModelE> {
+  List<MutableEntityE> toMutableEntityEList() {
+    return map((e) => e.toMutableEntityE()).toList();
+  }
+}
+''')
+@OmniMapper(target: MutableEntityE, methodName: 'toMutableEntityE')
+class ModelE {
+  final int id;
+  final String name;
+  ModelE({required this.id, required this.name});
 }
 
 // --- ERROR SCENARIOS ---
