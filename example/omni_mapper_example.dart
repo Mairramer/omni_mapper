@@ -1,6 +1,7 @@
 import 'package:example/approach_a_abstract_class.dart';
 import 'package:example/approach_b_extension_to.dart';
 import 'package:example/approach_c_extension_from.dart';
+import 'package:example/approach_d_advanced.dart';
 
 void main() {
   print('--- Approach A (Abstract Class) ---');
@@ -18,4 +19,26 @@ void main() {
   final entityC = EntityC(id: 3, title: 'Item C');
   final modelC = entityC.toModel();
   print('Mapped EntityC to ModelC: id=${modelC.id}, title=${modelC.title}\n');
+  print('--- Approach D (Advanced Features) ---');
+  final advancedModel = AdvancedModel(
+    userId: 10,
+    title: 'Advanced Item',
+    createdAt: '2026-06-17T12:00:00Z',
+  );
+  
+  final advancedEntity = advancedModel.toEntity();
+  print('Mapped AdvancedModel to AdvancedEntity:');
+  print('  id=${advancedEntity.id} (from userId)');
+  print('  title=${advancedEntity.title}');
+  print('  status=${advancedEntity.status} (from defaultValue)');
+  print('  createdAt=${advancedEntity.createdAt} (from converter)\n');
+
+  print('Testing Update Method:');
+  final existingEntity = AdvancedEntity(id: 0, title: 'Old', status: 'inactive', createdAt: DateTime(2000));
+  advancedModel.updateAdvancedEntity(existingEntity);
+  print('  Updated existingEntity title: ${existingEntity.title}');
+
+  print('Testing List Mapping:');
+  final list = [advancedModel, advancedModel].toEntityList();
+  print('  Mapped list length: ${list.length}\n');
 }

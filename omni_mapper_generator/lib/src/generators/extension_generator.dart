@@ -31,6 +31,30 @@ class ExtensionGenerator {
             .toList() ??
         const [];
 
+    final fieldMaps = annotation
+            .peek('fieldMaps')
+            ?.mapValue
+            .map((k, v) => MapEntry(k?.toStringValue() ?? '', v?.toStringValue() ?? '')) ??
+        const {};
+
+    final defaultValues = annotation
+            .peek('defaultValues')
+            ?.mapValue
+            .map((k, v) => MapEntry(k?.toStringValue() ?? '', v?.toStringValue() ?? '')) ??
+        const {};
+
+    final converters = annotation
+            .peek('converters')
+            ?.listValue
+            .map((e) => e.toTypeValue())
+            .where((e) => e != null)
+            .cast<DartType>()
+            .toList() ??
+        const [];
+
+    final generateListMapper = annotation.peek('generateListMapper')?.boolValue ?? true;
+    final generateUpdateMethod = annotation.peek('generateUpdateMethod')?.boolValue ?? true;
+
     final codeBody = MappingBodyBuilder.build(
       sourceClass: sourceClass,
       targetClass: targetClass,
@@ -39,19 +63,82 @@ class ExtensionGenerator {
       elementContext: elementContext,
       extensionMethodName: methodName,
       ignoreFields: ignoreFields,
+      fieldMaps: fieldMaps,
+      defaultValues: defaultValues,
+      converters: converters,
     );
 
-    final extensionBuilder = Extension((e) => e
-      ..name = extensionName
-      ..on = refer(sourceClass.name ?? '')
-      ..methods.add(Method(
-        (m) => m
-          ..name = methodName
-          ..returns = refer(targetClass.name ?? '')
-          ..body = Code(codeBody),
-      )));
+    final extensionBuilder = Extension((e) {
+      e
+        ..name = extensionName
+        ..on = refer(sourceClass.name ?? '')
+        ..methods.add(Method(
+          (m) => m
+            ..name = methodName
+            ..returns = refer(targetClass.name ?? '')
+            ..body = Code(codeBody),
+        ));
+
+      if (generateUpdateMethod) {
+        final updateBodyBuffer = StringBuffer();
+        
+        final sourceFieldNames = <String>{};
+        for (final f in sourceClass.fields) {
+          if (!f.isStatic && f.name != null) sourceFieldNames.add(f.name!);
+        }
+        for (final g in sourceClass.getters) {
+          if (!g.isStatic && g.name != null) sourceFieldNames.add(g.name!);
+        }
+
+        for (final field in targetClass.fields) {
+          final fieldName = field.name;
+          if (fieldName == null || field.isStatic || field.isFinal || field.setter == null) continue;
+          if (ignoreFields.contains(fieldName)) continue;
+
+          String sourceFieldName = fieldName;
+          for (final entry in fieldMaps.entries) {
+            if (entry.value == fieldName) {
+              sourceFieldName = entry.key;
+              break;
+            }
+          }
+
+          if (sourceFieldNames.contains(sourceFieldName)) {
+            updateBodyBuffer.writeln('target.$fieldName = this.$sourceFieldName;');
+          } else if (defaultValues.containsKey(fieldName)) {
+            updateBodyBuffer.writeln('target.$fieldName = ${defaultValues[fieldName]};');
+          }
+        }
+        
+        e.methods.add(Method(
+          (m) => m
+            ..name = 'update${targetClass.name}'
+            ..returns = refer('void')
+            ..requiredParameters.add(Parameter((p) => p
+              ..name = 'target'
+              ..type = refer(targetClass.name ?? '')))
+            ..body = Code(updateBodyBuffer.toString()),
+        ));
+      }
+    });
 
     final emitter = DartEmitter();
-    return extensionBuilder.accept(emitter).toString();
+    final result = StringBuffer(extensionBuilder.accept(emitter).toString());
+
+    if (generateListMapper) {
+      final listExtensionBuilder = Extension((e) => e
+        ..name = '${extensionName}List'
+        ..on = refer('Iterable<${sourceClass.name}>')
+        ..methods.add(Method(
+          (m) => m
+            ..name = '${methodName}List'
+            ..returns = refer('List<${targetClass.name}>')
+            ..body = Code('return map((e) => e.$methodName()).toList();'),
+        )));
+      result.writeln();
+      result.writeln(listExtensionBuilder.accept(emitter).toString());
+    }
+
+    return result.toString();
   }
 }

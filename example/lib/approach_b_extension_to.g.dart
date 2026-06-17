@@ -13,6 +13,14 @@ extension ModelBToEntity on ModelB {
       title: title,
     );
   }
+
+  void updateEntityB(EntityB target) {}
+}
+
+extension ModelBToEntityList on Iterable<ModelB> {
+  List<EntityB> toEntityList() {
+    return map((e) => e.toEntity()).toList();
+  }
 }
 
 extension ModelBToEntityB2 on ModelB {
@@ -21,5 +29,13 @@ extension ModelBToEntityB2 on ModelB {
       id: id,
       title: title,
     );
+  }
+
+  void updateEntityB2(EntityB2 target) {}
+}
+
+extension ModelBToEntityB2List on Iterable<ModelB> {
+  List<EntityB2> toEntityB2List() {
+    return map((e) => e.toEntityB2()).toList();
   }
 }

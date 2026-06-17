@@ -11,6 +11,9 @@ class MappingBodyBuilder {
     required Element elementContext,
     String extensionMethodName = 'toEntity',
     List<String> ignoreFields = const [],
+    Map<String, String> fieldMaps = const {},
+    Map<String, String> defaultValues = const {},
+    List<DartType> converters = const [],
   }) {
     final sourceFieldNames = <String>{};
     final sourceFieldTypes = <String, DartType>{};
@@ -49,11 +52,40 @@ class MappingBodyBuilder {
 
       if (ignoreFields.contains(paramName)) continue;
 
-      final hasSourceField = sourceFieldNames.contains(paramName);
+      // Find mapped source field if provided in fieldMaps
+      String sourceFieldName = paramName;
+      for (final entry in fieldMaps.entries) {
+        if (entry.value == paramName) {
+          sourceFieldName = entry.key;
+          break;
+        }
+      }
+
+      final hasSourceField = sourceFieldNames.contains(sourceFieldName);
 
       if (hasSourceField) {
-        final sourceFieldType = sourceFieldTypes[paramName];
+        final sourceFieldType = sourceFieldTypes[sourceFieldName];
+        final targetFieldType = param.type;
         MethodElement? nestedMapper;
+        DartType? matchingConverter;
+
+        // Check for matching converter
+        if (sourceFieldType != null && sourceFieldType.element != targetFieldType.element) {
+          for (final converter in converters) {
+            final classElement = converter.element;
+            if (classElement is ClassElement) {
+              final omniConverter = classElement.allSupertypes.where((t) => t.element.name == 'OmniConverter').firstOrNull;
+              if (omniConverter != null && omniConverter.typeArguments.length == 2) {
+                final sType = omniConverter.typeArguments[0];
+                final tType = omniConverter.typeArguments[1];
+                if (sType.element == sourceFieldType.element && tType.element == targetFieldType.element) {
+                  matchingConverter = converter;
+                  break;
+                }
+              }
+            }
+          }
+        }
 
         if (mapperClass != null && sourceFieldType != null) {
           final sourceTypeElement = sourceFieldType.element;
@@ -71,33 +103,45 @@ class MappingBodyBuilder {
           }
         }
 
-        if (nestedMapper != null) {
-          final access = sourceFieldAccess(paramName);
+        if (matchingConverter != null) {
+          final converterName = matchingConverter.element?.name;
+          codeBuffer.writeln('$paramName: const $converterName().convert(${sourceFieldAccess(sourceFieldName)}),');
+        } else if (nestedMapper != null) {
+          final access = sourceFieldAccess(sourceFieldName);
           codeBuffer.writeln('$paramName: $access != null ? ${nestedMapper.name}($access!) : null,');
         } else {
-          final sourceFieldType = sourceFieldTypes[paramName];
           if (mapperClass == null && sourceFieldType != null) {
             final sourceTypeElement = sourceFieldType.element;
             final targetTypeElement = param.type.element;
             if (sourceTypeElement != null && targetTypeElement != null && sourceTypeElement != targetTypeElement) {
-              codeBuffer.writeln('$paramName: ${sourceFieldAccess(paramName)}?.$extensionMethodName(),');
+              // Automatic Nested Mapping
+              if (sourceFieldType.isDartCoreList && targetFieldType.isDartCoreList) {
+                // If it's a list, map it
+                codeBuffer.writeln('$paramName: ${sourceFieldAccess(sourceFieldName)}?.map((e) => e.$extensionMethodName()).toList(),');
+              } else {
+                codeBuffer.writeln('$paramName: ${sourceFieldAccess(sourceFieldName)}?.$extensionMethodName(),');
+              }
               assignedParams.add(paramName);
               continue;
             }
           }
 
           if (param.isNamed) {
-            codeBuffer.writeln('$paramName: ${sourceFieldAccess(paramName)},');
+            codeBuffer.writeln('$paramName: ${sourceFieldAccess(sourceFieldName)},');
           } else {
-            codeBuffer.writeln('${sourceFieldAccess(paramName)},');
+            codeBuffer.writeln('${sourceFieldAccess(sourceFieldName)},');
           }
         }
         assignedParams.add(paramName);
       } else {
-        if (param.isRequired) {
+        // Fallback to default values
+        if (defaultValues.containsKey(paramName)) {
+          codeBuffer.writeln('$paramName: ${defaultValues[paramName]},');
+          assignedParams.add(paramName);
+        } else if (param.isRequired) {
           throw InvalidGenerationSourceError(
             'Missing required field "$paramName" from source class ${sourceClass.name} '
-            'to construct ${targetClass.name}.',
+            'to construct ${targetClass.name}. You can provide a `defaultValue` or `fieldMap`.',
             element: elementContext,
           );
         }
