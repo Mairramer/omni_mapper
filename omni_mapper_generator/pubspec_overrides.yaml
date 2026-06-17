@@ -1,3 +1,0 @@
-dependency_overrides:
-  omni_mapper:
-    path: ../omni_mapper

@@ -1,9 +1,12 @@
 name: omni_mapper_workspace
-description: A workspace for the Omni Mapper packages.
 publish_to: 'none'
 
 environment:
-  sdk: '>=3.0.0 <4.0.0'
+  sdk: '>=3.5.0 <4.0.0'
 
+workspace:
+  - packages/omni_mapper
+  - packages/omni_mapper_generator
+  - packages/example
 dev_dependencies:
-  melos: ^5.0.0
+  lints: ^3.0.0
