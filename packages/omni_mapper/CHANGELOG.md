@@ -1,3 +1,9 @@
+## 0.2.0
+
+- **Feat**: Added `strictMode` mapping option to enforce complete mappings.
+- **Feat**: Added `ignoreIfNull` mapping option for PATCH-like object updates.
+- **Feat**: Introduced custom mapping hooks via the `OmniHook` abstract class.
+
 ## 0.1.0
 
 - Initial release.
