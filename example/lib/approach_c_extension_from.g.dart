@@ -9,8 +9,8 @@ part of 'approach_c_extension_from.dart';
 extension EntityCToModel on EntityC {
   ModelC toModel() {
     return ModelC(
-      id: this.id,
-      title: this.title,
+      id: id,
+      title: title,
     );
   }
 }

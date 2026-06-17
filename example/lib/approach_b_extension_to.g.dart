@@ -9,8 +9,8 @@ part of 'approach_b_extension_to.dart';
 extension ModelBToEntity on ModelB {
   EntityB toEntity() {
     return EntityB(
-      id: this.id,
-      title: this.title,
+      id: id,
+      title: title,
     );
   }
 }
