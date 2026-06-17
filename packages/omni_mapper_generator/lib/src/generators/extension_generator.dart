@@ -17,13 +17,15 @@ class ExtensionGenerator {
     }
 
     final methodName = annotation.peek('methodName')?.stringValue ?? 'toEntity';
-    final capitalizedMethodName =
-        methodName.isNotEmpty ? '${methodName[0].toUpperCase()}${methodName.substring(1)}' : 'Mapper';
-    
+    final capitalizedMethodName = methodName.isNotEmpty
+        ? '${methodName[0].toUpperCase()}${methodName.substring(1)}'
+        : 'Mapper';
+
     // Ensure unique name by combining Source class and capitalized method name
     final extensionName = '${sourceClass.name}$capitalizedMethodName';
 
-    final ignoreFields = annotation
+    final ignoreFields =
+        annotation
             .peek('ignoreFields')
             ?.listValue
             .map((e) => e.toStringValue() ?? '')
@@ -31,19 +33,22 @@ class ExtensionGenerator {
             .toList() ??
         const [];
 
-    final fieldMaps = annotation
+    final fieldMaps =
+        annotation
             .peek('fieldMaps')
             ?.mapValue
             .map((k, v) => MapEntry(k?.toStringValue() ?? '', v?.toStringValue() ?? '')) ??
         const {};
 
-    final defaultValues = annotation
+    final defaultValues =
+        annotation
             .peek('defaultValues')
             ?.mapValue
             .map((k, v) => MapEntry(k?.toStringValue() ?? '', v?.toStringValue() ?? '')) ??
         const {};
 
-    final converters = annotation
+    final converters =
+        annotation
             .peek('converters')
             ?.listValue
             .map((e) => e.toTypeValue())
@@ -72,16 +77,18 @@ class ExtensionGenerator {
       e
         ..name = extensionName
         ..on = refer(sourceClass.name ?? '')
-        ..methods.add(Method(
-          (m) => m
-            ..name = methodName
-            ..returns = refer(targetClass.name ?? '')
-            ..body = Code(codeBody),
-        ));
+        ..methods.add(
+          Method(
+            (m) => m
+              ..name = methodName
+              ..returns = refer(targetClass.name ?? '')
+              ..body = Code(codeBody),
+          ),
+        );
 
       if (generateUpdateMethod) {
         final updateBodyBuffer = StringBuffer();
-        
+
         final sourceFieldNames = <String>{};
         for (final f in sourceClass.fields) {
           if (!f.isStatic && f.name != null) {
@@ -117,16 +124,22 @@ class ExtensionGenerator {
             updateBodyBuffer.writeln('target.$fieldName = ${defaultValues[fieldName]};');
           }
         }
-        
-        e.methods.add(Method(
-          (m) => m
-            ..name = 'update${targetClass.name}'
-            ..returns = refer('void')
-            ..requiredParameters.add(Parameter((p) => p
-              ..name = 'target'
-              ..type = refer(targetClass.name ?? '')))
-            ..body = Code(updateBodyBuffer.toString()),
-        ));
+
+        e.methods.add(
+          Method(
+            (m) => m
+              ..name = 'update${targetClass.name}'
+              ..returns = refer('void')
+              ..requiredParameters.add(
+                Parameter(
+                  (p) => p
+                    ..name = 'target'
+                    ..type = refer(targetClass.name ?? ''),
+                ),
+              )
+              ..body = Code(updateBodyBuffer.toString()),
+          ),
+        );
       }
     });
 
@@ -134,15 +147,19 @@ class ExtensionGenerator {
     final result = StringBuffer(extensionBuilder.accept(emitter).toString());
 
     if (generateListMapper) {
-      final listExtensionBuilder = Extension((e) => e
-        ..name = '${extensionName}List'
-        ..on = refer('Iterable<${sourceClass.name}>')
-        ..methods.add(Method(
-          (m) => m
-            ..name = '${methodName}List'
-            ..returns = refer('List<${targetClass.name}>')
-            ..body = Code('return map((e) => e.$methodName()).toList();'),
-        )));
+      final listExtensionBuilder = Extension(
+        (e) => e
+          ..name = '${extensionName}List'
+          ..on = refer('Iterable<${sourceClass.name}>')
+          ..methods.add(
+            Method(
+              (m) => m
+                ..name = '${methodName}List'
+                ..returns = refer('List<${targetClass.name}>')
+                ..body = Code('return map((e) => e.$methodName()).toList();'),
+            ),
+          ),
+      );
       result.writeln();
       result.writeln(listExtensionBuilder.accept(emitter).toString());
     }
