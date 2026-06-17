@@ -42,7 +42,7 @@ class StringDateTimeConverter extends OmniConverter<DateTime, String> {
     methodName: 'toModel',
     fieldMaps: {'id': 'userId'},
     converters: [StringDateTimeConverter],
-  )
+  ),
 ])
 class AdvancedModel {
   final int userId;

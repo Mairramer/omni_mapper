@@ -98,12 +98,14 @@ class OmniMapper {
     this.strictMode = false,
     this.ignoreIfNull = false,
     this.hook,
-  }) : assert(!(target != null && from != null),
-            'You cannot specify both `target` and `from` in the same annotation. Use multiple @OmniMapper annotations instead.');
+  }) : assert(
+         !(target != null && from != null),
+         'You cannot specify both `target` and `from` in the same annotation. Use multiple @OmniMapper annotations instead.',
+       );
 }
 
 /// Annotation used to define multiple [OmniMapper] mappings for a single class.
-/// 
+///
 /// Example:
 /// ```dart
 /// @OmniMappers([

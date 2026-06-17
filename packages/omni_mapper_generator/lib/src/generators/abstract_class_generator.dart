@@ -8,12 +8,14 @@ class AbstractClassGenerator {
     required ClassElement element,
     required ConstantReader annotation,
   }) {
-    final classBuilder = Class((c) => c
-      ..name = '${element.name}Impl'
-      ..extend = refer(element.name ?? '')
-      ..methods.addAll(
-        element.methods.where((m) => m.isAbstract).map((m) => _generateMethod(m, element, annotation)),
-      ));
+    final classBuilder = Class(
+      (c) => c
+        ..name = '${element.name}Impl'
+        ..extend = refer(element.name ?? '')
+        ..methods.addAll(
+          element.methods.where((m) => m.isAbstract).map((m) => _generateMethod(m, element, annotation)),
+        ),
+    );
 
     final emitter = DartEmitter();
     return classBuilder.accept(emitter).toString();
@@ -39,7 +41,8 @@ class AbstractClassGenerator {
       );
     }
 
-    final ignoreFields = annotation
+    final ignoreFields =
+        annotation
             .peek('ignoreFields')
             ?.listValue
             .map((e) => e.toStringValue() ?? '')
@@ -61,15 +64,19 @@ class AbstractClassGenerator {
       hookType: hookType,
     );
 
-    return Method((m) => m
-      ..name = method.name
-      ..annotations.add(refer('override'))
-      ..returns = refer(targetClass.name ?? '')
-      ..requiredParameters.add(
-        Parameter((p) => p
-          ..name = sourceParam.name ?? ''
-          ..type = refer(sourceClass.name ?? '')),
-      )
-      ..body = Code(codeBody));
+    return Method(
+      (m) => m
+        ..name = method.name
+        ..annotations.add(refer('override'))
+        ..returns = refer(targetClass.name ?? '')
+        ..requiredParameters.add(
+          Parameter(
+            (p) => p
+              ..name = sourceParam.name ?? ''
+              ..type = refer(sourceClass.name ?? ''),
+          ),
+        )
+        ..body = Code(codeBody),
+    );
   }
 }
