@@ -1,0 +1,42 @@
+name: Publish to Pub.dev
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+*' # Triggers on tags like v1.0.0, v0.2.0+1
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    
+    # Required for OIDC authentication with pub.dev
+    permissions:
+      id-token: write
+      contents: read
+
+    strategy:
+      # Use max-parallel to ensure packages are published sequentially 
+      # if they depend on each other. If omni_mapper depends on the generator, 
+      # it might need to wait, but usually pub.dev allows publishing them.
+      max-parallel: 1
+      matrix:
+        package:
+          - omni_mapper
+          - omni_mapper_generator
+
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Dart
+        uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+
+      - name: Install Dependencies
+        working-directory: packages/${{ matrix.package }}
+        run: dart pub get
+
+      - name: Publish Package
+        working-directory: packages/${{ matrix.package }}
+        # The --force flag skips the interactive confirmation prompt
+        run: dart pub publish --force
