@@ -1,7 +1,7 @@
 # OmniMapper Generator
 
 [![pub package](https://img.shields.io/pub/v/omni_mapper_generator.svg)](https://pub.dev/packages/omni_mapper_generator)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![License](https://img.shields.io/badge/license-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 
 Code generator for the [`omni_mapper`](https://pub.dev/packages/omni_mapper) package.
 
@@ -47,4 +47,4 @@ dart run build_runner watch -d
 
 ## License
 
-This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
+This project is licensed under the BSD 3-Clause License — see the [LICENSE](LICENSE) file for details.

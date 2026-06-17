@@ -1,7 +1,7 @@
 # OmniMapper
 
 [![pub package](https://img.shields.io/pub/v/omni_mapper.svg)](https://pub.dev/packages/omni_mapper)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![License](https://img.shields.io/badge/license-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 
 A powerful, highly customizable code-generation library for Dart and Flutter that automatically generates **object-to-object mapping** code.
 
@@ -88,4 +88,4 @@ Contributions are welcome! Please file issues and pull requests on the [GitHub r
 
 ## License
 
-This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
+This project is licensed under the BSD 3-Clause License — see the [LICENSE](LICENSE) file for details.
