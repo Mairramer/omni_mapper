@@ -2,12 +2,13 @@ import 'package:analyzer/dart/element/element.dart';
 import 'package:build/build.dart';
 import 'package:omni_mapper/omni_mapper.dart';
 import 'package:source_gen/source_gen.dart';
+
 import 'generators/abstract_class_generator.dart';
 import 'generators/extension_generator.dart';
 
 class MapperGenerator extends GeneratorForAnnotation<OmniMapper> {
   @override
-  String generateForAnnotatedElement(
+  String? generateForAnnotatedElement(
     Element element,
     ConstantReader annotation,
     BuildStep buildStep,
@@ -18,7 +19,10 @@ class MapperGenerator extends GeneratorForAnnotation<OmniMapper> {
         element: element,
       );
     }
+    return _generateFor(element, annotation);
+  }
 
+  String? _generateFor(ClassElement element, ConstantReader annotation) {
     final targetType = annotation.peek('target')?.typeValue;
     final fromType = annotation.peek('from')?.typeValue;
 
@@ -57,3 +61,32 @@ class MapperGenerator extends GeneratorForAnnotation<OmniMapper> {
   }
 }
 
+class MultiMapperGenerator extends GeneratorForAnnotation<OmniMappers> {
+  @override
+  String? generateForAnnotatedElement(
+    Element element,
+    ConstantReader annotation,
+    BuildStep buildStep,
+  ) {
+    if (element is! ClassElement) {
+      throw InvalidGenerationSourceError(
+        '`@OmniMappers` can only be applied to classes.',
+        element: element,
+      );
+    }
+
+    final codeBuffer = StringBuffer();
+    final mappers = annotation.read('mappers').listValue;
+
+    for (final mapper in mappers) {
+      final mapperReader = ConstantReader(mapper);
+      // Since _generateFor is static/shared, let's just create a dummy MapperGenerator or make _generateFor a static method.
+      // Wait, _generateFor is an instance method of MapperGenerator, so we need to instantiate it.
+      final code = MapperGenerator()._generateFor(element, mapperReader);
+      if (code != null) codeBuffer.writeln(code);
+    }
+
+    if (codeBuffer.isEmpty) return null;
+    return codeBuffer.toString();
+  }
+}

@@ -5,4 +5,4 @@ import 'package:source_gen/source_gen.dart';
 
 import 'src/omni_mapper_generator.dart';
 
-Builder mapperBuilder(BuilderOptions options) => SharedPartBuilder([MapperGenerator()], 'mapper');
+Builder mapperBuilder(BuilderOptions options) => SharedPartBuilder([MapperGenerator(), MultiMapperGenerator()], 'mapper');

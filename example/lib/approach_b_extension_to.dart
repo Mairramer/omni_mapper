@@ -12,9 +12,22 @@ class EntityB {
   });
 }
 
+class EntityB2 {
+  final int id;
+  final String title;
+
+  EntityB2({
+    required this.id,
+    required this.title,
+  });
+}
+
 // Approach B: Extension mapping TO a target class
 // Generates: extension ModelBToEntity on ModelB { EntityB toEntity() { ... } }
-@OmniMapper(target: EntityB)
+@OmniMappers([
+  OmniMapper(target: EntityB),
+  OmniMapper(target: EntityB2, methodName: 'toEntityB2'),
+])
 class ModelB {
   final int id;
   final String title;
