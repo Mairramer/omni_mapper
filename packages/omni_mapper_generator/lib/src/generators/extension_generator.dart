@@ -130,7 +130,9 @@ class ExtensionGenerator {
           if (sourceFieldNames.contains(sourceFieldName)) {
             final isNullable = sourceFieldTypes[sourceFieldName]?.nullabilitySuffix == NullabilitySuffix.question;
             if (ignoreIfNull && isNullable) {
-              updateBodyBuffer.writeln('if (this.$sourceFieldName != null) target.$fieldName = this.$sourceFieldName!;');
+              updateBodyBuffer.writeln(
+                'if (this.$sourceFieldName != null) target.$fieldName = this.$sourceFieldName!;',
+              );
             } else {
               updateBodyBuffer.writeln('target.$fieldName = this.$sourceFieldName;');
             }

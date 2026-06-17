@@ -180,7 +180,7 @@ class TargetF {
   final int id;
   final int rating;
   int count = 0; // has initializer
-  
+
   TargetF({required this.id, this.rating = 5}); // rating has default value
 }
 
@@ -213,8 +213,10 @@ class TargetG {
   TargetG({required this.id});
 }
 
-@ShouldThrow('Strict mode is enabled, but the following target properties are unmapped: unmapped.\n'
-    'To fix this, map them from the source, provide a defaultValue, or add them to ignoreFields.')
+@ShouldThrow(
+  'Strict mode is enabled, but the following target properties are unmapped: unmapped.\n'
+  'To fix this, map them from the source, provide a defaultValue, or add them to ignoreFields.',
+)
 @OmniMapper(target: TargetG, strictMode: true, methodName: 'toTargetG')
 class ModelG {
   final int id;

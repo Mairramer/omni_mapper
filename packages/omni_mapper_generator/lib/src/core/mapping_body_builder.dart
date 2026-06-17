@@ -187,7 +187,7 @@ class MappingBodyBuilder {
     }
 
     codeBuffer.writeln(';');
-    
+
     // After Hook
     if (hookName != null) {
       codeBuffer.writeln('$hookName().after(${sourceVarName == 'this' ? 'this' : sourceVarName}, target);');
@@ -195,7 +195,7 @@ class MappingBodyBuilder {
 
     if (strictMode) {
       final unmappedFields = <String>{};
-      
+
       for (final param in targetParams) {
         if (param.name != null &&
             !assignedParams.contains(param.name) &&
@@ -204,18 +204,13 @@ class MappingBodyBuilder {
           unmappedFields.add(param.name!);
         }
       }
-      
+
       for (final field in targetClass.fields) {
         final fieldName = field.name;
-        if (fieldName == null ||
-            field.isStatic ||
-            field.isFinal ||
-            field.setter == null) {
+        if (fieldName == null || field.isStatic || field.isFinal || field.setter == null) {
           continue;
         }
-        if (!assignedParams.contains(fieldName) &&
-            !ignoreFields.contains(fieldName) &&
-            !field.hasInitializer) {
+        if (!assignedParams.contains(fieldName) && !ignoreFields.contains(fieldName) && !field.hasInitializer) {
           unmappedFields.add(fieldName);
         }
       }

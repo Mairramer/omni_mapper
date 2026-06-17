@@ -49,7 +49,7 @@ class AbstractClassGenerator {
             .where((e) => e.isNotEmpty)
             .toList() ??
         const [];
-        
+
     final strictMode = annotation.peek('strictMode')?.boolValue ?? false;
     final hookType = annotation.peek('hook')?.typeValue;
 
