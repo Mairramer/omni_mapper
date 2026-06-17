@@ -15,7 +15,7 @@ This is a monorepo containing the following packages:
 
 | Package | Description | pub.dev |
 |---|---|---|
-| [`omni_mapper`](./packages/omni_mapper) | Annotations (`@OmniMapper`, `@OmniMappers`, `OmniConverter`) | [![pub](https://img.shields.io/pub/v/omni_mapper.svg)](https://pub.dev/packages/omni_mapper) |
+| [`omni_mapper`](./packages/omni_mapper) | Annotations (`@OmniMapper`, `@OmniMappers`) & `OmniConverter` interface | [![pub](https://img.shields.io/pub/v/omni_mapper.svg)](https://pub.dev/packages/omni_mapper) |
 | [`omni_mapper_generator`](./packages/omni_mapper_generator) | Code generator (powered by `source_gen` + `build_runner`) | [![pub](https://img.shields.io/pub/v/omni_mapper_generator.svg)](https://pub.dev/packages/omni_mapper_generator) |
 
 ## Installation
