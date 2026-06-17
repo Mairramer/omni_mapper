@@ -36,6 +36,8 @@ class MappingBodyBuilder {
       targetConstructor = targetClass.constructors.first;
     }
 
+    String sourceFieldAccess(String name) => sourceVarName == 'this' ? name : '$sourceVarName.$name';
+
     final assignedParams = <String>[];
     final codeBuffer = StringBuffer();
     codeBuffer.writeln('return ${targetClass.name}(');
@@ -70,24 +72,24 @@ class MappingBodyBuilder {
         }
 
         if (nestedMapper != null) {
-          codeBuffer.writeln(
-              '$paramName: $sourceVarName.$paramName != null ? ${nestedMapper.name}($sourceVarName.$paramName!) : null,');
+          final access = sourceFieldAccess(paramName);
+          codeBuffer.writeln('$paramName: $access != null ? ${nestedMapper.name}($access!) : null,');
         } else {
           final sourceFieldType = sourceFieldTypes[paramName];
           if (mapperClass == null && sourceFieldType != null) {
             final sourceTypeElement = sourceFieldType.element;
             final targetTypeElement = param.type.element;
             if (sourceTypeElement != null && targetTypeElement != null && sourceTypeElement != targetTypeElement) {
-              codeBuffer.writeln('$paramName: $sourceVarName.$paramName?.$extensionMethodName(),');
+              codeBuffer.writeln('$paramName: ${sourceFieldAccess(paramName)}?.$extensionMethodName(),');
               assignedParams.add(paramName);
               continue;
             }
           }
 
           if (param.isNamed) {
-            codeBuffer.writeln('$paramName: $sourceVarName.$paramName,');
+            codeBuffer.writeln('$paramName: ${sourceFieldAccess(paramName)},');
           } else {
-            codeBuffer.writeln('$sourceVarName.$paramName,');
+            codeBuffer.writeln('${sourceFieldAccess(paramName)},');
           }
         }
         assignedParams.add(paramName);
@@ -115,7 +117,7 @@ class MappingBodyBuilder {
         continue;
       }
       if (sourceFieldNames.contains(fieldName)) {
-        codeBuffer.write('..$fieldName = $sourceVarName.$fieldName');
+        codeBuffer.write('..$fieldName = ${sourceFieldAccess(fieldName)}');
       }
     }
 
