@@ -8,9 +8,9 @@ part of 'approach_h_hooks.dart';
 
 extension HookedUserModelToEntity on HookedUserModel {
   HookedUserEntity toEntity() {
-    const HookedUserMapperHook().before(this);
+    HookedUserMapperHook().before(this);
     final target = HookedUserEntity(id: id, name: name);
-    const HookedUserMapperHook().after(this, target);
+    HookedUserMapperHook().after(this, target);
     return target;
   }
 

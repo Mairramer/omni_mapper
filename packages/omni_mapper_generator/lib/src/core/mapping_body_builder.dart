@@ -50,7 +50,7 @@ class MappingBodyBuilder {
 
     // Before Hook
     if (hookName != null) {
-      codeBuffer.writeln('const $hookName().before(${sourceVarName == 'this' ? 'this' : sourceVarName});');
+      codeBuffer.writeln('$hookName().before(${sourceVarName == 'this' ? 'this' : sourceVarName});');
     }
 
     codeBuffer.writeln('final target = ${targetClass.name}(');
@@ -190,7 +190,7 @@ class MappingBodyBuilder {
     
     // After Hook
     if (hookName != null) {
-      codeBuffer.writeln('const $hookName().after(${sourceVarName == 'this' ? 'this' : sourceVarName}, target);');
+      codeBuffer.writeln('$hookName().after(${sourceVarName == 'this' ? 'this' : sourceVarName}, target);');
     }
 
     if (strictMode) {
@@ -199,7 +199,8 @@ class MappingBodyBuilder {
       for (final param in targetParams) {
         if (param.name != null &&
             !assignedParams.contains(param.name) &&
-            !ignoreFields.contains(param.name)) {
+            !ignoreFields.contains(param.name) &&
+            !param.hasDefaultValue) {
           unmappedFields.add(param.name!);
         }
       }
@@ -213,7 +214,8 @@ class MappingBodyBuilder {
           continue;
         }
         if (!assignedParams.contains(fieldName) &&
-            !ignoreFields.contains(fieldName)) {
+            !ignoreFields.contains(fieldName) &&
+            !field.hasInitializer) {
           unmappedFields.add(fieldName);
         }
       }
