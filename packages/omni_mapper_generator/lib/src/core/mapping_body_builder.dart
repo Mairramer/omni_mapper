@@ -1,5 +1,6 @@
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/type.dart';
+import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:source_gen/source_gen.dart';
 
 class MappingBodyBuilder {
@@ -130,6 +131,23 @@ class MappingBodyBuilder {
             final sourceTypeElement = sourceFieldType.element;
             final targetTypeElement = param.type.element;
             if (sourceTypeElement != null && targetTypeElement != null && sourceTypeElement != targetTypeElement) {
+              // Automatic Enum Mapping
+              if (sourceTypeElement is EnumElement && targetTypeElement is EnumElement) {
+                final targetEnumName = targetTypeElement.name;
+                final sourceAccess = sourceFieldAccess(sourceFieldName);
+                if (sourceFieldType.nullabilitySuffix == NullabilitySuffix.question) {
+                  codeBuffer.writeln(
+                    '$paramName: $sourceAccess != null ? $targetEnumName.values.firstWhere((e) => e.name == $sourceAccess!.name) : null,',
+                  );
+                } else {
+                  codeBuffer.writeln(
+                    '$paramName: $targetEnumName.values.firstWhere((e) => e.name == $sourceAccess.name),',
+                  );
+                }
+                assignedParams.add(paramName);
+                continue;
+              }
+
               // Automatic Nested Mapping
               if (sourceFieldType.isDartCoreList && targetFieldType.isDartCoreList) {
                 // If it's a list, map it
