@@ -13,7 +13,7 @@ class MapperGenerator extends GeneratorForAnnotation<OmniMapper> {
     ConstantReader annotation,
     BuildStep buildStep,
   ) {
-    print('MapperGenerator invoked for ${element.name} with target: ${annotation.peek('target')?.typeValue}');
+
     if (element is! ClassElement) {
       throw InvalidGenerationSourceError(
         '`@OmniMapper` can only be applied to classes.',
@@ -81,8 +81,6 @@ class MultiMapperGenerator extends GeneratorForAnnotation<OmniMappers> {
 
     for (final mapper in mappers) {
       final mapperReader = ConstantReader(mapper);
-      // Since _generateFor is static/shared, let's just create a dummy MapperGenerator or make _generateFor a static method.
-      // Wait, _generateFor is an instance method of MapperGenerator, so we need to instantiate it.
       final code = MapperGenerator()._generateFor(element, mapperReader);
       if (code != null) codeBuffer.writeln(code);
     }

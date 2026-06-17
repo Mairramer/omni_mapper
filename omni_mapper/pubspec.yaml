@@ -1,8 +1,18 @@
 name: omni_mapper
-description: Annotations for the Omni Mapper code generator. Use this package to annotate your classes for mapping generation.
+description: >-
+  Annotations for the OmniMapper code generator. Provides @OmniMapper and
+  @OmniMappers to automatically generate type-safe object-to-object mapping
+  code between DTOs, Models, and Entities.
 version: 0.1.0
 homepage: https://github.com/Mairramer/omni_mapper
 repository: https://github.com/Mairramer/omni_mapper
+issue_tracker: https://github.com/Mairramer/omni_mapper/issues
+
+topics:
+  - mapper
+  - code-generation
+  - clean-architecture
+  - dto
 
 environment:
   sdk: '>=3.0.0 <4.0.0'

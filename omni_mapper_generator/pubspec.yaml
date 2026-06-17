@@ -1,8 +1,18 @@
 name: omni_mapper_generator
-description: Code generator for omni_mapper. Automatically generates data mapping code.
+description: >-
+  Code generator for the omni_mapper package. Automatically generates type-safe
+  object-to-object mapping code with support for field mapping, type converters,
+  default values, list generation, and in-place updates.
 version: 0.1.0
 homepage: https://github.com/Mairramer/omni_mapper
 repository: https://github.com/Mairramer/omni_mapper
+issue_tracker: https://github.com/Mairramer/omni_mapper/issues
+
+topics:
+  - mapper
+  - code-generation
+  - build-runner
+  - source-gen
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
