@@ -78,7 +78,9 @@ class MappingBodyBuilder {
           for (final converter in converters) {
             final classElement = converter.element;
             if (classElement is ClassElement) {
-              final omniConverter = classElement.allSupertypes.where((t) => t.element.name == 'OmniConverter').firstOrNull;
+              final omniConverter = classElement.allSupertypes
+                  .where((t) => t.element.name == 'OmniConverter')
+                  .firstOrNull;
               if (omniConverter != null && omniConverter.typeArguments.length == 2) {
                 final sType = omniConverter.typeArguments[0];
                 final tType = omniConverter.typeArguments[1];
@@ -121,7 +123,9 @@ class MappingBodyBuilder {
               // Automatic Nested Mapping
               if (sourceFieldType.isDartCoreList && targetFieldType.isDartCoreList) {
                 // If it's a list, map it
-                codeBuffer.writeln('$paramName: ${sourceFieldAccess(sourceFieldName)}?.map((e) => e.$extensionMethodName()).toList(),');
+                codeBuffer.writeln(
+                  '$paramName: ${sourceFieldAccess(sourceFieldName)}?.map((e) => e.$extensionMethodName()).toList(),',
+                );
               } else {
                 codeBuffer.writeln('$paramName: ${sourceFieldAccess(sourceFieldName)}?.$extensionMethodName(),');
               }

@@ -26,7 +26,7 @@ void main() {
     title: 'Advanced Item',
     createdAt: '2026-06-17T12:00:00Z',
   );
-  
+
   final advancedEntity = advancedModel.toEntity();
   print('Mapped AdvancedModel to AdvancedEntity:');
   print('  id=${advancedEntity.id} (from userId)');
@@ -51,10 +51,14 @@ void main() {
 
   print('--- Approach E (In-Place Update) ---');
   final existingMutableEntity = MutableEntity(id: 1, name: 'Old Name');
-  print('Before update: id=${existingMutableEntity.id}, name=${existingMutableEntity.name}, isActive=${existingMutableEntity.isActive}');
+  print(
+    'Before update: id=${existingMutableEntity.id}, name=${existingMutableEntity.name}, isActive=${existingMutableEntity.isActive}',
+  );
 
   final formModel = FormModel(id: 99, name: 'New Name', isActive: true);
   formModel.updateMutableEntity(existingMutableEntity);
 
-  print('After update: id=${existingMutableEntity.id}, name=${existingMutableEntity.name}, isActive=${existingMutableEntity.isActive}\n');
+  print(
+    'After update: id=${existingMutableEntity.id}, name=${existingMutableEntity.name}, isActive=${existingMutableEntity.isActive}\n',
+  );
 }

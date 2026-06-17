@@ -13,7 +13,6 @@ class MapperGenerator extends GeneratorForAnnotation<OmniMapper> {
     ConstantReader annotation,
     BuildStep buildStep,
   ) {
-
     if (element is! ClassElement) {
       throw InvalidGenerationSourceError(
         '`@OmniMapper` can only be applied to classes.',
