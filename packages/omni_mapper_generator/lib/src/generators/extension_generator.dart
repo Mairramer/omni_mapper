@@ -54,6 +54,9 @@ class ExtensionGenerator {
 
     final generateListMapper = annotation.peek('generateListMapper')?.boolValue ?? true;
     final generateUpdateMethod = annotation.peek('generateUpdateMethod')?.boolValue ?? true;
+    final strictMode = annotation.peek('strictMode')?.boolValue ?? false;
+    final ignoreIfNull = annotation.peek('ignoreIfNull')?.boolValue ?? false;
+    final hookType = annotation.peek('hook')?.typeValue;
 
     final codeBody = MappingBodyBuilder.build(
       sourceClass: sourceClass,
@@ -66,6 +69,8 @@ class ExtensionGenerator {
       fieldMaps: fieldMaps,
       defaultValues: defaultValues,
       converters: converters,
+      strictMode: strictMode,
+      hookType: hookType,
     );
 
     final extensionBuilder = Extension((e) {
@@ -112,7 +117,11 @@ class ExtensionGenerator {
           }
 
           if (sourceFieldNames.contains(sourceFieldName)) {
-            updateBodyBuffer.writeln('target.$fieldName = this.$sourceFieldName;');
+            if (ignoreIfNull) {
+              updateBodyBuffer.writeln('if (this.$sourceFieldName != null) target.$fieldName = this.$sourceFieldName!;');
+            } else {
+              updateBodyBuffer.writeln('target.$fieldName = this.$sourceFieldName;');
+            }
           } else if (defaultValues.containsKey(fieldName)) {
             updateBodyBuffer.writeln('target.$fieldName = ${defaultValues[fieldName]};');
           }

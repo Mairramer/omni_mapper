@@ -8,12 +8,13 @@ part of 'approach_d_advanced.dart';
 
 extension AdvancedModelToEntity on AdvancedModel {
   AdvancedEntity toEntity() {
-    return AdvancedEntity(
+    final target = AdvancedEntity(
       id: userId,
       title: title,
       status: "active",
       createdAt: const DateTimeStringConverter().convert(createdAt),
     );
+    return target;
   }
 
   void updateAdvancedEntity(AdvancedEntity target) {}
@@ -27,11 +28,12 @@ extension AdvancedModelToEntityList on Iterable<AdvancedModel> {
 
 extension AdvancedEntityToModel on AdvancedEntity {
   AdvancedModel toModel() {
-    return AdvancedModel(
+    final target = AdvancedModel(
       userId: id,
       title: title,
       createdAt: const StringDateTimeConverter().convert(createdAt),
     );
+    return target;
   }
 
   void updateAdvancedModel(AdvancedModel target) {}

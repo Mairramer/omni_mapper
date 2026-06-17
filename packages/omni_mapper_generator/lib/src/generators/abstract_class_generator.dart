@@ -46,6 +46,9 @@ class AbstractClassGenerator {
             .where((e) => e.isNotEmpty)
             .toList() ??
         const [];
+        
+    final strictMode = annotation.peek('strictMode')?.boolValue ?? false;
+    final hookType = annotation.peek('hook')?.typeValue;
 
     final codeBody = MappingBodyBuilder.build(
       sourceClass: sourceClass,
@@ -54,6 +57,8 @@ class AbstractClassGenerator {
       mapperClass: mapperClass,
       elementContext: mapperClass,
       ignoreFields: ignoreFields,
+      strictMode: strictMode,
+      hookType: hookType,
     );
 
     return Method((m) => m
