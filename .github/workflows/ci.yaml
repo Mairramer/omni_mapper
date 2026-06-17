@@ -9,6 +9,13 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        package:
+          - omni_mapper
+          - omni_mapper_generator
+          - example
+    name: Package ${{ matrix.package }}
     env:
       ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
     
@@ -21,14 +28,22 @@ jobs:
           sdk: stable
 
       - name: Install Dependencies
+        working-directory: packages/${{ matrix.package }}
         run: dart pub get
         
       - name: Verify Formatting
+        working-directory: packages/${{ matrix.package }}
         run: dart format --output=none --set-exit-if-changed .
 
       - name: Analyze Project
+        working-directory: packages/${{ matrix.package }}
         run: dart analyze --fatal-infos
         
-      - name: Run Tests (omni_mapper_generator)
-        working-directory: packages/omni_mapper_generator
-        run: dart test
+      - name: Run Tests
+        working-directory: packages/${{ matrix.package }}
+        run: |
+          if [ -d "test" ]; then
+            dart test
+          else
+            echo "No test directory found. Skipping tests."
+          fi
