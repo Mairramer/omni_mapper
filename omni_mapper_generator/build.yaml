@@ -13,3 +13,10 @@ builders:
     auto_apply: dependents
     build_to: cache
     applies_builders: ["source_gen|combining_builder"]
+
+global_options:
+  source_gen|combining_builder:
+    options:
+      ignore_for_file:
+        - type=lint
+        - coverage:ignore-file

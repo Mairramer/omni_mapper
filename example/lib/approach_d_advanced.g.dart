@@ -3,7 +3,7 @@
 part of 'approach_d_advanced.dart';
 
 // **************************************************************************
-// MapperGenerator
+// MultiMapperGenerator
 // **************************************************************************
 
 extension AdvancedModelToEntity on AdvancedModel {
@@ -22,5 +22,23 @@ extension AdvancedModelToEntity on AdvancedModel {
 extension AdvancedModelToEntityList on Iterable<AdvancedModel> {
   List<AdvancedEntity> toEntityList() {
     return map((e) => e.toEntity()).toList();
+  }
+}
+
+extension AdvancedEntityToModel on AdvancedEntity {
+  AdvancedModel toModel() {
+    return AdvancedModel(
+      userId: id,
+      title: title,
+      createdAt: const StringDateTimeConverter().convert(createdAt),
+    );
+  }
+
+  void updateAdvancedModel(AdvancedModel target) {}
+}
+
+extension AdvancedEntityToModelList on Iterable<AdvancedEntity> {
+  List<AdvancedModel> toModelList() {
+    return map((e) => e.toModel()).toList();
   }
 }

@@ -41,4 +41,10 @@ void main() {
   print('Testing List Mapping:');
   final list = [advancedModel, advancedModel].toEntityList();
   print('  Mapped list length: ${list.length}\n');
+
+  print('Testing Reverse Mapping (Entity -> Model):');
+  final backToModel = advancedEntity.toModel();
+  print('  userId=${backToModel.userId} (from id)');
+  print('  title=${backToModel.title}');
+  print('  createdAt=${backToModel.createdAt} (from converter)\n');
 }

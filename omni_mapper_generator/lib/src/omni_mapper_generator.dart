@@ -13,6 +13,7 @@ class MapperGenerator extends GeneratorForAnnotation<OmniMapper> {
     ConstantReader annotation,
     BuildStep buildStep,
   ) {
+    print('MapperGenerator invoked for ${element.name} with target: ${annotation.peek('target')?.typeValue}');
     if (element is! ClassElement) {
       throw InvalidGenerationSourceError(
         '`@OmniMapper` can only be applied to classes.',

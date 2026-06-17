@@ -23,14 +23,31 @@ class DateTimeStringConverter extends OmniConverter<String, DateTime> {
   DateTime convert(String source) => DateTime.parse(source);
 }
 
-@OmniMapper(
-  target: AdvancedEntity,
-  fieldMaps: {'userId': 'id'},
-  defaultValues: {'status': '"active"'},
-  converters: [DateTimeStringConverter],
-  generateListMapper: true,
-  generateUpdateMethod: true,
-)
+class StringDateTimeConverter extends OmniConverter<DateTime, String> {
+  const StringDateTimeConverter();
+
+  @override
+  String convert(DateTime source) => source.toIso8601String();
+}
+
+@OmniMappers([
+  OmniMapper(
+    target: AdvancedEntity,
+    fieldMaps: {'userId': 'id'},
+    defaultValues: {'status': '"active"'},
+    converters: [DateTimeStringConverter],
+    generateListMapper: true,
+    generateUpdateMethod: true,
+  ),
+  OmniMapper(
+    from: AdvancedEntity,
+    methodName: 'toModel',
+    fieldMaps: {'id': 'userId'}, // O source agora é o Entity (id), e o target é o Model (userId)
+    converters: [StringDateTimeConverter],
+    generateListMapper: true,
+    generateUpdateMethod: true,
+  )
+])
 class AdvancedModel {
   final int userId;
   final String title;
