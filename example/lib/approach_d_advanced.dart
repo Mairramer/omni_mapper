@@ -42,7 +42,7 @@ class StringDateTimeConverter extends OmniConverter<DateTime, String> {
   OmniMapper(
     from: AdvancedEntity,
     methodName: 'toModel',
-    fieldMaps: {'id': 'userId'}, // O source agora é o Entity (id), e o target é o Model (userId)
+    fieldMaps: {'id': 'userId'},
     converters: [StringDateTimeConverter],
     generateListMapper: true,
     generateUpdateMethod: true,
