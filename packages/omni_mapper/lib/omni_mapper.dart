@@ -85,6 +85,14 @@ class OmniMapper {
   /// Provides `before` and `after` callbacks to inject custom logic during the mapping process.
   final Type? hook;
 
+  /// Whether to automatically generate a reverse mapping extension.
+  /// If true, it will invert the source and target classes and swap the keys/values in `fieldMaps`.
+  final bool generateReverse;
+
+  /// The name of the method for the generated reverse mapping.
+  /// If left empty, it defaults to `to${SourceClassName}`.
+  final String reverseMethodName;
+
   const OmniMapper({
     this.target,
     this.from,
@@ -98,6 +106,8 @@ class OmniMapper {
     this.strictMode = false,
     this.ignoreIfNull = false,
     this.hook,
+    this.generateReverse = false,
+    this.reverseMethodName = '',
   }) : assert(
          !(target != null && from != null),
          'You cannot specify both `target` and `from` in the same annotation. Use multiple @OmniMapper annotations instead.',

@@ -404,3 +404,56 @@ class ModelK {
 
   ModelK({this.userAddress, required this.profile});
 }
+
+// --- APPROACH L (Reverse Mapping) ---
+class TargetL {
+  final int id;
+  final String title;
+  final String status;
+  TargetL({required this.id, required this.title, required this.status});
+}
+
+@ShouldGenerate(r'''
+extension ModelLToTargetL on ModelL {
+  TargetL toTargetL() {
+    final target = TargetL(id: userId, title: title, status: "active");
+    return target;
+  }
+
+  void updateTargetL(TargetL target) {}
+}
+
+extension ModelLToTargetLList on Iterable<ModelL> {
+  List<TargetL> toTargetLList() {
+    return map((e) => e.toTargetL()).toList();
+  }
+}
+
+extension TargetLToModelL on TargetL {
+  ModelL toModelL() {
+    final target = ModelL(userId: id, title: title);
+    return target;
+  }
+
+  void updateModelL(ModelL target) {}
+}
+
+extension TargetLToModelLList on Iterable<TargetL> {
+  List<ModelL> toModelLList() {
+    return map((e) => e.toModelL()).toList();
+  }
+}
+''')
+@OmniMapper(
+  target: TargetL,
+  methodName: 'toTargetL',
+  generateReverse: true,
+  reverseMethodName: 'toModelL',
+  fieldMaps: {'userId': 'id'},
+  defaultValues: {'status': '"active"'},
+)
+class ModelL {
+  final int userId;
+  final String title;
+  ModelL({required this.userId, required this.title});
+}

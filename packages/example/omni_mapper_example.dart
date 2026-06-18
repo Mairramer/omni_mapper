@@ -5,6 +5,7 @@ import 'package:example/approach_d_advanced.dart';
 import 'package:example/approach_e_update.dart';
 import 'package:example/approach_i_enum_mapping.dart';
 import 'package:example/approach_j_auto_flattening.dart';
+import 'package:example/approach_k_reverse_mapping.dart';
 
 void main() {
   print('--- Approach A (Abstract Class) ---');
@@ -94,4 +95,12 @@ void main() {
   print('  userAddressCityName=${flattenTarget.userAddressCityName}');
   print('  profileSettingsThemeId=${flattenTarget.profileSettingsThemeId}');
   print('  profileSettingsThemeMode=${flattenTarget.profileSettingsThemeMode}\n');
+
+  print('--- Approach K (Reverse Mapping) ---');
+  const entityModel = EntityModel(userId: 'u123', fullName: 'Alice', age: 30);
+  final dtoModel = entityModel.toDto();
+  print('Entity to Dto: ${dtoModel.id}, ${dtoModel.name}, ${dtoModel.age}, ${dtoModel.status}');
+
+  final reversedEntity = dtoModel.toEntity();
+  print('Dto to Entity: ${reversedEntity.userId}, ${reversedEntity.fullName}, ${reversedEntity.age}\n');
 }
