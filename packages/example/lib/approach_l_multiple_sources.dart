@@ -28,8 +28,8 @@ class UserProfile {
   final String city;
   final String zipCode;
 
-  // Custom mapped field
-  final String fullAddress;
+  // Custom mapped field (non-final to allow mutation in hook)
+  String fullAddress;
 
   UserProfile({
     required this.id,
@@ -37,7 +37,7 @@ class UserProfile {
     required this.street,
     required this.city,
     required this.zipCode,
-    required this.fullAddress,
+    this.fullAddress = '',
   });
 
   @override
@@ -46,12 +46,20 @@ class UserProfile {
   }
 }
 
+class UserProfileHook extends OmniHook<User, UserProfile> {
+  const UserProfileHook();
+
+  @override
+  void after(User source, UserProfile target) {
+    // Note: OmniHook currently receives only the primary (first) source.
+    // So we use the User's name to generate the fullAddress in this example.
+    target.fullAddress = '${source.name} lives at ${target.street}, ${target.city} - ${target.zipCode}';
+  }
+}
+
 @OmniMapper(
-  fieldMaps: {
-    // We map fullAddress from the street field just for demonstration,
-    // though in a real scenario you might want a custom expression or hook.
-    'address.street': 'fullAddress',
-  },
+  ignoreFields: ['fullAddress'],
+  hook: UserProfileHook,
 )
 abstract class UserProfileMapper {
   UserProfile toProfile(User user, Address address);

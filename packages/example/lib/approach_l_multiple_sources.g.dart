@@ -12,14 +12,15 @@ class UserProfileMapperImpl extends UserProfileMapper {
     User user,
     Address address,
   ) {
+    UserProfileHook().before(user);
     final target = UserProfile(
       id: user.id,
       name: user.name,
       street: address.street,
       city: address.city,
       zipCode: address.zipCode,
-      fullAddress: address.street,
     );
+    UserProfileHook().after(user, target);
     return target;
   }
 }
