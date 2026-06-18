@@ -293,3 +293,47 @@ class ModelI {
   final int id;
   ModelI({required this.id});
 }
+
+// --- APPROACH J (Enum Mapping) ---
+enum SourceEnum { active, inactive }
+
+enum TargetEnum { active, inactive, unknown }
+
+class TargetJ {
+  TargetEnum status;
+  TargetEnum? optionalStatus;
+  TargetJ({required this.status, this.optionalStatus});
+}
+
+@ShouldGenerate(r'''
+extension ModelJToTargetJ on ModelJ {
+  TargetJ toTargetJ() {
+    final target = TargetJ(
+      status: TargetEnum.values.byName(status.name),
+      optionalStatus: optionalStatus != null
+          ? TargetEnum.values.byName(optionalStatus!.name)
+          : null,
+    );
+    return target;
+  }
+
+  void updateTargetJ(TargetJ target) {
+    target.status = TargetEnum.values.byName(this.status.name);
+    target.optionalStatus = this.optionalStatus != null
+        ? TargetEnum.values.byName(this.optionalStatus!.name)
+        : null;
+  }
+}
+
+extension ModelJToTargetJList on Iterable<ModelJ> {
+  List<TargetJ> toTargetJList() {
+    return map((e) => e.toTargetJ()).toList();
+  }
+}
+''')
+@OmniMapper(target: TargetJ, methodName: 'toTargetJ')
+class ModelJ {
+  final SourceEnum status;
+  final SourceEnum? optionalStatus;
+  ModelJ({required this.status, this.optionalStatus});
+}

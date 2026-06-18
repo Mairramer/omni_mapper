@@ -129,13 +129,38 @@ class ExtensionGenerator {
           }
 
           if (sourceFieldNames.contains(sourceFieldName)) {
-            final isNullable = sourceFieldTypes[sourceFieldName]?.nullabilitySuffix == NullabilitySuffix.question;
-            if (ignoreIfNull && isNullable) {
-              updateBodyBuffer.writeln(
-                'if (this.$sourceFieldName != null) target.$fieldName = this.$sourceFieldName!;',
-              );
+            final sourceFieldType = sourceFieldTypes[sourceFieldName];
+            final targetFieldType = field.type;
+            final sourceTypeElement = sourceFieldType?.element;
+            final targetTypeElement = targetFieldType.element;
+
+            final isNullable = sourceFieldType?.nullabilitySuffix == NullabilitySuffix.question;
+
+            if (sourceTypeElement is EnumElement &&
+                targetTypeElement is EnumElement &&
+                sourceTypeElement != targetTypeElement) {
+              final targetEnumName = targetTypeElement.name;
+              if (ignoreIfNull && isNullable) {
+                updateBodyBuffer.writeln(
+                  'if (this.$sourceFieldName != null) target.$fieldName = $targetEnumName.values.byName(this.$sourceFieldName!.name);',
+                );
+              } else if (isNullable) {
+                updateBodyBuffer.writeln(
+                  'target.$fieldName = this.$sourceFieldName != null ? $targetEnumName.values.byName(this.$sourceFieldName!.name) : null;',
+                );
+              } else {
+                updateBodyBuffer.writeln(
+                  'target.$fieldName = $targetEnumName.values.byName(this.$sourceFieldName.name);',
+                );
+              }
             } else {
-              updateBodyBuffer.writeln('target.$fieldName = this.$sourceFieldName;');
+              if (ignoreIfNull && isNullable) {
+                updateBodyBuffer.writeln(
+                  'if (this.$sourceFieldName != null) target.$fieldName = this.$sourceFieldName!;',
+                );
+              } else {
+                updateBodyBuffer.writeln('target.$fieldName = this.$sourceFieldName;');
+              }
             }
           } else if (defaultValues.containsKey(fieldName)) {
             updateBodyBuffer.writeln('target.$fieldName = ${defaultValues[fieldName]};');

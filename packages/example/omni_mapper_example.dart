@@ -3,6 +3,7 @@ import 'package:example/approach_b_extension_to.dart';
 import 'package:example/approach_c_extension_from.dart';
 import 'package:example/approach_d_advanced.dart';
 import 'package:example/approach_e_update.dart';
+import 'package:example/approach_i_enum_mapping.dart';
 
 void main() {
   print('--- Approach A (Abstract Class) ---');
@@ -60,5 +61,20 @@ void main() {
 
   print(
     'After update: id=${existingMutableEntity.id}, name=${existingMutableEntity.name}, isActive=${existingMutableEntity.isActive}\n',
+  );
+
+  print('--- Approach I (Enum Mapping) ---');
+  final userModel = UserModel(
+    id: 1,
+    role: ClientRole.admin,
+    secondaryRole: ClientRole.editor,
+  );
+
+  final userEntity = userModel.toEntity();
+  print('Mapped UserModel to UserEntity:');
+  print('  id=${userEntity.id}');
+  print('  role=${userEntity.role.name} (mapped from ClientRole.${userModel.role.name})');
+  print(
+    '  secondaryRole=${userEntity.secondaryRole?.name} (mapped from ClientRole.${userModel.secondaryRole?.name})\n',
   );
 }
