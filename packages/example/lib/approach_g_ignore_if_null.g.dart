@@ -8,7 +8,11 @@ part of 'approach_g_ignore_if_null.dart';
 
 extension PatchUserModelToEntity on PatchUserModel {
   PatchUserEntity toEntity() {
-    final target = PatchUserEntity(id: id, name: name, bio: bio);
+    final target = PatchUserEntity(
+      id: id,
+      name: name,
+      bio: bio,
+    );
     return target;
   }
 

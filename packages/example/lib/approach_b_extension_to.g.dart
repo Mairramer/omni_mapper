@@ -8,7 +8,10 @@ part of 'approach_b_extension_to.dart';
 
 extension ModelBToEntity on ModelB {
   EntityB toEntity() {
-    final target = EntityB(id: id, title: title);
+    final target = EntityB(
+      id: id,
+      title: title,
+    );
     return target;
   }
 
@@ -23,7 +26,10 @@ extension ModelBToEntityList on Iterable<ModelB> {
 
 extension ModelBToEntityB2 on ModelB {
   EntityB2 toEntityB2() {
-    final target = EntityB2(id: id, title: title);
+    final target = EntityB2(
+      id: id,
+      title: title,
+    );
     return target;
   }
 

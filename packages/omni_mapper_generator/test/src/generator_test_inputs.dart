@@ -168,7 +168,9 @@ class ModelE {
 }
 
 // --- ERROR SCENARIOS ---
-@ShouldThrow('`@OmniMapper` on a concrete class must specify a `target` or `from` type.')
+@ShouldThrow(
+  '`@OmniMapper` on a concrete class must specify a `target` or `from` type.',
+)
 @OmniMapper()
 class InvalidConcreteClass {
   final int id;

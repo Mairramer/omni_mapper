@@ -22,7 +22,9 @@ class DtoModel {
   generateReverse: true,
   reverseMethodName: 'toEntity',
   fieldMaps: {'userId': 'id', 'fullName': 'name'},
-  defaultValues: {'status': '"active"'}, // default values are ignored in reverse
+  defaultValues: {
+    'status': '"active"',
+  }, // default values are ignored in reverse
 )
 class EntityModel {
   final String userId;

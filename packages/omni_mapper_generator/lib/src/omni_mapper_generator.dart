@@ -38,7 +38,10 @@ class MapperGenerator extends GeneratorForAnnotation<OmniMapper> {
       // Approach C: Extension on 'from' mapping TO Concrete Model Class
       final fromClass = fromType.element as ClassElement?;
       if (fromClass == null) {
-        throw InvalidGenerationSourceError('`from` must be a class.', element: element);
+        throw InvalidGenerationSourceError(
+          '`from` must be a class.',
+          element: element,
+        );
       }
       return ExtensionGenerator.generate(
         sourceClass: fromClass,

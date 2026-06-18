@@ -38,7 +38,12 @@ void main() {
   print('  createdAt=${advancedEntity.createdAt} (from converter)\n');
 
   print('Testing Update Method:');
-  final existingEntity = AdvancedEntity(id: 0, title: 'Old', status: 'inactive', createdAt: DateTime(2000));
+  final existingEntity = AdvancedEntity(
+    id: 0,
+    title: 'Old',
+    status: 'inactive',
+    createdAt: DateTime(2000),
+  );
   advancedModel.updateAdvancedEntity(existingEntity);
   print('  Updated existingEntity title: ${existingEntity.title}');
 
@@ -75,7 +80,9 @@ void main() {
   final userEntity = userModel.toEntity();
   print('Mapped UserModel to UserEntity:');
   print('  id=${userEntity.id}');
-  print('  role=${userEntity.role.name} (mapped from ClientRole.${userModel.role.name})');
+  print(
+    '  role=${userEntity.role.name} (mapped from ClientRole.${userModel.role.name})',
+  );
   print(
     '  secondaryRole=${userEntity.secondaryRole?.name} (mapped from ClientRole.${userModel.secondaryRole?.name})\n',
   );
@@ -94,13 +101,19 @@ void main() {
   print('Mapped FlattenModel to FlattenTarget:');
   print('  userAddressCityName=${flattenTarget.userAddressCityName}');
   print('  profileSettingsThemeId=${flattenTarget.profileSettingsThemeId}');
-  print('  profileSettingsThemeMode=${flattenTarget.profileSettingsThemeMode}\n');
+  print(
+    '  profileSettingsThemeMode=${flattenTarget.profileSettingsThemeMode}\n',
+  );
 
   print('--- Approach K (Reverse Mapping) ---');
   const entityModel = EntityModel(userId: 'u123', fullName: 'Alice', age: 30);
   final dtoModel = entityModel.toDto();
-  print('Entity to Dto: ${dtoModel.id}, ${dtoModel.name}, ${dtoModel.age}, ${dtoModel.status}');
+  print(
+    'Entity to Dto: ${dtoModel.id}, ${dtoModel.name}, ${dtoModel.age}, ${dtoModel.status}',
+  );
 
   final reversedEntity = dtoModel.toEntity();
-  print('Dto to Entity: ${reversedEntity.userId}, ${reversedEntity.fullName}, ${reversedEntity.age}\n');
+  print(
+    'Dto to Entity: ${reversedEntity.userId}, ${reversedEntity.fullName}, ${reversedEntity.age}\n',
+  );
 }

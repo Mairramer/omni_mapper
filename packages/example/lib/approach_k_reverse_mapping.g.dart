@@ -28,7 +28,11 @@ extension EntityModelToDtoList on Iterable<EntityModel> {
 
 extension DtoModelToEntity on DtoModel {
   EntityModel toEntity() {
-    final target = EntityModel(userId: id, fullName: name, age: age);
+    final target = EntityModel(
+      userId: id,
+      fullName: name,
+      age: age,
+    );
     return target;
   }
 

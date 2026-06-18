@@ -13,7 +13,9 @@ class AbstractClassGenerator {
         ..name = '${element.name}Impl'
         ..extend = refer(element.name ?? '')
         ..methods.addAll(
-          element.methods.where((m) => m.isAbstract).map((m) => _generateMethod(m, element, annotation)),
+          element.methods
+              .where((m) => m.isAbstract)
+              .map((m) => _generateMethod(m, element, annotation)),
         ),
     );
 
@@ -21,7 +23,11 @@ class AbstractClassGenerator {
     return classBuilder.accept(emitter).toString();
   }
 
-  static Method _generateMethod(MethodElement method, ClassElement mapperClass, ConstantReader annotation) {
+  static Method _generateMethod(
+    MethodElement method,
+    ClassElement mapperClass,
+    ConstantReader annotation,
+  ) {
     final methodParams = method.formalParameters;
     if (methodParams.length != 1) {
       throw InvalidGenerationSourceError(

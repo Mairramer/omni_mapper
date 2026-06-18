@@ -8,7 +8,11 @@ part of 'approach_e_update.dart';
 
 extension FormModelToEntity on FormModel {
   MutableEntity toEntity() {
-    final target = MutableEntity(id: id, name: name, isActive: isActive);
+    final target = MutableEntity(
+      id: id,
+      name: name,
+      isActive: isActive,
+    );
     return target;
   }
 

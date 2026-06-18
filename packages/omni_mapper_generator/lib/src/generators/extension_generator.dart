@@ -16,7 +16,10 @@ class ExtensionGenerator {
   }) {
     final targetClass = targetType.element as ClassElement?;
     if (targetClass == null) {
-      throw InvalidGenerationSourceError('Target must be a class.', element: sourceClass);
+      throw InvalidGenerationSourceError(
+        'Target must be a class.',
+        element: sourceClass,
+      );
     }
 
     final methodName = annotation.peek('methodName')?.stringValue ?? 'toEntity';
@@ -40,14 +43,20 @@ class ExtensionGenerator {
         annotation
             .peek('fieldMaps')
             ?.mapValue
-            .map((k, v) => MapEntry(k?.toStringValue() ?? '', v?.toStringValue() ?? '')) ??
+            .map(
+              (k, v) =>
+                  MapEntry(k?.toStringValue() ?? '', v?.toStringValue() ?? ''),
+            ) ??
         const {};
 
     final defaultValues =
         annotation
             .peek('defaultValues')
             ?.mapValue
-            .map((k, v) => MapEntry(k?.toStringValue() ?? '', v?.toStringValue() ?? '')) ??
+            .map(
+              (k, v) =>
+                  MapEntry(k?.toStringValue() ?? '', v?.toStringValue() ?? ''),
+            ) ??
         const {};
 
     final converters =
@@ -60,14 +69,20 @@ class ExtensionGenerator {
             .toList() ??
         const [];
 
-    final generateListMapper = annotation.peek('generateListMapper')?.boolValue ?? true;
-    final generateUpdateMethod = annotation.peek('generateUpdateMethod')?.boolValue ?? true;
+    final generateListMapper =
+        annotation.peek('generateListMapper')?.boolValue ?? true;
+    final generateUpdateMethod =
+        annotation.peek('generateUpdateMethod')?.boolValue ?? true;
     final strictMode = annotation.peek('strictMode')?.boolValue ?? false;
     final ignoreIfNull = annotation.peek('ignoreIfNull')?.boolValue ?? false;
     final hookType = annotation.peek('hook')?.typeValue;
-    final generateReverse = annotation.peek('generateReverse')?.boolValue ?? false;
-    final reverseMethodNameRaw = annotation.peek('reverseMethodName')?.stringValue ?? '';
-    final reverseMethodName = reverseMethodNameRaw.isEmpty ? 'to${sourceClass.name}' : reverseMethodNameRaw;
+    final generateReverse =
+        annotation.peek('generateReverse')?.boolValue ?? false;
+    final reverseMethodNameRaw =
+        annotation.peek('reverseMethodName')?.stringValue ?? '';
+    final reverseMethodName = reverseMethodNameRaw.isEmpty
+        ? 'to${sourceClass.name}'
+        : reverseMethodNameRaw;
 
     final codeBody = MappingBodyBuilder.build(
       sourceClass: sourceClass,
@@ -117,7 +132,10 @@ class ExtensionGenerator {
 
         for (final field in targetClass.fields) {
           final fieldName = field.name;
-          if (fieldName == null || field.isStatic || field.isFinal || field.setter == null) {
+          if (fieldName == null ||
+              field.isStatic ||
+              field.isFinal ||
+              field.setter == null) {
             continue;
           }
           if (ignoreFields.contains(fieldName)) {
@@ -147,14 +165,17 @@ class ExtensionGenerator {
           }
 
           if (hasSourceField) {
-            final sourceFieldType = nestedField?.type ?? sourceFieldTypes[sourceFieldName];
+            final sourceFieldType =
+                nestedField?.type ?? sourceFieldTypes[sourceFieldName];
             final accessString = nestedField?.path ?? 'this.$sourceFieldName';
             final targetFieldType = field.type;
             final sourceTypeElement = sourceFieldType?.element;
             final targetTypeElement = targetFieldType.element;
 
             final isNullable =
-                sourceFieldType?.nullabilitySuffix == NullabilitySuffix.question || accessString.contains('?.');
+                sourceFieldType?.nullabilitySuffix ==
+                    NullabilitySuffix.question ||
+                accessString.contains('?.');
 
             if (sourceTypeElement is EnumElement &&
                 targetTypeElement is EnumElement &&
@@ -183,7 +204,9 @@ class ExtensionGenerator {
               }
             }
           } else if (defaultValues.containsKey(fieldName)) {
-            updateBodyBuffer.writeln('target.$fieldName = ${defaultValues[fieldName]};');
+            updateBodyBuffer.writeln(
+              'target.$fieldName = ${defaultValues[fieldName]};',
+            );
           }
         }
 
@@ -281,7 +304,10 @@ class ExtensionGenerator {
 
           for (final field in sourceClass.fields) {
             final fieldName = field.name;
-            if (fieldName == null || field.isStatic || field.isFinal || field.setter == null) {
+            if (fieldName == null ||
+                field.isStatic ||
+                field.isFinal ||
+                field.setter == null) {
               continue;
             }
             if (reverseIgnoreFields.contains(fieldName)) {
@@ -305,14 +331,17 @@ class ExtensionGenerator {
             }
 
             if (hasSourceField) {
-              final sourceFieldType = nestedField?.type ?? sourceFieldTypes[sourceFieldName];
+              final sourceFieldType =
+                  nestedField?.type ?? sourceFieldTypes[sourceFieldName];
               final accessString = nestedField?.path ?? 'this.$sourceFieldName';
               final targetFieldType = field.type;
               final sourceTypeElement = sourceFieldType?.element;
               final targetTypeElement = targetFieldType.element;
 
               final isNullable =
-                  sourceFieldType?.nullabilitySuffix == NullabilitySuffix.question || accessString.contains('?.');
+                  sourceFieldType?.nullabilitySuffix ==
+                      NullabilitySuffix.question ||
+                  accessString.contains('?.');
 
               if (sourceTypeElement is EnumElement &&
                   targetTypeElement is EnumElement &&
@@ -337,7 +366,9 @@ class ExtensionGenerator {
                     'if ($accessString case final $fieldName?) target.$fieldName = $fieldName;',
                   );
                 } else {
-                  updateBodyBuffer.writeln('target.$fieldName = $accessString;');
+                  updateBodyBuffer.writeln(
+                    'target.$fieldName = $accessString;',
+                  );
                 }
               }
             }
@@ -374,7 +405,9 @@ class ExtensionGenerator {
                 (m) => m
                   ..name = '${reverseMethodName}List'
                   ..returns = refer('List<${sourceClass.name}>')
-                  ..body = Code('return map((e) => e.$reverseMethodName()).toList();'),
+                  ..body = Code(
+                    'return map((e) => e.$reverseMethodName()).toList();',
+                  ),
               ),
             ),
         );

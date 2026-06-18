@@ -5,7 +5,8 @@ part 'approach_f_strict_mode.g.dart';
 class StrictUserEntity {
   final int id;
   final String name;
-  final String? unmappedField; // optional, so it doesn't fail the required check
+  final String?
+  unmappedField; // optional, so it doesn't fail the required check
 
   StrictUserEntity({
     required this.id,
@@ -20,7 +21,9 @@ class StrictUserEntity {
 @OmniMapper(
   target: StrictUserEntity,
   strictMode: true,
-  ignoreFields: ['unmappedField'], // We must ignore it or map it to prevent generation error
+  ignoreFields: [
+    'unmappedField',
+  ], // We must ignore it or map it to prevent generation error
 )
 class StrictUserModel {
   final int id;

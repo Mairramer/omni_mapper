@@ -8,7 +8,10 @@ part of 'approach_f_strict_mode.dart';
 
 extension StrictUserModelToEntity on StrictUserModel {
   StrictUserEntity toEntity() {
-    final target = StrictUserEntity(id: id, name: name);
+    final target = StrictUserEntity(
+      id: id,
+      name: name,
+    );
     return target;
   }
 

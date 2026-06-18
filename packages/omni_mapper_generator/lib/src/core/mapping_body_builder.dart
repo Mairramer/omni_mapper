@@ -44,7 +44,8 @@ class MappingBodyBuilder {
       targetConstructor = targetClass.constructors.first;
     }
 
-    String sourceFieldAccess(String name) => sourceVarName == 'this' ? name : '$sourceVarName.$name';
+    String sourceFieldAccess(String name) =>
+        sourceVarName == 'this' ? name : '$sourceVarName.$name';
 
     final assignedParams = <String>[];
     final codeBuffer = StringBuffer();
@@ -53,7 +54,9 @@ class MappingBodyBuilder {
 
     // Before Hook
     if (hookName != null) {
-      codeBuffer.writeln('$hookName().before(${sourceVarName == 'this' ? 'this' : sourceVarName});');
+      codeBuffer.writeln(
+        '$hookName().before(${sourceVarName == 'this' ? 'this' : sourceVarName});',
+      );
     }
 
     codeBuffer.writeln('final target = ${targetClass.name}(');
@@ -93,24 +96,29 @@ class MappingBodyBuilder {
       }
 
       if (hasSourceField) {
-        final sourceFieldType = nestedField?.type ?? sourceFieldTypes[sourceFieldName];
-        final accessString = nestedField?.path ?? sourceFieldAccess(sourceFieldName);
+        final sourceFieldType =
+            nestedField?.type ?? sourceFieldTypes[sourceFieldName];
+        final accessString =
+            nestedField?.path ?? sourceFieldAccess(sourceFieldName);
         final targetFieldType = param.type;
         MethodElement? nestedMapper;
         DartType? matchingConverter;
 
         // Check for matching converter
-        if (sourceFieldType != null && sourceFieldType.element != targetFieldType.element) {
+        if (sourceFieldType != null &&
+            sourceFieldType.element != targetFieldType.element) {
           for (final converter in converters) {
             final classElement = converter.element;
             if (classElement is ClassElement) {
               final omniConverter = classElement.allSupertypes
                   .where((t) => t.element.name == 'OmniConverter')
                   .firstOrNull;
-              if (omniConverter != null && omniConverter.typeArguments.length == 2) {
+              if (omniConverter != null &&
+                  omniConverter.typeArguments.length == 2) {
                 final sType = omniConverter.typeArguments[0];
                 final tType = omniConverter.typeArguments[1];
-                if (sType.element == sourceFieldType.element && tType.element == targetFieldType.element) {
+                if (sType.element == sourceFieldType.element &&
+                    tType.element == targetFieldType.element) {
                   matchingConverter = converter;
                   break;
                 }
@@ -122,11 +130,14 @@ class MappingBodyBuilder {
         if (mapperClass != null && sourceFieldType != null) {
           final sourceTypeElement = sourceFieldType.element;
           final targetTypeElement = param.type.element;
-          if (sourceTypeElement != null && targetTypeElement != null && sourceTypeElement != targetTypeElement) {
+          if (sourceTypeElement != null &&
+              targetTypeElement != null &&
+              sourceTypeElement != targetTypeElement) {
             for (final m in mapperClass.methods) {
               if (m.isAbstract && m.formalParameters.length == 1) {
                 if (m.returnType.element == targetTypeElement &&
-                    m.formalParameters.first.type.element == sourceTypeElement) {
+                    m.formalParameters.first.type.element ==
+                        sourceTypeElement) {
                   nestedMapper = m;
                   break;
                 }
@@ -137,19 +148,28 @@ class MappingBodyBuilder {
 
         if (matchingConverter != null) {
           final converterName = matchingConverter.element?.name;
-          codeBuffer.writeln('$paramName: const $converterName().convert($accessString),');
+          codeBuffer.writeln(
+            '$paramName: const $converterName().convert($accessString),',
+          );
         } else if (nestedMapper != null) {
-          codeBuffer.writeln('$paramName: $accessString != null ? ${nestedMapper.name}(($accessString)!) : null,');
+          codeBuffer.writeln(
+            '$paramName: $accessString != null ? ${nestedMapper.name}(($accessString)!) : null,',
+          );
         } else {
           if (mapperClass == null && sourceFieldType != null) {
             final sourceTypeElement = sourceFieldType.element;
             final targetTypeElement = param.type.element;
-            if (sourceTypeElement != null && targetTypeElement != null && sourceTypeElement != targetTypeElement) {
+            if (sourceTypeElement != null &&
+                targetTypeElement != null &&
+                sourceTypeElement != targetTypeElement) {
               final isPathNullable =
-                  sourceFieldType.nullabilitySuffix == NullabilitySuffix.question || accessString.contains('?.');
+                  sourceFieldType.nullabilitySuffix ==
+                      NullabilitySuffix.question ||
+                  accessString.contains('?.');
 
               // Automatic Enum Mapping
-              if (sourceTypeElement is EnumElement && targetTypeElement is EnumElement) {
+              if (sourceTypeElement is EnumElement &&
+                  targetTypeElement is EnumElement) {
                 final targetEnumName = targetTypeElement.name;
                 if (isPathNullable) {
                   codeBuffer.writeln(
@@ -165,13 +185,16 @@ class MappingBodyBuilder {
               }
 
               // Automatic Nested Mapping
-              if (sourceFieldType.isDartCoreList && targetFieldType.isDartCoreList) {
+              if (sourceFieldType.isDartCoreList &&
+                  targetFieldType.isDartCoreList) {
                 // If it's a list, map it
                 codeBuffer.writeln(
                   '$paramName: $accessString${isPathNullable ? '?' : ''}.map((e) => e.$extensionMethodName()).toList(),',
                 );
               } else {
-                codeBuffer.writeln('$paramName: $accessString${isPathNullable ? '?' : ''}.$extensionMethodName(),');
+                codeBuffer.writeln(
+                  '$paramName: $accessString${isPathNullable ? '?' : ''}.$extensionMethodName(),',
+                );
               }
               assignedParams.add(paramName);
               continue;
@@ -239,7 +262,9 @@ class MappingBodyBuilder {
 
     // After Hook
     if (hookName != null) {
-      codeBuffer.writeln('$hookName().after(${sourceVarName == 'this' ? 'this' : sourceVarName}, target);');
+      codeBuffer.writeln(
+        '$hookName().after(${sourceVarName == 'this' ? 'this' : sourceVarName}, target);',
+      );
     }
 
     if (strictMode) {
@@ -256,10 +281,15 @@ class MappingBodyBuilder {
 
       for (final field in targetClass.fields) {
         final fieldName = field.name;
-        if (fieldName == null || field.isStatic || field.isFinal || field.setter == null) {
+        if (fieldName == null ||
+            field.isStatic ||
+            field.isFinal ||
+            field.setter == null) {
           continue;
         }
-        if (!assignedParams.contains(fieldName) && !ignoreFields.contains(fieldName) && !field.hasInitializer) {
+        if (!assignedParams.contains(fieldName) &&
+            !ignoreFields.contains(fieldName) &&
+            !field.hasInitializer) {
           unmappedFields.add(fieldName);
         }
       }
