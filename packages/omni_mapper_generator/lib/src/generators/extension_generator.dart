@@ -228,6 +228,10 @@ class ExtensionGenerator {
 
     if (generateReverse) {
       final reverseFieldMaps = fieldMaps.map((k, v) => MapEntry(v, k));
+      final reverseIgnoreFields = fieldMaps.entries
+          .where((e) => ignoreFields.contains(e.value))
+          .map((e) => e.key)
+          .toList();
       final reverseCodeBody = MappingBodyBuilder.build(
         sourceClass: targetClass,
         targetClass: sourceClass,
@@ -235,11 +239,10 @@ class ExtensionGenerator {
         mapperClass: null,
         elementContext: elementContext,
         extensionMethodName: reverseMethodName,
-        ignoreFields: ignoreFields,
+        ignoreFields: reverseIgnoreFields,
         fieldMaps: reverseFieldMaps,
         converters: converters,
         strictMode: strictMode,
-        hookType: hookType,
       );
 
       final reverseExtensionName =
@@ -281,17 +284,11 @@ class ExtensionGenerator {
             if (fieldName == null || field.isStatic || field.isFinal || field.setter == null) {
               continue;
             }
-            if (ignoreFields.contains(fieldName)) {
+            if (reverseIgnoreFields.contains(fieldName)) {
               continue;
             }
 
-            String sourceFieldName = fieldName;
-            for (final entry in reverseFieldMaps.entries) {
-              if (entry.value == fieldName) {
-                sourceFieldName = entry.key;
-                break;
-              }
-            }
+            final sourceFieldName = fieldMaps[fieldName] ?? fieldName;
 
             bool hasSourceField = sourceFieldNames.contains(sourceFieldName);
             ResolvedNestedField? nestedField;
