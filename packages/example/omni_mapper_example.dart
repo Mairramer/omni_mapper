@@ -4,6 +4,7 @@ import 'package:example/approach_c_extension_from.dart';
 import 'package:example/approach_d_advanced.dart';
 import 'package:example/approach_e_update.dart';
 import 'package:example/approach_i_enum_mapping.dart';
+import 'package:example/approach_j_auto_flattening.dart';
 
 void main() {
   print('--- Approach A (Abstract Class) ---');
@@ -77,4 +78,20 @@ void main() {
   print(
     '  secondaryRole=${userEntity.secondaryRole?.name} (mapped from ClientRole.${userModel.secondaryRole?.name})\n',
   );
+
+  print('--- Approach J (Auto-Flattening) ---');
+  final flattenModel = FlattenModel(
+    userAddress: Address(city: City(name: 'San Francisco')),
+    profile: Profile(
+      settings: Settings(
+        theme: Theme(id: 'dark_01', mode: 'dark'),
+      ),
+    ),
+  );
+
+  final flattenTarget = flattenModel.toEntity();
+  print('Mapped FlattenModel to FlattenTarget:');
+  print('  userAddressCityName=${flattenTarget.userAddressCityName}');
+  print('  profileSettingsThemeId=${flattenTarget.profileSettingsThemeId}');
+  print('  profileSettingsThemeMode=${flattenTarget.profileSettingsThemeMode}\n');
 }

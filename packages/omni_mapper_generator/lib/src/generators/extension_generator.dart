@@ -5,6 +5,7 @@ import 'package:code_builder/code_builder.dart';
 import 'package:source_gen/source_gen.dart';
 
 import '../core/mapping_body_builder.dart';
+import '../core/nested_field_resolver.dart';
 
 class ExtensionGenerator {
   static String generate({
@@ -128,8 +129,23 @@ class ExtensionGenerator {
             }
           }
 
-          if (sourceFieldNames.contains(sourceFieldName)) {
-            final sourceFieldType = sourceFieldTypes[sourceFieldName];
+          bool hasSourceField = sourceFieldNames.contains(sourceFieldName);
+          ResolvedNestedField? nestedField;
+
+          if (!hasSourceField) {
+            nestedField = resolveNestedField(
+              sourceClass,
+              sourceFieldName,
+              'this',
+            );
+            if (nestedField != null) {
+              hasSourceField = true;
+            }
+          }
+
+          if (hasSourceField) {
+            final sourceFieldType = nestedField?.type ?? sourceFieldTypes[sourceFieldName];
+            final accessString = nestedField?.path ?? 'this.$sourceFieldName';
             final targetFieldType = field.type;
             final sourceTypeElement = sourceFieldType?.element;
             final targetTypeElement = targetFieldType.element;
@@ -142,24 +158,24 @@ class ExtensionGenerator {
               final targetEnumName = targetTypeElement.name;
               if (ignoreIfNull && isNullable) {
                 updateBodyBuffer.writeln(
-                  'if (this.$sourceFieldName != null) target.$fieldName = $targetEnumName.values.byName(this.$sourceFieldName!.name);',
+                  'if ($accessString case final $fieldName?) target.$fieldName = $targetEnumName.values.byName($fieldName.name);',
                 );
               } else if (isNullable) {
                 updateBodyBuffer.writeln(
-                  'target.$fieldName = this.$sourceFieldName != null ? $targetEnumName.values.byName(this.$sourceFieldName!.name) : null;',
+                  'target.$fieldName = $accessString != null ? $targetEnumName.values.byName(($accessString)!.name) : null;',
                 );
               } else {
                 updateBodyBuffer.writeln(
-                  'target.$fieldName = $targetEnumName.values.byName(this.$sourceFieldName.name);',
+                  'target.$fieldName = $targetEnumName.values.byName($accessString.name);',
                 );
               }
             } else {
               if (ignoreIfNull && isNullable) {
                 updateBodyBuffer.writeln(
-                  'if (this.$sourceFieldName != null) target.$fieldName = this.$sourceFieldName!;',
+                  'if ($accessString case final $fieldName?) target.$fieldName = $fieldName;',
                 );
               } else {
-                updateBodyBuffer.writeln('target.$fieldName = this.$sourceFieldName;');
+                updateBodyBuffer.writeln('target.$fieldName = $accessString;');
               }
             }
           } else if (defaultValues.containsKey(fieldName)) {

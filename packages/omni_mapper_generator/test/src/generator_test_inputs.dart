@@ -238,7 +238,7 @@ extension ModelHToTargetH on ModelH {
   }
 
   void updateTargetH(TargetH target) {
-    if (this.id != null) target.id = this.id!;
+    if (this.id case final id?) target.id = id;
     target.name = this.name;
   }
 }
@@ -311,7 +311,7 @@ extension ModelJToTargetJ on ModelJ {
     final target = TargetJ(
       status: TargetEnum.values.byName(status.name),
       optionalStatus: optionalStatus != null
-          ? TargetEnum.values.byName(optionalStatus!.name)
+          ? TargetEnum.values.byName((optionalStatus)!.name)
           : null,
     );
     return target;
@@ -320,7 +320,7 @@ extension ModelJToTargetJ on ModelJ {
   void updateTargetJ(TargetJ target) {
     target.status = TargetEnum.values.byName(this.status.name);
     target.optionalStatus = this.optionalStatus != null
-        ? TargetEnum.values.byName(this.optionalStatus!.name)
+        ? TargetEnum.values.byName((this.optionalStatus)!.name)
         : null;
   }
 }
@@ -336,4 +336,71 @@ class ModelJ {
   final SourceEnum status;
   final SourceEnum? optionalStatus;
   ModelJ({required this.status, this.optionalStatus});
+}
+
+// --- APPROACH K (Auto-Flattening) ---
+class TargetK {
+  final String? userAddressCityName;
+  final String? profileSettingsThemeId;
+  String? profileSettingsThemeMode;
+
+  TargetK({
+    this.userAddressCityName,
+    this.profileSettingsThemeId,
+  });
+}
+
+class CityK {
+  final String name;
+  CityK({required this.name});
+}
+
+class AddressK {
+  final CityK? city;
+  AddressK({this.city});
+}
+
+class ThemeK {
+  final String id;
+  final String mode;
+  ThemeK({required this.id, required this.mode});
+}
+
+class SettingsK {
+  final ThemeK? theme;
+  SettingsK({this.theme});
+}
+
+class ProfileK {
+  final SettingsK settings;
+  ProfileK({required this.settings});
+}
+
+@ShouldGenerate(r'''
+extension ModelKToTargetK on ModelK {
+  TargetK toTargetK() {
+    final target = TargetK(
+      userAddressCityName: this.userAddress?.city?.name,
+      profileSettingsThemeId: this.profile.settings.theme?.id,
+    )..profileSettingsThemeMode = this.profile.settings.theme?.mode;
+    return target;
+  }
+
+  void updateTargetK(TargetK target) {
+    target.profileSettingsThemeMode = this.profile.settings.theme?.mode;
+  }
+}
+
+extension ModelKToTargetKList on Iterable<ModelK> {
+  List<TargetK> toTargetKList() {
+    return map((e) => e.toTargetK()).toList();
+  }
+}
+''')
+@OmniMapper(target: TargetK, methodName: 'toTargetK')
+class ModelK {
+  final AddressK? userAddress;
+  final ProfileK profile;
+
+  ModelK({this.userAddress, required this.profile});
 }

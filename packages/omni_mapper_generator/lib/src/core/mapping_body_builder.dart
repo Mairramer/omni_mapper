@@ -3,6 +3,8 @@ import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:source_gen/source_gen.dart';
 
+import 'nested_field_resolver.dart';
+
 class MappingBodyBuilder {
   static String build({
     required ClassElement sourceClass,
@@ -76,10 +78,23 @@ class MappingBodyBuilder {
         }
       }
 
-      final hasSourceField = sourceFieldNames.contains(sourceFieldName);
+      bool hasSourceField = sourceFieldNames.contains(sourceFieldName);
+      ResolvedNestedField? nestedField;
+
+      if (!hasSourceField) {
+        nestedField = resolveNestedField(
+          sourceClass,
+          sourceFieldName,
+          sourceVarName == 'this' ? 'this' : sourceVarName,
+        );
+        if (nestedField != null) {
+          hasSourceField = true;
+        }
+      }
 
       if (hasSourceField) {
-        final sourceFieldType = sourceFieldTypes[sourceFieldName];
+        final sourceFieldType = nestedField?.type ?? sourceFieldTypes[sourceFieldName];
+        final accessString = nestedField?.path ?? sourceFieldAccess(sourceFieldName);
         final targetFieldType = param.type;
         MethodElement? nestedMapper;
         DartType? matchingConverter;
@@ -122,10 +137,9 @@ class MappingBodyBuilder {
 
         if (matchingConverter != null) {
           final converterName = matchingConverter.element?.name;
-          codeBuffer.writeln('$paramName: const $converterName().convert(${sourceFieldAccess(sourceFieldName)}),');
+          codeBuffer.writeln('$paramName: const $converterName().convert($accessString),');
         } else if (nestedMapper != null) {
-          final access = sourceFieldAccess(sourceFieldName);
-          codeBuffer.writeln('$paramName: $access != null ? ${nestedMapper.name}($access!) : null,');
+          codeBuffer.writeln('$paramName: $accessString != null ? ${nestedMapper.name}(($accessString)!) : null,');
         } else {
           if (mapperClass == null && sourceFieldType != null) {
             final sourceTypeElement = sourceFieldType.element;
@@ -134,14 +148,13 @@ class MappingBodyBuilder {
               // Automatic Enum Mapping
               if (sourceTypeElement is EnumElement && targetTypeElement is EnumElement) {
                 final targetEnumName = targetTypeElement.name;
-                final sourceAccess = sourceFieldAccess(sourceFieldName);
                 if (sourceFieldType.nullabilitySuffix == NullabilitySuffix.question) {
                   codeBuffer.writeln(
-                    '$paramName: $sourceAccess != null ? $targetEnumName.values.byName($sourceAccess!.name) : null,',
+                    '$paramName: $accessString != null ? $targetEnumName.values.byName(($accessString)!.name) : null,',
                   );
                 } else {
                   codeBuffer.writeln(
-                    '$paramName: $targetEnumName.values.byName($sourceAccess.name),',
+                    '$paramName: $targetEnumName.values.byName($accessString.name),',
                   );
                 }
                 assignedParams.add(paramName);
@@ -152,10 +165,10 @@ class MappingBodyBuilder {
               if (sourceFieldType.isDartCoreList && targetFieldType.isDartCoreList) {
                 // If it's a list, map it
                 codeBuffer.writeln(
-                  '$paramName: ${sourceFieldAccess(sourceFieldName)}?.map((e) => e.$extensionMethodName()).toList(),',
+                  '$paramName: $accessString?.map((e) => e.$extensionMethodName()).toList(),',
                 );
               } else {
-                codeBuffer.writeln('$paramName: ${sourceFieldAccess(sourceFieldName)}?.$extensionMethodName(),');
+                codeBuffer.writeln('$paramName: $accessString?.$extensionMethodName(),');
               }
               assignedParams.add(paramName);
               continue;
@@ -163,9 +176,9 @@ class MappingBodyBuilder {
           }
 
           if (param.isNamed) {
-            codeBuffer.writeln('$paramName: ${sourceFieldAccess(sourceFieldName)},');
+            codeBuffer.writeln('$paramName: $accessString,');
           } else {
-            codeBuffer.writeln('${sourceFieldAccess(sourceFieldName)},');
+            codeBuffer.writeln('$accessString,');
           }
         }
         assignedParams.add(paramName);
@@ -198,8 +211,23 @@ class MappingBodyBuilder {
           ignoreFields.contains(fieldName)) {
         continue;
       }
-      if (sourceFieldNames.contains(fieldName)) {
-        codeBuffer.write('..$fieldName = ${sourceFieldAccess(fieldName)}');
+      bool hasSourceField = sourceFieldNames.contains(fieldName);
+      ResolvedNestedField? nestedField;
+
+      if (!hasSourceField) {
+        nestedField = resolveNestedField(
+          sourceClass,
+          fieldName,
+          sourceVarName == 'this' ? 'this' : sourceVarName,
+        );
+        if (nestedField != null) {
+          hasSourceField = true;
+        }
+      }
+
+      if (hasSourceField) {
+        final accessString = nestedField?.path ?? sourceFieldAccess(fieldName);
+        codeBuffer.write('..$fieldName = $accessString');
         assignedParams.add(fieldName);
       }
     }
