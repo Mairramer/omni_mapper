@@ -76,6 +76,8 @@ class MappingBodyBuilder {
         final parts = sourceFieldName.split('.');
         final prefix = parts.first;
         final rest = parts.skip(1).join('.');
+
+        // 1. Check if prefix matches a parameter name (Multiple Sources)
         for (var i = 0; i < sourceVarNames.length; i++) {
           if (sourceVarNames[i] == prefix) {
             final sClass = sourceClasses[i];
@@ -91,6 +93,24 @@ class MappingBodyBuilder {
                 sClass,
               );
             }
+          }
+        }
+
+        // 2. Check if the entire path resolves against ANY source (e.g., Extension Mappers or nested structures)
+        for (var i = 0; i < sourceVarNames.length; i++) {
+          final sClass = sourceClasses[i];
+          final varName = sourceVarNames[i];
+          final nestedField = resolveNestedField(
+            sClass,
+            sourceFieldName,
+            varName == 'this' ? 'this' : varName,
+          );
+          if (nestedField != null) {
+            return ResolvedFieldInfo(
+              nestedField.type,
+              nestedField.path,
+              sClass,
+            );
           }
         }
       }

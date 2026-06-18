@@ -27,6 +27,32 @@ ResolvedNestedField? resolveNestedField(
       return ResolvedNestedField(access, field.returnType);
     }
 
+    if (targetName.contains('.')) {
+      final parts = targetName.split('.');
+      final firstPart = parts.first;
+      final remainingName = parts.skip(1).join('.');
+
+      if (fieldName == firstPart) {
+        final fieldTypeElement = field.returnType.element;
+        if (fieldTypeElement is ClassElement) {
+          final isFieldNullable =
+              field.returnType.nullabilitySuffix == NullabilitySuffix.question;
+          final access =
+              '$currentAccess${needsQuestionMark ? '?.' : '.'}$fieldName';
+
+          final result = resolveNestedField(
+            fieldTypeElement,
+            remainingName,
+            access,
+            needsQuestionMark: isFieldNullable,
+          );
+          if (result != null) {
+            return result;
+          }
+        }
+      }
+    }
+
     if (targetName.startsWith(fieldName) &&
         targetName.length > fieldName.length) {
       final nextChar = targetName[fieldName.length];

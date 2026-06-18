@@ -53,7 +53,8 @@ class UserProfileHook extends OmniHook<User, UserProfile> {
   void after(User source, UserProfile target) {
     // Note: OmniHook currently receives only the primary (first) source.
     // So we use the User's name to generate the fullAddress in this example.
-    target.fullAddress = '${source.name} lives at ${target.street}, ${target.city} - ${target.zipCode}';
+    target.fullAddress =
+        '${source.name} lives at ${target.street}, ${target.city} - ${target.zipCode}';
   }
 }
 
