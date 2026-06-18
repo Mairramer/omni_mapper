@@ -459,3 +459,34 @@ class ModelL {
   final String title;
   ModelL({required this.userId, required this.title});
 }
+
+// --- FEATURE 1: Multiple Sources ---
+class SourceX {
+  final int id;
+  SourceX({required this.id});
+}
+
+class SourceY {
+  final String name;
+  SourceY({required this.name});
+}
+
+class TargetMultiple {
+  final int id;
+  final String name;
+  TargetMultiple({required this.id, required this.name});
+}
+
+@ShouldGenerate(r'''
+class MultipleSourcesMapperImpl extends MultipleSourcesMapper {
+  @override
+  TargetMultiple toTarget(SourceX x, SourceY y) {
+    final target = TargetMultiple(id: x.id, name: y.name);
+    return target;
+  }
+}
+''')
+@OmniMapper()
+abstract class MultipleSourcesMapper {
+  TargetMultiple toTarget(SourceX x, SourceY y);
+}

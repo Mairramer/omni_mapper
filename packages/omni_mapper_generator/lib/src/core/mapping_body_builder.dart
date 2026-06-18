@@ -5,11 +5,19 @@ import 'package:source_gen/source_gen.dart';
 
 import 'nested_field_resolver.dart';
 
+class ResolvedFieldInfo {
+  final DartType type;
+  final String accessString;
+  final ClassElement sourceClass;
+
+  ResolvedFieldInfo(this.type, this.accessString, this.sourceClass);
+}
+
 class MappingBodyBuilder {
   static String build({
-    required ClassElement sourceClass,
+    required List<ClassElement> sourceClasses,
     required ClassElement targetClass,
-    required String sourceVarName,
+    required List<String> sourceVarNames,
     required ClassElement? mapperClass,
     required Element elementContext,
     String extensionMethodName = 'toEntity',
@@ -20,19 +28,114 @@ class MappingBodyBuilder {
     bool strictMode = false,
     DartType? hookType,
   }) {
-    final sourceFieldNames = <String>{};
-    final sourceFieldTypes = <String, DartType>{};
-    for (final f in sourceClass.fields) {
-      if (!f.isStatic && f.name != null) {
-        sourceFieldNames.add(f.name!);
-        sourceFieldTypes[f.name!] = f.type;
+    // Collect all source fields into a structured map for quick checking
+    // name -> list of matching fields (to detect ambiguity)
+    final availableSourceFields = <String, List<ResolvedFieldInfo>>{};
+
+    for (var i = 0; i < sourceClasses.length; i++) {
+      final sClass = sourceClasses[i];
+      final sVar = sourceVarNames[i];
+      String getAccess(String name) => sVar == 'this' ? name : '$sVar.$name';
+
+      final addedAccesses = <String>{};
+
+      void tryAdd(String name, DartType type) {
+        final access = getAccess(name);
+        if (!addedAccesses.contains(access)) {
+          addedAccesses.add(access);
+          availableSourceFields
+              .putIfAbsent(name, () => [])
+              .add(ResolvedFieldInfo(type, access, sClass));
+        }
+      }
+
+      for (final f in sClass.fields) {
+        if (!f.isStatic && f.name != null) {
+          tryAdd(f.name!, f.type);
+        }
+      }
+      for (final g in sClass.getters) {
+        if (!g.isStatic && g.name != null) {
+          tryAdd(g.name!, g.returnType);
+        }
       }
     }
-    for (final g in sourceClass.getters) {
-      if (!g.isStatic && g.name != null) {
-        sourceFieldNames.add(g.name!);
-        sourceFieldTypes[g.name!] = g.returnType;
+
+    ResolvedFieldInfo? resolveField(String targetFieldName) {
+      String sourceFieldName = targetFieldName;
+      for (final entry in fieldMaps.entries) {
+        if (entry.value == targetFieldName) {
+          sourceFieldName = entry.key;
+          break;
+        }
       }
+
+      // Check explicit dot notation in fieldMaps for explicit source targeting
+      // E.g., {'user.name': 'fullName'}
+      if (sourceFieldName.contains('.')) {
+        final parts = sourceFieldName.split('.');
+        final prefix = parts.first;
+        final rest = parts.skip(1).join('.');
+        for (var i = 0; i < sourceVarNames.length; i++) {
+          if (sourceVarNames[i] == prefix) {
+            final sClass = sourceClasses[i];
+            final nestedField = resolveNestedField(
+              sClass,
+              rest,
+              sourceVarNames[i] == 'this' ? 'this' : sourceVarNames[i],
+            );
+            if (nestedField != null) {
+              return ResolvedFieldInfo(
+                nestedField.type,
+                nestedField.path,
+                sClass,
+              );
+            }
+          }
+        }
+      }
+
+      final directMatches = availableSourceFields[sourceFieldName];
+      if (directMatches != null && directMatches.isNotEmpty) {
+        if (directMatches.length > 1) {
+          throw InvalidGenerationSourceError(
+            'Ambiguous mapping for target field "$targetFieldName". It exists in multiple source classes. Please map it explicitly using fieldMaps.',
+            element: elementContext,
+          );
+        }
+        return directMatches.first;
+      }
+
+      // Try nested resolution if no direct match
+      final nestedMatches = <ResolvedFieldInfo>[];
+      for (var i = 0; i < sourceClasses.length; i++) {
+        final nestedField = resolveNestedField(
+          sourceClasses[i],
+          sourceFieldName,
+          sourceVarNames[i] == 'this' ? 'this' : sourceVarNames[i],
+        );
+        if (nestedField != null) {
+          nestedMatches.add(
+            ResolvedFieldInfo(
+              nestedField.type,
+              nestedField.path,
+              sourceClasses[i],
+            ),
+          );
+        }
+      }
+
+      if (nestedMatches.isNotEmpty) {
+        if (nestedMatches.length > 1) {
+          throw InvalidGenerationSourceError(
+            'Ambiguous nested mapping for target field "$targetFieldName". It exists in multiple source classes. Please map it explicitly using fieldMaps.',
+            element: elementContext,
+          );
+        }
+        return nestedMatches.first;
+      }
+
+      return null;
     }
 
     ConstructorElement targetConstructor;
@@ -44,9 +147,6 @@ class MappingBodyBuilder {
       targetConstructor = targetClass.constructors.first;
     }
 
-    String sourceFieldAccess(String name) =>
-        sourceVarName == 'this' ? name : '$sourceVarName.$name';
-
     final assignedParams = <String>[];
     final codeBuffer = StringBuffer();
 
@@ -54,9 +154,15 @@ class MappingBodyBuilder {
 
     // Before Hook
     if (hookName != null) {
-      codeBuffer.writeln(
-        '$hookName().before(${sourceVarName == 'this' ? 'this' : sourceVarName});',
-      );
+      if (sourceVarNames.length == 1) {
+        codeBuffer.writeln(
+          '$hookName().before(${sourceVarNames.first == 'this' ? 'this' : sourceVarNames.first});',
+        );
+      } else {
+        codeBuffer.writeln(
+          '$hookName().before(${sourceVarNames.first == 'this' ? 'this' : sourceVarNames.first});',
+        );
+      }
     }
 
     codeBuffer.writeln('final target = ${targetClass.name}(');
@@ -67,46 +173,21 @@ class MappingBodyBuilder {
       if (paramName == null) {
         continue;
       }
-
       if (ignoreFields.contains(paramName)) {
         continue;
       }
 
-      // Find mapped source field if provided in fieldMaps
-      String sourceFieldName = paramName;
-      for (final entry in fieldMaps.entries) {
-        if (entry.value == paramName) {
-          sourceFieldName = entry.key;
-          break;
-        }
-      }
+      final resolved = resolveField(paramName);
 
-      bool hasSourceField = sourceFieldNames.contains(sourceFieldName);
-      ResolvedNestedField? nestedField;
-
-      if (!hasSourceField) {
-        nestedField = resolveNestedField(
-          sourceClass,
-          sourceFieldName,
-          sourceVarName == 'this' ? 'this' : sourceVarName,
-        );
-        if (nestedField != null) {
-          hasSourceField = true;
-        }
-      }
-
-      if (hasSourceField) {
-        final sourceFieldType =
-            nestedField?.type ?? sourceFieldTypes[sourceFieldName];
-        final accessString =
-            nestedField?.path ?? sourceFieldAccess(sourceFieldName);
+      if (resolved != null) {
+        final sourceFieldType = resolved.type;
+        final accessString = resolved.accessString;
         final targetFieldType = param.type;
         MethodElement? nestedMapper;
         DartType? matchingConverter;
 
         // Check for matching converter
-        if (sourceFieldType != null &&
-            sourceFieldType.element != targetFieldType.element) {
+        if (sourceFieldType.element != targetFieldType.element) {
           for (final converter in converters) {
             final classElement = converter.element;
             if (classElement is ClassElement) {
@@ -127,7 +208,7 @@ class MappingBodyBuilder {
           }
         }
 
-        if (mapperClass != null && sourceFieldType != null) {
+        if (mapperClass != null) {
           final sourceTypeElement = sourceFieldType.element;
           final targetTypeElement = param.type.element;
           if (sourceTypeElement != null &&
@@ -156,7 +237,7 @@ class MappingBodyBuilder {
             '$paramName: $accessString != null ? ${nestedMapper.name}(($accessString)!) : null,',
           );
         } else {
-          if (mapperClass == null && sourceFieldType != null) {
+          if (mapperClass == null) {
             final sourceTypeElement = sourceFieldType.element;
             final targetTypeElement = param.type.element;
             if (sourceTypeElement != null &&
@@ -215,8 +296,7 @@ class MappingBodyBuilder {
           assignedParams.add(paramName);
         } else if (param.isRequired) {
           throw InvalidGenerationSourceError(
-            'Missing required field "$paramName" from source class ${sourceClass.name} '
-            'to construct ${targetClass.name}. You can provide a `defaultValue` or `fieldMap`.',
+            'Missing required field "$paramName" to construct ${targetClass.name}. You can provide a `defaultValue` or `fieldMap`.',
             element: elementContext,
           );
         }
@@ -230,6 +310,7 @@ class MappingBodyBuilder {
       if (fieldName == null) {
         continue;
       }
+
       if (field.isStatic ||
           field.isFinal ||
           field.setter == null ||
@@ -237,23 +318,10 @@ class MappingBodyBuilder {
           ignoreFields.contains(fieldName)) {
         continue;
       }
-      bool hasSourceField = sourceFieldNames.contains(fieldName);
-      ResolvedNestedField? nestedField;
 
-      if (!hasSourceField) {
-        nestedField = resolveNestedField(
-          sourceClass,
-          fieldName,
-          sourceVarName == 'this' ? 'this' : sourceVarName,
-        );
-        if (nestedField != null) {
-          hasSourceField = true;
-        }
-      }
-
-      if (hasSourceField) {
-        final accessString = nestedField?.path ?? sourceFieldAccess(fieldName);
-        codeBuffer.write('..$fieldName = $accessString');
+      final resolved = resolveField(fieldName);
+      if (resolved != null) {
+        codeBuffer.write('..$fieldName = ${resolved.accessString}');
         assignedParams.add(fieldName);
       }
     }
@@ -263,7 +331,7 @@ class MappingBodyBuilder {
     // After Hook
     if (hookName != null) {
       codeBuffer.writeln(
-        '$hookName().after(${sourceVarName == 'this' ? 'this' : sourceVarName}, target);',
+        '$hookName().after(${sourceVarNames.first == 'this' ? 'this' : sourceVarNames.first}, target);',
       );
     }
 

@@ -82,6 +82,18 @@ final entity = model.toEntity(); // Automatically mapped!
 
 For detailed documentation and advanced usage, see the [`omni_mapper` package README](./packages/omni_mapper/README.md).
 
+## Roadmap
+
+Para tornar o OmniMapper a solução definitiva para o ecossistema Dart/Flutter (semelhante ao MapStruct/AutoMapper), estamos focando nas seguintes features:
+
+1. **Mapeamento de Múltiplas Fontes (Multiple Sources):** Combinar múltiplos objetos em um único alvo.
+2. **Plena compatibilidade com Freezed/BuiltValue:** Suporte perfeito a Factory Constructors.
+3. **Passagem de Contexto (`@Context`):** Repassar dependências/estado pela árvore de conversão.
+4. **Mapeamento Polimórfico:** Lidar com subclasses e herança de forma dinâmica (`@SubclassMapping`).
+5. **Utilização de outros Mappers:** Referenciar mappers injetáveis existentes (`uses: [OtherMapper]`).
+6. **Estratégias de Atualização de Coleções:** Opção para dar `clear()` e `addAll()` ao invés de substituir a referência da lista.
+7. **Expressões Customizadas por Campo:** Código puro Dart passado via string para flexibilidade extrema.
+
 ## Contributing
 
 Contributions are welcome! Please file issues and pull requests on the [GitHub repository](https://github.com/Mairramer/omni_mapper).

@@ -29,20 +29,32 @@ class AbstractClassGenerator {
     ConstantReader annotation,
   ) {
     final methodParams = method.formalParameters;
-    if (methodParams.length != 1) {
+    if (methodParams.isEmpty) {
       throw InvalidGenerationSourceError(
-        'Mapper methods must have exactly one parameter.',
+        'Mapper methods must have at least one parameter.',
         element: method,
       );
     }
 
-    final sourceParam = methodParams.first;
-    final sourceClass = sourceParam.type.element as ClassElement?;
+    final sourceClasses = <ClassElement>[];
+    final sourceVarNames = <String>[];
+    for (final param in methodParams) {
+      final paramClass = param.type.element as ClassElement?;
+      if (paramClass == null) {
+        throw InvalidGenerationSourceError(
+          'Mapper method parameters must be classes.',
+          element: method,
+        );
+      }
+      sourceClasses.add(paramClass);
+      sourceVarNames.add(param.name ?? '');
+    }
+
     final targetClass = method.returnType.element as ClassElement?;
 
-    if (sourceClass == null || targetClass == null) {
+    if (targetClass == null) {
       throw InvalidGenerationSourceError(
-        'Mapper methods must use classes as parameters and return types.',
+        'Mapper methods must return a class.',
         element: method,
       );
     }
@@ -60,9 +72,9 @@ class AbstractClassGenerator {
     final hookType = annotation.peek('hook')?.typeValue;
 
     final codeBody = MappingBodyBuilder.build(
-      sourceClass: sourceClass,
+      sourceClasses: sourceClasses,
       targetClass: targetClass,
-      sourceVarName: sourceParam.name ?? '',
+      sourceVarNames: sourceVarNames,
       mapperClass: mapperClass,
       elementContext: mapperClass,
       ignoreFields: ignoreFields,
@@ -75,11 +87,13 @@ class AbstractClassGenerator {
         ..name = method.name
         ..annotations.add(refer('override'))
         ..returns = refer(targetClass.name ?? '')
-        ..requiredParameters.add(
-          Parameter(
-            (p) => p
-              ..name = sourceParam.name ?? ''
-              ..type = refer(sourceClass.name ?? ''),
+        ..requiredParameters.addAll(
+          methodParams.map(
+            (p) => Parameter(
+              (pb) => pb
+                ..name = p.name ?? ''
+                ..type = refer(p.type.element?.name ?? ''),
+            ),
           ),
         )
         ..body = Code(codeBody),
