@@ -1,4 +1,5 @@
 import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/dart/element/type.dart';
 import 'package:code_builder/code_builder.dart';
 import 'package:source_gen/source_gen.dart';
 import '../core/mapping_body_builder.dart';
@@ -68,6 +69,39 @@ class AbstractClassGenerator {
             .toList() ??
         const [];
 
+    final fieldMapsObj = annotation.peek('fieldMaps')?.mapValue;
+    final fieldMaps = <String, String>{};
+    if (fieldMapsObj != null) {
+      for (final entry in fieldMapsObj.entries) {
+        final key = entry.key?.toStringValue();
+        final value = entry.value?.toStringValue();
+        if (key != null && value != null) {
+          fieldMaps[key] = value;
+        }
+      }
+    }
+
+    final defaultValuesObj = annotation.peek('defaultValues')?.mapValue;
+    final defaultValues = <String, String>{};
+    if (defaultValuesObj != null) {
+      for (final entry in defaultValuesObj.entries) {
+        final key = entry.key?.toStringValue();
+        final value = entry.value?.toStringValue();
+        if (key != null && value != null) {
+          defaultValues[key] = value;
+        }
+      }
+    }
+
+    final converters =
+        annotation
+            .peek('converters')
+            ?.listValue
+            .map((e) => e.toTypeValue())
+            .whereType<DartType>()
+            .toList() ??
+        const [];
+
     final strictMode = annotation.peek('strictMode')?.boolValue ?? false;
     final hookType = annotation.peek('hook')?.typeValue;
 
@@ -78,6 +112,9 @@ class AbstractClassGenerator {
       mapperClass: mapperClass,
       elementContext: mapperClass,
       ignoreFields: ignoreFields,
+      fieldMaps: fieldMaps,
+      defaultValues: defaultValues,
+      converters: converters,
       strictMode: strictMode,
       hookType: hookType,
     );

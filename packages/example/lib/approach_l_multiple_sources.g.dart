@@ -1,0 +1,25 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'approach_l_multiple_sources.dart';
+
+// **************************************************************************
+// MapperGenerator
+// **************************************************************************
+
+class UserProfileMapperImpl extends UserProfileMapper {
+  @override
+  UserProfile toProfile(
+    User user,
+    Address address,
+  ) {
+    final target = UserProfile(
+      id: user.id,
+      name: user.name,
+      street: address.street,
+      city: address.city,
+      zipCode: address.zipCode,
+      fullAddress: address.street,
+    );
+    return target;
+  }
+}
