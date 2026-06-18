@@ -15,40 +15,6 @@ ResolvedNestedField? resolveNestedField(
   String currentAccess, {
   bool needsQuestionMark = false,
 }) {
-  for (final field in classElement.fields) {
-    if (field.isStatic || field.name == null) {
-      continue;
-    }
-    final fieldName = field.name!;
-
-    if (fieldName == targetName) {
-      final access = '$currentAccess${needsQuestionMark ? '?.' : '.'}$fieldName';
-      return ResolvedNestedField(access, field.type);
-    }
-
-    if (targetName.startsWith(fieldName) && targetName.length > fieldName.length) {
-      final nextChar = targetName[fieldName.length];
-      if (nextChar == nextChar.toUpperCase()) {
-        final remainingName = nextChar.toLowerCase() + targetName.substring(fieldName.length + 1);
-        final fieldTypeElement = field.type.element;
-        if (fieldTypeElement is ClassElement) {
-          final isFieldNullable = field.type.nullabilitySuffix == NullabilitySuffix.question;
-          final access = '$currentAccess${needsQuestionMark ? '?.' : '.'}$fieldName';
-
-          final result = resolveNestedField(
-            fieldTypeElement,
-            remainingName,
-            access,
-            needsQuestionMark: isFieldNullable,
-          );
-          if (result != null) {
-            return result;
-          }
-        }
-      }
-    }
-  }
-
   for (final field in classElement.getters) {
     if (field.isStatic || field.name == null) {
       continue;

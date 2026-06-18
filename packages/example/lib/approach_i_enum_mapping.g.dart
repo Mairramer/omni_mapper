@@ -11,7 +11,9 @@ extension UserModelToEntity on UserModel {
     final target = UserEntity(
       id: id,
       role: UserRole.values.byName(role.name),
-      secondaryRole: secondaryRole != null ? UserRole.values.byName((secondaryRole)!.name) : null,
+      secondaryRole: secondaryRole != null
+          ? UserRole.values.byName((secondaryRole)!.name)
+          : null,
     );
     return target;
   }

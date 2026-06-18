@@ -150,7 +150,7 @@ class ExtensionGenerator {
             final sourceTypeElement = sourceFieldType?.element;
             final targetTypeElement = targetFieldType.element;
 
-            final isNullable = sourceFieldType?.nullabilitySuffix == NullabilitySuffix.question;
+            final isNullable = sourceFieldType?.nullabilitySuffix == NullabilitySuffix.question || accessString.contains('?.');
 
             if (sourceTypeElement is EnumElement &&
                 targetTypeElement is EnumElement &&

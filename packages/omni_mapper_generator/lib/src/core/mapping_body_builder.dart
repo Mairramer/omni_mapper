@@ -145,10 +145,12 @@ class MappingBodyBuilder {
             final sourceTypeElement = sourceFieldType.element;
             final targetTypeElement = param.type.element;
             if (sourceTypeElement != null && targetTypeElement != null && sourceTypeElement != targetTypeElement) {
+              final isPathNullable = sourceFieldType.nullabilitySuffix == NullabilitySuffix.question || accessString.contains('?.');
+
               // Automatic Enum Mapping
               if (sourceTypeElement is EnumElement && targetTypeElement is EnumElement) {
                 final targetEnumName = targetTypeElement.name;
-                if (sourceFieldType.nullabilitySuffix == NullabilitySuffix.question) {
+                if (isPathNullable) {
                   codeBuffer.writeln(
                     '$paramName: $accessString != null ? $targetEnumName.values.byName(($accessString)!.name) : null,',
                   );
@@ -165,10 +167,10 @@ class MappingBodyBuilder {
               if (sourceFieldType.isDartCoreList && targetFieldType.isDartCoreList) {
                 // If it's a list, map it
                 codeBuffer.writeln(
-                  '$paramName: $accessString?.map((e) => e.$extensionMethodName()).toList(),',
+                  '$paramName: $accessString${isPathNullable ? '?' : ''}.map((e) => e.$extensionMethodName()).toList(),',
                 );
               } else {
-                codeBuffer.writeln('$paramName: $accessString?.$extensionMethodName(),');
+                codeBuffer.writeln('$paramName: $accessString${isPathNullable ? '?' : ''}.$extensionMethodName(),');
               }
               assignedParams.add(paramName);
               continue;
