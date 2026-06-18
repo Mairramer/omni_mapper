@@ -27,7 +27,7 @@ class UserProfile {
   final String street;
   final String city;
   final String zipCode;
-  
+
   // Custom mapped field
   final String fullAddress;
 
