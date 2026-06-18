@@ -85,9 +85,9 @@ class ExtensionGenerator {
         : reverseMethodNameRaw;
 
     final codeBody = MappingBodyBuilder.build(
-      sourceClass: sourceClass,
+      sourceClasses: [sourceClass],
       targetClass: targetClass,
-      sourceVarName: 'this',
+      sourceVarNames: ['this'],
       mapperClass: null,
       elementContext: elementContext,
       extensionMethodName: methodName,
@@ -256,9 +256,9 @@ class ExtensionGenerator {
           .map((e) => e.key)
           .toList();
       final reverseCodeBody = MappingBodyBuilder.build(
-        sourceClass: targetClass,
+        sourceClasses: [targetClass],
         targetClass: sourceClass,
-        sourceVarName: 'this',
+        sourceVarNames: ['this'],
         mapperClass: null,
         elementContext: elementContext,
         extensionMethodName: reverseMethodName,
