@@ -142,15 +142,15 @@ class ExtensionGenerator {
               final targetEnumName = targetTypeElement.name;
               if (ignoreIfNull && isNullable) {
                 updateBodyBuffer.writeln(
-                  'if (this.$sourceFieldName != null) target.$fieldName = $targetEnumName.values.firstWhere((e) => e.name == this.$sourceFieldName!.name);',
+                  'if (this.$sourceFieldName != null) target.$fieldName = $targetEnumName.values.byName(this.$sourceFieldName!.name);',
                 );
               } else if (isNullable) {
                 updateBodyBuffer.writeln(
-                  'target.$fieldName = this.$sourceFieldName != null ? $targetEnumName.values.firstWhere((e) => e.name == this.$sourceFieldName!.name) : null;',
+                  'target.$fieldName = this.$sourceFieldName != null ? $targetEnumName.values.byName(this.$sourceFieldName!.name) : null;',
                 );
               } else {
                 updateBodyBuffer.writeln(
-                  'target.$fieldName = $targetEnumName.values.firstWhere((e) => e.name == this.$sourceFieldName.name);',
+                  'target.$fieldName = $targetEnumName.values.byName(this.$sourceFieldName.name);',
                 );
               }
             } else {

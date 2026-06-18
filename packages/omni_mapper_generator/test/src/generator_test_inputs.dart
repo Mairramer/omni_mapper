@@ -309,22 +309,18 @@ class TargetJ {
 extension ModelJToTargetJ on ModelJ {
   TargetJ toTargetJ() {
     final target = TargetJ(
-      status: TargetEnum.values.firstWhere((e) => e.name == status.name),
+      status: TargetEnum.values.byName(status.name),
       optionalStatus: optionalStatus != null
-          ? TargetEnum.values.firstWhere((e) => e.name == optionalStatus!.name)
+          ? TargetEnum.values.byName(optionalStatus!.name)
           : null,
     );
     return target;
   }
 
   void updateTargetJ(TargetJ target) {
-    target.status = TargetEnum.values.firstWhere(
-      (e) => e.name == this.status.name,
-    );
+    target.status = TargetEnum.values.byName(this.status.name);
     target.optionalStatus = this.optionalStatus != null
-        ? TargetEnum.values.firstWhere(
-            (e) => e.name == this.optionalStatus!.name,
-          )
+        ? TargetEnum.values.byName(this.optionalStatus!.name)
         : null;
   }
 }
