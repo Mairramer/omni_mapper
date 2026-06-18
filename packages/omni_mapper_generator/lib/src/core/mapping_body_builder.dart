@@ -154,15 +154,9 @@ class MappingBodyBuilder {
 
     // Before Hook
     if (hookName != null) {
-      if (sourceVarNames.length == 1) {
-        codeBuffer.writeln(
-          '$hookName().before(${sourceVarNames.first == 'this' ? 'this' : sourceVarNames.first});',
-        );
-      } else {
-        codeBuffer.writeln(
-          '$hookName().before(${sourceVarNames.first == 'this' ? 'this' : sourceVarNames.first});',
-        );
-      }
+      codeBuffer.writeln(
+        '$hookName().before(${sourceVarNames.first == 'this' ? 'this' : sourceVarNames.first});',
+      );
     }
 
     codeBuffer.writeln('final target = ${targetClass.name}(');
