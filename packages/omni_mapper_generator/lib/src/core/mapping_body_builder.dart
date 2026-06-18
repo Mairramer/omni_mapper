@@ -145,7 +145,8 @@ class MappingBodyBuilder {
             final sourceTypeElement = sourceFieldType.element;
             final targetTypeElement = param.type.element;
             if (sourceTypeElement != null && targetTypeElement != null && sourceTypeElement != targetTypeElement) {
-              final isPathNullable = sourceFieldType.nullabilitySuffix == NullabilitySuffix.question || accessString.contains('?.');
+              final isPathNullable =
+                  sourceFieldType.nullabilitySuffix == NullabilitySuffix.question || accessString.contains('?.');
 
               // Automatic Enum Mapping
               if (sourceTypeElement is EnumElement && targetTypeElement is EnumElement) {
