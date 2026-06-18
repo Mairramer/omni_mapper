@@ -38,10 +38,14 @@ class MappingBodyBuilder {
     ConstructorElement targetConstructor;
     try {
       targetConstructor = targetClass.constructors.firstWhere(
-        (c) => (c.name ?? '').isEmpty,
+        (c) => (c.name == null || c.name!.isEmpty) && !c.isPrivate,
       );
     } catch (_) {
-      targetConstructor = targetClass.constructors.first;
+      try {
+        targetConstructor = targetClass.constructors.firstWhere((c) => !c.isPrivate);
+      } catch (_) {
+        targetConstructor = targetClass.constructors.first;
+      }
     }
 
     String sourceFieldAccess(String name) =>

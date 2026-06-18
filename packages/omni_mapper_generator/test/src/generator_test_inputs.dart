@@ -459,3 +459,32 @@ class ModelL {
   final String title;
   ModelL({required this.userId, required this.title});
 }
+
+// --- FEATURE 7: Factory Constructors (Freezed) ---
+class FreezedLikeModel {
+  final String title;
+  FreezedLikeModel._(this.title);
+
+  factory FreezedLikeModel({required String title}) {
+    return FreezedLikeModel._(title);
+  }
+}
+
+class SourceFreezed {
+  final String title;
+  SourceFreezed({required this.title});
+}
+
+@ShouldGenerate(r'''
+class FreezedMapperImpl extends FreezedMapper {
+  @override
+  FreezedLikeModel toFreezed(SourceFreezed source) {
+    final target = FreezedLikeModel(title: source.title);
+    return target;
+  }
+}
+''')
+@OmniMapper()
+abstract class FreezedMapper {
+  FreezedLikeModel toFreezed(SourceFreezed source);
+}
