@@ -1,3 +1,10 @@
+## 0.3.0
+
+- **Feat**: Support for mapping from multiple source objects into a single target.
+- **Feat**: Added automatic enum mapping (`approach_i_enum_mapping.dart`).
+- **Feat**: Implemented deep auto-flattening for nested mapping.
+- **Feat**: Added automatic reverse mapping via the `generateReverse` option.
+
 ## 0.2.0
 
 - **Feat**: Added `strictMode` mapping option to enforce complete mappings.
