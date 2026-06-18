@@ -84,15 +84,15 @@ For detailed documentation and advanced usage, see the [`omni_mapper` package RE
 
 ## Roadmap
 
-Para tornar o OmniMapper a solução definitiva para o ecossistema Dart/Flutter (semelhante ao MapStruct/AutoMapper), estamos focando nas seguintes features:
+To make OmniMapper the ultimate solution for the Dart/Flutter ecosystem (similar to MapStruct/AutoMapper), we are focusing on the following features:
 
-1. **Mapeamento de Múltiplas Fontes (Multiple Sources):** Combinar múltiplos objetos em um único alvo.
-2. **Plena compatibilidade com Freezed/BuiltValue:** Suporte perfeito a Factory Constructors.
-3. **Passagem de Contexto (`@Context`):** Repassar dependências/estado pela árvore de conversão.
-4. **Mapeamento Polimórfico:** Lidar com subclasses e herança de forma dinâmica (`@SubclassMapping`).
-5. **Utilização de outros Mappers:** Referenciar mappers injetáveis existentes (`uses: [OtherMapper]`).
-6. **Estratégias de Atualização de Coleções:** Opção para dar `clear()` e `addAll()` ao invés de substituir a referência da lista.
-7. **Expressões Customizadas por Campo:** Código puro Dart passado via string para flexibilidade extrema.
+- [x] **Multiple Sources Mapping:** Combine multiple source objects into a single target object.
+- [ ] **Full Freezed/BuiltValue Compatibility:** Flawless support for Factory Constructors.
+- [ ] **Context Passing (`@Context`):** Pass dependencies/state down the mapping tree.
+- [ ] **Polymorphic Mapping:** Handle subclasses and inheritance dynamically (`@SubclassMapping`).
+- [ ] **Utilizing other Mappers:** Reference existing injectable mappers (`uses: [OtherMapper]`).
+- [ ] **Collection Update Strategies:** Option to `clear()` and `addAll()` instead of replacing the list reference.
+- [ ] **Custom Field Expressions:** Pure Dart code passed as a string for extreme flexibility.
 
 ## Contributing
 
