@@ -338,3 +338,114 @@ class ModelM {
     required this.userId,
   });
 }
+
+// -----------------------------------------------------------------------------
+// APPROACH N: Polymorphic Subclass Mapping (Abstract Class)
+// -----------------------------------------------------------------------------
+
+class Vehicle {
+  final int wheels;
+  Vehicle(this.wheels);
+}
+
+class Car extends Vehicle {
+  final int doors;
+  Car(super.wheels, this.doors);
+}
+
+class Motorcycle extends Vehicle {
+  final bool hasSidecar;
+  Motorcycle(super.wheels, this.hasSidecar);
+}
+
+class VehicleEntity {
+  final int wheels;
+  VehicleEntity(this.wheels);
+}
+
+class CarEntity extends VehicleEntity {
+  final int doors;
+  CarEntity(super.wheels, this.doors);
+}
+
+class MotorcycleEntity extends VehicleEntity {
+  final bool hasSidecar;
+  MotorcycleEntity(super.wheels, this.hasSidecar);
+}
+
+@ShouldGenerate(r'''
+class VehicleMapperImpl extends VehicleMapper {
+  @override
+  VehicleEntity toEntity(Vehicle vehicle) {
+    return switch (vehicle) {
+      Car s => carToEntity(s),
+      Motorcycle s => motoToEntity(s),
+      _ => VehicleEntity(vehicle.wheels),
+    };
+  }
+
+  @override
+  CarEntity carToEntity(Car car) {
+    final target = CarEntity(car.wheels, car.doors);
+    return target;
+  }
+
+  @override
+  MotorcycleEntity motoToEntity(Motorcycle moto) {
+    final target = MotorcycleEntity(moto.wheels, moto.hasSidecar);
+    return target;
+  }
+}
+''')
+@OmniMapper()
+abstract class VehicleMapper {
+  @SubclassMapping(source: Car, target: CarEntity)
+  @SubclassMapping(source: Motorcycle, target: MotorcycleEntity)
+  VehicleEntity toEntity(Vehicle vehicle);
+
+  CarEntity carToEntity(Car car);
+  MotorcycleEntity motoToEntity(Motorcycle moto);
+}
+
+// -----------------------------------------------------------------------------
+// APPROACH O: Polymorphic Subclass Mapping (Extension)
+// -----------------------------------------------------------------------------
+
+@ShouldGenerate(r'''
+extension VehicleBaseToEntity on VehicleBase {
+  VehicleEntity toEntity() {
+    return switch (this) {
+      CarBase s => s.toCarEntity(),
+      MotorcycleBase s => s.toMotorcycleEntity(),
+      _ => VehicleEntity(wheels),
+    };
+  }
+
+  void updateVehicleEntity(VehicleEntity target) {}
+}
+
+extension VehicleBaseToEntityList on Iterable<VehicleBase> {
+  List<VehicleEntity> toEntityList() {
+    return map((e) => e.toEntity()).toList();
+  }
+}
+''')
+@OmniMapper(
+  target: VehicleEntity,
+  subclasses: [
+    SubclassMapping(source: CarBase, target: CarEntity, methodName: 'toCarEntity'),
+    SubclassMapping(source: MotorcycleBase, target: MotorcycleEntity),
+  ]
+)
+class VehicleBase {
+  final int wheels;
+  VehicleBase(this.wheels);
+}
+
+class CarBase extends VehicleBase {
+  CarBase(super.wheels);
+}
+
+class MotorcycleBase extends VehicleBase {
+  MotorcycleBase(super.wheels);
+}

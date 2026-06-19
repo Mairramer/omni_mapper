@@ -1,0 +1,94 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'subclass_mapping.dart';
+
+// **************************************************************************
+// MapperGenerator
+// **************************************************************************
+
+extension VehicleToEntity on Vehicle {
+  VehicleDto toEntity() {
+    return switch (this) {
+      Car s => s.toCarDto(),
+      Motorcycle s => s.toMotorcycleDto(),
+      _ => VehicleDto(
+        wheels: wheels,
+      ),
+    };
+  }
+
+  void updateVehicleDto(VehicleDto target) {}
+}
+
+extension VehicleToEntityList on Iterable<Vehicle> {
+  List<VehicleDto> toEntityList() {
+    return map((e) => e.toEntity()).toList();
+  }
+}
+
+extension CarToCarDto on Car {
+  CarDto toCarDto() {
+    final target = CarDto(
+      wheels: wheels,
+      doors: doors,
+    );
+    return target;
+  }
+
+  void updateCarDto(CarDto target) {}
+}
+
+extension CarToCarDtoList on Iterable<Car> {
+  List<CarDto> toCarDtoList() {
+    return map((e) => e.toCarDto()).toList();
+  }
+}
+
+extension MotorcycleToMotorcycleDto on Motorcycle {
+  MotorcycleDto toMotorcycleDto() {
+    final target = MotorcycleDto(
+      wheels: wheels,
+      hasSidecar: hasSidecar,
+    );
+    return target;
+  }
+
+  void updateMotorcycleDto(MotorcycleDto target) {}
+}
+
+extension MotorcycleToMotorcycleDtoList on Iterable<Motorcycle> {
+  List<MotorcycleDto> toMotorcycleDtoList() {
+    return map((e) => e.toMotorcycleDto()).toList();
+  }
+}
+
+class VehicleMapperImpl extends VehicleMapper {
+  @override
+  VehicleDto toDto(Vehicle vehicle) {
+    return switch (vehicle) {
+      Car s => carToDto(s),
+      Motorcycle s => motorcycleToDto(s),
+      _ => VehicleDto(
+        wheels: vehicle.wheels,
+      ),
+    };
+  }
+
+  @override
+  CarDto carToDto(Car car) {
+    final target = CarDto(
+      wheels: car.wheels,
+      doors: car.doors,
+    );
+    return target;
+  }
+
+  @override
+  MotorcycleDto motorcycleToDto(Motorcycle motorcycle) {
+    final target = MotorcycleDto(
+      wheels: motorcycle.wheels,
+      hasSidecar: motorcycle.hasSidecar,
+    );
+    return target;
+  }
+}

@@ -52,14 +52,26 @@ class MappingBodyBuilder {
         }
       }
 
-      for (final f in sClass.fields) {
-        if (!f.isStatic && f.name != null) {
-          tryAdd(f.name!, f.type);
+      final typesToCheck = <InterfaceElement>[
+        sClass,
+        ...sClass.allSupertypes
+            .map((t) => t.element)
+            .whereType<InterfaceElement>(),
+      ];
+
+      for (final element in typesToCheck) {
+        if (element.name == 'Object') {
+          continue;
         }
-      }
-      for (final g in sClass.getters) {
-        if (!g.isStatic && g.name != null) {
-          tryAdd(g.name!, g.returnType);
+        for (final f in element.fields) {
+          if (!f.isStatic && f.name != null) {
+            tryAdd(f.name!, f.type);
+          }
+        }
+        for (final g in element.getters) {
+          if (!g.isStatic && g.name != null) {
+            tryAdd(g.name!, g.returnType);
+          }
         }
       }
     }
