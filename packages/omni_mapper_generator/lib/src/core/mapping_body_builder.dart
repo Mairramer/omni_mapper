@@ -422,12 +422,14 @@ class MappingBodyBuilder {
     var body = codeBuffer.toString();
 
     // Optimize single expression returns
-    final simpleRegex = RegExp(
-      r'^final target = ([\s\S]+);\s*return target;\s*$',
-    );
-    final match = simpleRegex.firstMatch(body.trim());
-    if (match != null) {
-      body = 'return ${match.group(1)};\n';
+    if (hookName == null) {
+      final simpleRegex = RegExp(
+        r'^final target = ([\s\S]+);\s*return target;\s*$',
+      );
+      final match = simpleRegex.firstMatch(body.trim());
+      if (match != null) {
+        body = 'return ${match.group(1)};\n';
+      }
     }
 
     return body;

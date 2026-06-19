@@ -119,17 +119,13 @@ class ExtensionGenerator {
     final subclassesList = annotation.peek('subclasses')?.listValue ?? [];
     final subclasses = <String, String>{};
     for (final subclassObj in subclassesList) {
-      final sType = subclassObj
-          .getField('source')
-          ?.toTypeValue()
-          ?.getDisplayString();
-      final tType = subclassObj
-          .getField('target')
-          ?.toTypeValue()
-          ?.getDisplayString();
+      final sTypeDart = subclassObj.getField('source')?.toTypeValue();
+      final tTypeDart = subclassObj.getField('target')?.toTypeValue();
+      final sType = sTypeDart?.getDisplayString(withNullability: false);
+      final tType = tTypeDart?.getDisplayString(withNullability: false);
       final sMethodName = subclassObj.getField('methodName')?.toStringValue();
       if (sType != null && tType != null) {
-        subclasses[sType] = sMethodName ?? 'to$tType';
+        subclasses[sType] = sMethodName ?? 'to${tTypeDart?.element?.name}';
       } else {
         throw InvalidGenerationSourceError(
           'Both source and target types must be provided in @SubclassMapping.',
@@ -162,10 +158,15 @@ class ExtensionGenerator {
       }
 
       final simpleConstructorRegex = RegExp(r'^return ([\s\S]+);\s*$');
-      final match = simpleConstructorRegex.firstMatch(codeBody.trim());
+      final simpleThrowRegex = RegExp(r'^(throw\s+[\s\S]+);\s*$');
+      final trimmedBody = codeBody.trim();
+      final match = simpleConstructorRegex.firstMatch(trimmedBody);
+      final matchThrow = simpleThrowRegex.firstMatch(trimmedBody);
 
       if (match != null) {
         switchBuffer.writeln('  _ => ${match.group(1)},');
+      } else if (matchThrow != null) {
+        switchBuffer.writeln('  _ => ${matchThrow.group(1)},');
       } else {
         switchBuffer.writeln('  _ => () {');
         switchBuffer.writeln(codeBody);

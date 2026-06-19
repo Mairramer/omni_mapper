@@ -142,8 +142,10 @@ class AbstractClassGenerator {
     for (final meta in method.metadata.annotations) {
       final obj = meta.computeConstantValue();
       if (obj != null && obj.type?.element?.name == 'SubclassMapping') {
-        final sType = obj.getField('source')?.toTypeValue()?.getDisplayString();
-        final tType = obj.getField('target')?.toTypeValue()?.getDisplayString();
+        final sTypeDart = obj.getField('source')?.toTypeValue();
+        final tTypeDart = obj.getField('target')?.toTypeValue();
+        final sType = sTypeDart?.getDisplayString(withNullability: false);
+        final tType = tTypeDart?.getDisplayString(withNullability: false);
         final sMethodName = obj.getField('methodName')?.toStringValue();
         if (sType != null && tType != null) {
           if (sMethodName != null) {
@@ -153,8 +155,8 @@ class AbstractClassGenerator {
             String? foundMethod;
             for (final m in mapperClass.methods) {
               if (m.isAbstract && m.formalParameters.length == 1) {
-                if (m.returnType.getDisplayString() == tType &&
-                    m.formalParameters.first.type.getDisplayString() == sType) {
+                if (m.returnType.element == tTypeDart?.element &&
+                    m.formalParameters.first.type.element == sTypeDart?.element) {
                   foundMethod = m.name;
                   break;
                 }
@@ -203,10 +205,15 @@ class AbstractClassGenerator {
       }
 
       final simpleConstructorRegex = RegExp(r'^return ([\s\S]+);\s*$');
-      final match = simpleConstructorRegex.firstMatch(codeBody.trim());
+      final simpleThrowRegex = RegExp(r'^(throw\s+[\s\S]+);\s*$');
+      final trimmedBody = codeBody.trim();
+      final match = simpleConstructorRegex.firstMatch(trimmedBody);
+      final matchThrow = simpleThrowRegex.firstMatch(trimmedBody);
 
       if (match != null) {
         switchBuffer.writeln('  _ => ${match.group(1)},');
+      } else if (matchThrow != null) {
+        switchBuffer.writeln('  _ => ${matchThrow.group(1)},');
       } else {
         switchBuffer.writeln('  _ => () {');
         switchBuffer.writeln(codeBody);
