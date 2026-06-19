@@ -424,7 +424,7 @@ class MappingBodyBuilder {
     // Optimize single expression returns
     if (hookName == null) {
       final simpleRegex = RegExp(
-        r'^final target = ([\s\S]+);\s*return target;\s*$',
+        r'^final target = ([^;]+);\s*return target;\s*$',
       );
       final match = simpleRegex.firstMatch(body.trim());
       if (match != null) {

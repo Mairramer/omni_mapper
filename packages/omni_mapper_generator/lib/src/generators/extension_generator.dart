@@ -162,8 +162,8 @@ class ExtensionGenerator {
         switchBuffer.writeln('  ${entry.key} s => s.${entry.value}(),');
       }
 
-      final simpleConstructorRegex = RegExp(r'^return ([\s\S]+);\s*$');
-      final simpleThrowRegex = RegExp(r'^(throw\s+[\s\S]+);\s*$');
+      final simpleConstructorRegex = RegExp(r'^return ([^;]+);\s*$');
+      final simpleThrowRegex = RegExp(r'^(throw\s+[^;]+);\s*$');
       final trimmedBody = codeBody.trim();
       final match = simpleConstructorRegex.firstMatch(trimmedBody);
       final matchThrow = simpleThrowRegex.firstMatch(trimmedBody);

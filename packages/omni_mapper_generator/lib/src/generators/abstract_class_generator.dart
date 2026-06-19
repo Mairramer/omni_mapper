@@ -147,7 +147,12 @@ class AbstractClassGenerator {
         final sType = sTypeDart?.getDisplayString();
         final tType = tTypeDart?.getDisplayString();
         final sMethodName = obj.getField('methodName')?.toStringValue();
-        if (sType != null && tType != null) {
+        if (sType != null &&
+            tType != null &&
+            sTypeDart?.element != null &&
+            tTypeDart?.element != null &&
+            sType != 'dynamic' &&
+            tType != 'dynamic') {
           if (sMethodName != null) {
             subclasses[sType] = sMethodName;
           } else {
@@ -205,8 +210,8 @@ class AbstractClassGenerator {
         switchBuffer.writeln('  ${entry.key} s => ${entry.value}(s),');
       }
 
-      final simpleConstructorRegex = RegExp(r'^return ([\s\S]+);\s*$');
-      final simpleThrowRegex = RegExp(r'^(throw\s+[\s\S]+);\s*$');
+      final simpleConstructorRegex = RegExp(r'^return ([^;]+);\s*$');
+      final simpleThrowRegex = RegExp(r'^(throw\s+[^;]+);\s*$');
       final trimmedBody = codeBody.trim();
       final match = simpleConstructorRegex.firstMatch(trimmedBody);
       final matchThrow = simpleThrowRegex.firstMatch(trimmedBody);
