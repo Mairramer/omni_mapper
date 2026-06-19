@@ -132,6 +132,11 @@ class ExtensionGenerator {
       final sMethodName = subclassObj.getField('methodName')?.toStringValue();
       if (sType != null && tType != null) {
         subclasses[sType] = sMethodName ?? 'to$tType';
+      } else {
+        throw InvalidGenerationSourceError(
+          'Both source and target types must be provided in @SubclassMapping.',
+          element: sourceClass,
+        );
       }
     }
 

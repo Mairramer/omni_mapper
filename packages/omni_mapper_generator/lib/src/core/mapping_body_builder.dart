@@ -173,6 +173,10 @@ class MappingBodyBuilder {
       return null;
     }
 
+    if (targetClass.isAbstract) {
+      return "throw UnsupportedError('Cannot instantiate abstract class ${targetClass.name}. Did you forget to map all subclasses?');\n";
+    }
+
     final targetConstructor =
         targetClass.constructors
             .where((c) => (c.name == null || c.name!.isEmpty) && !c.isPrivate)

@@ -160,10 +160,21 @@ class AbstractClassGenerator {
                 }
               }
             }
+
             if (foundMethod != null) {
               subclasses[sType] = foundMethod;
+            } else {
+              throw InvalidGenerationSourceError(
+                'Could not find a method in ${mapperClass.name} that maps from $sType to $tType. Please define one, or specify the methodName in @SubclassMapping.',
+                element: method,
+              );
             }
           }
+        } else {
+          throw InvalidGenerationSourceError(
+            'Both source and target types must be provided in @SubclassMapping.',
+            element: method,
+          );
         }
       }
     }
