@@ -449,7 +449,7 @@ class MotorcycleBase extends VehicleBase {
 // APPROACH P: Abstract Target Fallback Exception
 // -----------------------------------------------------------------------------
 
-abstract class AbstractTarget { }
+abstract class AbstractTarget {}
 
 @ShouldGenerate(r'''
 class AbstractTargetMapperImpl extends AbstractTargetMapper {
@@ -505,4 +505,3 @@ class DummyModel {
   final int id;
   DummyModel(this.id);
 }
-

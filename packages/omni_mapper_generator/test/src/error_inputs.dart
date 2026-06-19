@@ -21,7 +21,9 @@ class DummyTarget {
   DummyTarget(this.id);
 }
 
-@ShouldThrow('Both source and target types must be provided in @SubclassMapping.')
+@ShouldThrow(
+  'Both source and target types must be provided in @SubclassMapping.',
+)
 @OmniMapper(
   target: DummyTarget,
   subclasses: [
@@ -33,7 +35,9 @@ class InvalidSubclassMappingSource {
   InvalidSubclassMappingSource({required this.id});
 }
 
-@ShouldThrow('Could not find a method in AbstractMapperInvalid that maps from DummyModel to DummyTarget. Please define one, or specify the methodName in @SubclassMapping.')
+@ShouldThrow(
+  'Could not find a method in AbstractMapperInvalid that maps from DummyModel to DummyTarget. Please define one, or specify the methodName in @SubclassMapping.',
+)
 @OmniMapper()
 abstract class AbstractMapperInvalid {
   @SubclassMapping(source: DummyModel, target: DummyTarget)
