@@ -167,7 +167,9 @@ class MappingBodyBuilder {
       );
     } catch (_) {
       try {
-        targetConstructor = targetClass.constructors.firstWhere((c) => !c.isPrivate);
+        targetConstructor = targetClass.constructors.firstWhere(
+          (c) => !c.isPrivate,
+        );
       } catch (_) {
         targetConstructor = targetClass.constructors.first;
       }
