@@ -1,11 +1,12 @@
 import 'package:analyzer/dart/element/element.dart';
-import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:code_builder/code_builder.dart';
 import 'package:source_gen/source_gen.dart';
 
 import '../core/mapping_body_builder.dart';
-import '../core/nested_field_resolver.dart';
+import '../utils/annotation_parser.dart';
+import '../utils/switch_builder.dart';
+import '../utils/update_method_builder.dart';
 
 /// Generates extension methods for mapping between a source class and a target class.
 class ExtensionGenerator {
@@ -23,98 +24,18 @@ class ExtensionGenerator {
       );
     }
 
-    final methodName = annotation.peek('methodName')?.stringValue ?? 'toEntity';
-    final capitalizedMethodName = methodName.isNotEmpty
-        ? '${methodName[0].toUpperCase()}${methodName.substring(1)}'
+    final config = AnnotationParser.parse(annotation);
+
+    final capitalizedMethodName = config.methodName.isNotEmpty
+        ? '${config.methodName[0].toUpperCase()}${config.methodName.substring(1)}'
         : 'Mapper';
 
     // Ensure unique name by combining Source class and capitalized method name
     final extensionName = '${sourceClass.name}$capitalizedMethodName';
 
-    final ignoreFields =
-        annotation
-            .peek('ignoreFields')
-            ?.listValue
-            .map((e) => e.toStringValue() ?? '')
-            .where((e) => e.isNotEmpty)
-            .toList() ??
-        [];
-
-    final fieldMaps =
-        annotation
-            .peek('fieldMaps')
-            ?.mapValue
-            .map(
-              (k, v) =>
-                  MapEntry(k?.toStringValue() ?? '', v?.toStringValue() ?? ''),
-            ) ??
-        <String, String>{};
-
-    final defaultValues =
-        annotation
-            .peek('defaultValues')
-            ?.mapValue
-            .map(
-              (k, v) =>
-                  MapEntry(k?.toStringValue() ?? '', v?.toStringValue() ?? ''),
-            ) ??
-        <String, String>{};
-
-    final customMappings = <String, String>{};
-    final mappingsList = annotation.peek('mappings')?.listValue;
-    if (mappingsList != null) {
-      for (final mapping in mappingsList) {
-        final target = mapping.getField('target')?.toStringValue();
-        if (target == null) {
-          continue;
-        }
-
-        final source = mapping.getField('source')?.toStringValue();
-        if (source != null) {
-          fieldMaps[source] = target;
-        }
-
-        final custom = mapping.getField('custom')?.toStringValue();
-        if (custom != null) {
-          customMappings[target] = custom;
-        }
-
-        final ignore = mapping.getField('ignore')?.toBoolValue() ?? false;
-        if (ignore) {
-          ignoreFields.add(target);
-        }
-
-        final defaultValue = mapping.getField('defaultValue')?.toStringValue();
-        if (defaultValue != null) {
-          defaultValues[target] = defaultValue;
-        }
-      }
-    }
-
-    final converters =
-        annotation
-            .peek('converters')
-            ?.listValue
-            .map((e) => e.toTypeValue())
-            .where((e) => e != null)
-            .cast<DartType>()
-            .toList() ??
-        const [];
-
-    final generateListMapper =
-        annotation.peek('generateListMapper')?.boolValue ?? true;
-    final generateUpdateMethod =
-        annotation.peek('generateUpdateMethod')?.boolValue ?? true;
-    final strictMode = annotation.peek('strictMode')?.boolValue ?? false;
-    final ignoreIfNull = annotation.peek('ignoreIfNull')?.boolValue ?? false;
-    final hookType = annotation.peek('hook')?.typeValue;
-    final generateReverse =
-        annotation.peek('generateReverse')?.boolValue ?? false;
-    final reverseMethodNameRaw =
-        annotation.peek('reverseMethodName')?.stringValue ?? '';
-    final reverseMethodName = reverseMethodNameRaw.isEmpty
+    final reverseMethodName = config.reverseMethodName.isEmpty
         ? 'to${sourceClass.name}'
-        : reverseMethodNameRaw;
+        : config.reverseMethodName;
 
     final subclassesList = annotation.peek('subclasses')?.listValue ?? [];
     final subclasses = <String, String>{};
@@ -145,40 +66,23 @@ class ExtensionGenerator {
       sourceVarNames: ['this'],
       mapperClass: null,
       elementContext: elementContext,
-      extensionMethodName: methodName,
-      ignoreFields: ignoreFields,
-      fieldMaps: fieldMaps,
-      defaultValues: defaultValues,
-      customMappings: customMappings,
-      converters: converters,
-      strictMode: strictMode,
-      hookType: hookType,
+      extensionMethodName: config.methodName,
+      ignoreFields: config.ignoreFields,
+      fieldMaps: config.fieldMaps,
+      defaultValues: config.defaultValues,
+      customMappings: config.customMappings,
+      converters: config.converters,
+      strictMode: config.strictMode,
+      hookType: config.hookType,
     );
 
     if (subclasses.isNotEmpty) {
-      final switchBuffer = StringBuffer();
-      switchBuffer.writeln('return switch (this) {');
-      for (final entry in subclasses.entries) {
-        switchBuffer.writeln('  ${entry.key} s => s.${entry.value}(),');
-      }
-
-      final simpleConstructorRegex = RegExp(r'^return ([^;]+);\s*$');
-      final simpleThrowRegex = RegExp(r'^(throw\s+[^;]+);\s*$');
-      final trimmedBody = codeBody.trim();
-      final match = simpleConstructorRegex.firstMatch(trimmedBody);
-      final matchThrow = simpleThrowRegex.firstMatch(trimmedBody);
-
-      if (match != null) {
-        switchBuffer.writeln('  _ => ${match.group(1)},');
-      } else if (matchThrow != null) {
-        switchBuffer.writeln('  _ => ${matchThrow.group(1)},');
-      } else {
-        switchBuffer.writeln('  _ => () {');
-        switchBuffer.writeln(codeBody);
-        switchBuffer.writeln('  }(),');
-      }
-      switchBuffer.writeln('};');
-      codeBody = switchBuffer.toString();
+      codeBody = SwitchBuilder.build(
+        codeBody: codeBody,
+        subclasses: subclasses,
+        sourceVarName: 'this',
+        isExtension: true,
+      );
     }
 
     final extensionBuilder = Extension((e) {
@@ -188,138 +92,22 @@ class ExtensionGenerator {
         ..methods.add(
           Method(
             (m) => m
-              ..name = methodName
+              ..name = config.methodName
               ..returns = refer(targetClass.name ?? '')
               ..body = Code(codeBody),
           ),
         );
 
-      if (generateUpdateMethod) {
-        final updateBodyBuffer = StringBuffer();
-
-        final sourceFieldNames = <String>{};
-        final sourceFieldTypes = <String, DartType>{};
-        final typesToCheck = <InterfaceElement>[
-          sourceClass,
-          ...sourceClass.allSupertypes
-              .map((t) => t.element)
-              .whereType<InterfaceElement>(),
-        ];
-        for (final element in typesToCheck) {
-          if (element.name == 'Object') {
-            continue;
-          }
-          for (final f in element.fields) {
-            if (!f.isStatic && f.name != null) {
-              sourceFieldNames.add(f.name!);
-              if (!sourceFieldTypes.containsKey(f.name!)) {
-                sourceFieldTypes[f.name!] = f.type;
-              }
-            }
-          }
-          for (final g in element.getters) {
-            if (!g.isStatic && g.name != null) {
-              sourceFieldNames.add(g.name!);
-              if (!sourceFieldTypes.containsKey(g.name!)) {
-                sourceFieldTypes[g.name!] = g.returnType;
-              }
-            }
-          }
-        }
-
-        for (final field in targetClass.fields) {
-          final fieldName = field.name;
-          if (fieldName == null ||
-              field.isStatic ||
-              field.isFinal ||
-              field.setter == null) {
-            continue;
-          }
-          if (ignoreFields.contains(fieldName)) {
-            continue;
-          }
-
-          String sourceFieldName = fieldName;
-          for (final entry in fieldMaps.entries) {
-            if (entry.value == fieldName) {
-              sourceFieldName = entry.key;
-              break;
-            }
-          }
-
-          bool hasSourceField = sourceFieldNames.contains(sourceFieldName);
-          ResolvedNestedField? nestedField;
-
-          if (!hasSourceField) {
-            nestedField = resolveNestedField(
-              sourceClass,
-              sourceFieldName,
-              'this',
-            );
-            if (nestedField != null) {
-              hasSourceField = true;
-            }
-          }
-
-          if (hasSourceField) {
-            final sourceFieldType =
-                nestedField?.type ?? sourceFieldTypes[sourceFieldName];
-            final accessString = nestedField?.path ?? 'this.$sourceFieldName';
-            final targetFieldType = field.type;
-            final sourceTypeElement = sourceFieldType?.element;
-            final targetTypeElement = targetFieldType.element;
-
-            final isNullable =
-                sourceFieldType?.nullabilitySuffix ==
-                    NullabilitySuffix.question ||
-                accessString.contains('?.');
-
-            if (sourceTypeElement is EnumElement &&
-                targetTypeElement is EnumElement &&
-                sourceTypeElement != targetTypeElement) {
-              final targetEnumName = targetTypeElement.name;
-              if (ignoreIfNull && isNullable) {
-                updateBodyBuffer.writeln(
-                  'if ($accessString case final $fieldName?) target.$fieldName = $targetEnumName.values.byName($fieldName.name);',
-                );
-              } else if (isNullable) {
-                updateBodyBuffer.writeln(
-                  'target.$fieldName = $accessString != null ? $targetEnumName.values.byName(($accessString)!.name) : null;',
-                );
-              } else {
-                updateBodyBuffer.writeln(
-                  'target.$fieldName = $targetEnumName.values.byName($accessString.name);',
-                );
-              }
-            } else {
-              if (ignoreIfNull && isNullable) {
-                updateBodyBuffer.writeln(
-                  'if ($accessString case final $fieldName?) target.$fieldName = $fieldName;',
-                );
-              } else {
-                updateBodyBuffer.writeln('target.$fieldName = $accessString;');
-              }
-            }
-          } else if (defaultValues.containsKey(fieldName)) {
-            updateBodyBuffer.writeln(
-              'target.$fieldName = ${defaultValues[fieldName]};',
-            );
-          }
-        }
-
+      if (config.generateUpdateMethod) {
         e.methods.add(
-          Method(
-            (m) => m
-              ..name = 'update${targetClass.name}'
-              ..returns = refer('void')
-              ..requiredParameters.add(
-                Parameter(
-                  (p) => p
-                    ..name = 'target'
-                    ..type = refer(targetClass.name ?? ''),
-                ),
-              )
-              ..body = Code(updateBodyBuffer.toString()),
+          UpdateMethodBuilder.build(
+            sourceClass: sourceClass,
+            targetClass: targetClass,
+            methodName: 'update${targetClass.name}',
+            fieldMaps: config.fieldMaps,
+            ignoreFields: config.ignoreFields,
+            defaultValues: config.defaultValues,
+            ignoreIfNull: config.ignoreIfNull,
           ),
         );
       }
@@ -328,7 +116,7 @@ class ExtensionGenerator {
     final emitter = DartEmitter();
     final result = StringBuffer(extensionBuilder.accept(emitter).toString());
 
-    if (generateListMapper) {
+    if (config.generateListMapper) {
       final listExtensionBuilder = Extension(
         (e) => e
           ..name = '${extensionName}List'
@@ -336,9 +124,11 @@ class ExtensionGenerator {
           ..methods.add(
             Method(
               (m) => m
-                ..name = '${methodName}List'
+                ..name = '${config.methodName}List'
                 ..returns = refer('List<${targetClass.name}>')
-                ..body = Code('return map((e) => e.$methodName()).toList();'),
+                ..body = Code(
+                  'return map((e) => e.${config.methodName}()).toList();',
+                ),
             ),
           ),
       );
@@ -346,10 +136,10 @@ class ExtensionGenerator {
       result.writeln(listExtensionBuilder.accept(emitter).toString());
     }
 
-    if (generateReverse) {
-      final reverseFieldMaps = fieldMaps.map((k, v) => MapEntry(v, k));
-      final reverseIgnoreFields = fieldMaps.entries
-          .where((e) => ignoreFields.contains(e.value))
+    if (config.generateReverse) {
+      final reverseFieldMaps = config.fieldMaps.map((k, v) => MapEntry(v, k));
+      final reverseIgnoreFields = config.fieldMaps.entries
+          .where((e) => config.ignoreFields.contains(e.value))
           .map((e) => e.key)
           .toList();
       final reverseCodeBody = MappingBodyBuilder.build(
@@ -363,8 +153,8 @@ class ExtensionGenerator {
         fieldMaps: reverseFieldMaps,
         customMappings:
             {}, // Reverse mappings don't automatically mirror custom mappings
-        converters: converters,
-        strictMode: strictMode,
+        converters: config.converters,
+        strictMode: config.strictMode,
       );
 
       final reverseExtensionName =
@@ -383,109 +173,17 @@ class ExtensionGenerator {
             ),
           );
 
-        if (generateUpdateMethod) {
-          final updateBodyBuffer = StringBuffer();
-
-          final sourceFieldNames = <String>{};
-          final sourceFieldTypes = <String, DartType>{};
-          for (final f in targetClass.fields) {
-            if (!f.isStatic && f.name != null) {
-              sourceFieldNames.add(f.name!);
-              sourceFieldTypes[f.name!] = f.type;
-            }
-          }
-          for (final g in targetClass.getters) {
-            if (!g.isStatic && g.name != null) {
-              sourceFieldNames.add(g.name!);
-              sourceFieldTypes[g.name!] = g.returnType;
-            }
-          }
-
-          for (final field in sourceClass.fields) {
-            final fieldName = field.name;
-            if (fieldName == null ||
-                field.isStatic ||
-                field.isFinal ||
-                field.setter == null) {
-              continue;
-            }
-            if (reverseIgnoreFields.contains(fieldName)) {
-              continue;
-            }
-
-            final sourceFieldName = fieldMaps[fieldName] ?? fieldName;
-
-            bool hasSourceField = sourceFieldNames.contains(sourceFieldName);
-            ResolvedNestedField? nestedField;
-
-            if (!hasSourceField) {
-              nestedField = resolveNestedField(
-                targetClass,
-                sourceFieldName,
-                'this',
-              );
-              if (nestedField != null) {
-                hasSourceField = true;
-              }
-            }
-
-            if (hasSourceField) {
-              final sourceFieldType =
-                  nestedField?.type ?? sourceFieldTypes[sourceFieldName];
-              final accessString = nestedField?.path ?? 'this.$sourceFieldName';
-              final targetFieldType = field.type;
-              final sourceTypeElement = sourceFieldType?.element;
-              final targetTypeElement = targetFieldType.element;
-
-              final isNullable =
-                  sourceFieldType?.nullabilitySuffix ==
-                      NullabilitySuffix.question ||
-                  accessString.contains('?.');
-
-              if (sourceTypeElement is EnumElement &&
-                  targetTypeElement is EnumElement &&
-                  sourceTypeElement != targetTypeElement) {
-                final targetEnumName = targetTypeElement.name;
-                if (ignoreIfNull && isNullable) {
-                  updateBodyBuffer.writeln(
-                    'if ($accessString case final $fieldName?) target.$fieldName = $targetEnumName.values.byName($fieldName.name);',
-                  );
-                } else if (isNullable) {
-                  updateBodyBuffer.writeln(
-                    'target.$fieldName = $accessString != null ? $targetEnumName.values.byName(($accessString)!.name) : null;',
-                  );
-                } else {
-                  updateBodyBuffer.writeln(
-                    'target.$fieldName = $targetEnumName.values.byName($accessString.name);',
-                  );
-                }
-              } else {
-                if (ignoreIfNull && isNullable) {
-                  updateBodyBuffer.writeln(
-                    'if ($accessString case final $fieldName?) target.$fieldName = $fieldName;',
-                  );
-                } else {
-                  updateBodyBuffer.writeln(
-                    'target.$fieldName = $accessString;',
-                  );
-                }
-              }
-            }
-          }
-
+        if (config.generateUpdateMethod) {
           e.methods.add(
-            Method(
-              (m) => m
-                ..name = 'update${sourceClass.name}'
-                ..returns = refer('void')
-                ..requiredParameters.add(
-                  Parameter(
-                    (p) => p
-                      ..name = 'target'
-                      ..type = refer(sourceClass.name ?? ''),
-                  ),
-                )
-                ..body = Code(updateBodyBuffer.toString()),
+            UpdateMethodBuilder.build(
+              sourceClass: targetClass,
+              targetClass: sourceClass,
+              methodName: 'update${sourceClass.name}',
+              fieldMaps: reverseFieldMaps,
+              ignoreFields: reverseIgnoreFields,
+              defaultValues:
+                  {}, // Reverse mappings don't automatically mirror default values
+              ignoreIfNull: config.ignoreIfNull,
             ),
           );
         }
@@ -494,7 +192,7 @@ class ExtensionGenerator {
       result.writeln();
       result.writeln(reverseExtensionBuilder.accept(emitter).toString());
 
-      if (generateListMapper) {
+      if (config.generateListMapper) {
         final listExtensionBuilder = Extension(
           (e) => e
             ..name = '${reverseExtensionName}List'

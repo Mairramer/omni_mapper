@@ -1,9 +1,10 @@
 import 'package:analyzer/dart/element/element.dart';
-import 'package:analyzer/dart/element/type.dart';
 import 'package:code_builder/code_builder.dart';
 import 'package:source_gen/source_gen.dart';
 
 import '../core/mapping_body_builder.dart';
+import '../utils/annotation_parser.dart';
+import '../utils/switch_builder.dart';
 
 /// Generates an implementation class for an abstract mapper class.
 class AbstractClassGenerator {
@@ -62,82 +63,7 @@ class AbstractClassGenerator {
       );
     }
 
-    final ignoreFields =
-        annotation
-            .peek('ignoreFields')
-            ?.listValue
-            .map((e) => e.toStringValue() ?? '')
-            .where((e) => e.isNotEmpty)
-            .toList() ??
-        [];
-
-    final fieldMapsObj = annotation.peek('fieldMaps')?.mapValue;
-    final fieldMaps = <String, String>{};
-    if (fieldMapsObj != null) {
-      for (final entry in fieldMapsObj.entries) {
-        final key = entry.key?.toStringValue();
-        final value = entry.value?.toStringValue();
-        if (key != null && value != null) {
-          fieldMaps[key] = value;
-        }
-      }
-    }
-
-    final defaultValuesObj = annotation.peek('defaultValues')?.mapValue;
-    final defaultValues = <String, String>{};
-    if (defaultValuesObj != null) {
-      for (final entry in defaultValuesObj.entries) {
-        final key = entry.key?.toStringValue();
-        final value = entry.value?.toStringValue();
-        if (key != null && value != null) {
-          defaultValues[key] = value;
-        }
-      }
-    }
-
-    final customMappings = <String, String>{};
-    final mappingsList = annotation.peek('mappings')?.listValue;
-    if (mappingsList != null) {
-      for (final mapping in mappingsList) {
-        final target = mapping.getField('target')?.toStringValue();
-        if (target == null) {
-          continue;
-        }
-
-        final source = mapping.getField('source')?.toStringValue();
-        if (source != null) {
-          fieldMaps[source] = target;
-        }
-
-        final custom = mapping.getField('custom')?.toStringValue();
-        if (custom != null) {
-          customMappings[target] = custom;
-        }
-
-        final ignore = mapping.getField('ignore')?.toBoolValue() ?? false;
-        if (ignore) {
-          ignoreFields.add(target);
-        }
-
-        final defaultValue = mapping.getField('defaultValue')?.toStringValue();
-        if (defaultValue != null) {
-          defaultValues[target] = defaultValue;
-        }
-      }
-    }
-
-    final converters =
-        annotation
-            .peek('converters')
-            ?.listValue
-            .map((e) => e.toTypeValue())
-            .whereType<DartType>()
-            .toList() ??
-        const [];
-
-    final strictMode = annotation.peek('strictMode')?.boolValue ?? false;
-    final hookType = annotation.peek('hook')?.typeValue;
-
+    final config = AnnotationParser.parse(annotation);
     final subclasses = <String, String>{};
     for (final meta in method.metadata.annotations) {
       final obj = meta.computeConstantValue();
@@ -193,40 +119,21 @@ class AbstractClassGenerator {
       sourceVarNames: sourceVarNames,
       mapperClass: mapperClass,
       elementContext: mapperClass,
-      ignoreFields: ignoreFields,
-      fieldMaps: fieldMaps,
-      defaultValues: defaultValues,
-      customMappings: customMappings,
-      converters: converters,
-      strictMode: strictMode,
-      hookType: hookType,
+      ignoreFields: config.ignoreFields,
+      fieldMaps: config.fieldMaps,
+      defaultValues: config.defaultValues,
+      customMappings: config.customMappings,
+      converters: config.converters,
+      strictMode: config.strictMode,
+      hookType: config.hookType,
     );
 
     if (subclasses.isNotEmpty) {
-      final sourceVarName = sourceVarNames.first;
-      final switchBuffer = StringBuffer();
-      switchBuffer.writeln('return switch ($sourceVarName) {');
-      for (final entry in subclasses.entries) {
-        switchBuffer.writeln('  ${entry.key} s => ${entry.value}(s),');
-      }
-
-      final simpleConstructorRegex = RegExp(r'^return ([^;]+);\s*$');
-      final simpleThrowRegex = RegExp(r'^(throw\s+[^;]+);\s*$');
-      final trimmedBody = codeBody.trim();
-      final match = simpleConstructorRegex.firstMatch(trimmedBody);
-      final matchThrow = simpleThrowRegex.firstMatch(trimmedBody);
-
-      if (match != null) {
-        switchBuffer.writeln('  _ => ${match.group(1)},');
-      } else if (matchThrow != null) {
-        switchBuffer.writeln('  _ => ${matchThrow.group(1)},');
-      } else {
-        switchBuffer.writeln('  _ => () {');
-        switchBuffer.writeln(codeBody);
-        switchBuffer.writeln('  }(),');
-      }
-      switchBuffer.writeln('};');
-      codeBody = switchBuffer.toString();
+      codeBody = SwitchBuilder.build(
+        codeBody: codeBody,
+        subclasses: subclasses,
+        sourceVarName: sourceVarNames.first,
+      );
     }
 
     return Method(
