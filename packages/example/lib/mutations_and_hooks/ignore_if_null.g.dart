@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'approach_g_ignore_if_null.dart';
+part of 'ignore_if_null.dart';
 
 // **************************************************************************
 // MapperGenerator

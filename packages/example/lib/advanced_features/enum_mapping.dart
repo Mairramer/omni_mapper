@@ -1,6 +1,6 @@
 import 'package:omni_mapper/omni_mapper.dart';
 
-part 'approach_i_enum_mapping.g.dart';
+part 'enum_mapping.g.dart';
 
 enum UserRole { admin, editor, viewer }
 

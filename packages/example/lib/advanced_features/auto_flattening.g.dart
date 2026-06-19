@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'approach_j_auto_flattening.dart';
+part of 'auto_flattening.dart';
 
 // **************************************************************************
 // MapperGenerator

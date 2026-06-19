@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'approach_i_enum_mapping.dart';
+part of 'enum_mapping.dart';
 
 // **************************************************************************
 // MapperGenerator

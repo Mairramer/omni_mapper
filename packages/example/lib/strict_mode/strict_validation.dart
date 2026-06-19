@@ -1,6 +1,6 @@
 import 'package:omni_mapper/omni_mapper.dart';
 
-part 'approach_f_strict_mode.g.dart';
+part 'strict_validation.g.dart';
 
 class StrictUserEntity {
   final int id;

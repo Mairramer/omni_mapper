@@ -1,6 +1,6 @@
 import 'package:omni_mapper/omni_mapper.dart';
 
-part 'approach_d_advanced.g.dart';
+part 'field_converters.g.dart';
 
 class AdvancedEntity {
   final int id;

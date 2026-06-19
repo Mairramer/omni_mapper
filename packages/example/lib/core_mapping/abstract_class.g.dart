@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'approach_a_abstract_class.dart';
+part of 'abstract_class.dart';
 
 // **************************************************************************
 // MapperGenerator

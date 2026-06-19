@@ -1,6 +1,6 @@
 import 'package:omni_mapper/omni_mapper.dart';
 
-part 'approach_h_hooks.g.dart';
+part 'mapping_hooks.g.dart';
 
 class HookedUserEntity {
   final int id;

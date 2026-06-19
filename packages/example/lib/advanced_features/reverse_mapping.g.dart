@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'approach_k_reverse_mapping.dart';
+part of 'reverse_mapping.dart';
 
 // **************************************************************************
 // MapperGenerator

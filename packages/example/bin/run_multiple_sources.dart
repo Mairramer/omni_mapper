@@ -1,4 +1,4 @@
-import 'package:example/approach_l_multiple_sources.dart';
+import 'package:example/multiple_sources/multiple_sources.dart';
 
 void main() {
   final user = User(id: '123', name: 'John Doe');

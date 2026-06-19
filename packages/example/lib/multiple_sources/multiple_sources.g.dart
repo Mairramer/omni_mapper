@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'approach_l_multiple_sources.dart';
+part of 'multiple_sources.dart';
 
 // **************************************************************************
 // MapperGenerator

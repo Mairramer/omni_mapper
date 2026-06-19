@@ -1,6 +1,6 @@
 import 'package:omni_mapper/omni_mapper.dart';
 
-part 'approach_k_reverse_mapping.g.dart';
+part 'reverse_mapping.g.dart';
 
 class DtoModel {
   final String id;

@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'approach_c_extension_from.dart';
+part of 'extension_from.dart';
 
 // **************************************************************************
 // MapperGenerator

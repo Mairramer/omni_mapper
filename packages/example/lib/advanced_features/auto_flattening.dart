@@ -1,6 +1,6 @@
 import 'package:omni_mapper/omni_mapper.dart';
 
-part 'approach_j_auto_flattening.g.dart';
+part 'auto_flattening.g.dart';
 
 class FlattenTarget {
   final String? userAddressCityName;

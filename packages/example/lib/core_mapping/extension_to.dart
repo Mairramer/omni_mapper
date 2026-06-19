@@ -1,6 +1,6 @@
 import 'package:omni_mapper/omni_mapper.dart';
 
-part 'approach_b_extension_to.g.dart';
+part 'extension_to.g.dart';
 
 class EntityB {
   final int id;

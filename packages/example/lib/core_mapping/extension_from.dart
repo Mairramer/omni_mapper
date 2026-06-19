@@ -1,6 +1,6 @@
 import 'package:omni_mapper/omni_mapper.dart';
 
-part 'approach_c_extension_from.g.dart';
+part 'extension_from.g.dart';
 
 class EntityC {
   final int id;

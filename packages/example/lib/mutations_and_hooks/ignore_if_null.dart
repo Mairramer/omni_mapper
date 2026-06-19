@@ -1,16 +1,16 @@
 import 'package:omni_mapper/omni_mapper.dart';
 
-part 'approach_g_ignore_if_null.g.dart';
+part 'ignore_if_null.g.dart';
 
 class PatchUserEntity {
-  int id;
-  String name;
-  String bio;
+  int? id;
+  String? name;
+  String? bio;
 
   PatchUserEntity({
-    required this.id,
-    required this.name,
-    required this.bio,
+    this.id,
+    this.name,
+    this.bio,
   });
 }
 

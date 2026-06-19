@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'approach_b_extension_to.dart';
+part of 'extension_to.dart';
 
 // **************************************************************************
 // MultiMapperGenerator

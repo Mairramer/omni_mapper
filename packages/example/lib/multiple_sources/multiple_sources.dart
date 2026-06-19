@@ -1,6 +1,6 @@
 import 'package:omni_mapper/omni_mapper.dart';
 
-part 'approach_l_multiple_sources.g.dart';
+part 'multiple_sources.g.dart';
 
 class User {
   final String id;

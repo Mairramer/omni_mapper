@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'approach_h_hooks.dart';
+part of 'mapping_hooks.dart';
 
 // **************************************************************************
 // MapperGenerator

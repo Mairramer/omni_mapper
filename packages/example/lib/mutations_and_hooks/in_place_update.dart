@@ -1,6 +1,6 @@
 import 'package:omni_mapper/omni_mapper.dart';
 
-part 'approach_e_update.g.dart';
+part 'in_place_update.g.dart';
 
 class MutableEntity {
   int id;

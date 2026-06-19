@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'approach_f_strict_mode.dart';
+part of 'strict_validation.dart';
 
 // **************************************************************************
 // MapperGenerator
