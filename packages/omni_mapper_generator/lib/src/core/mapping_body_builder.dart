@@ -160,14 +160,12 @@ class MappingBodyBuilder {
       return null;
     }
 
-    ConstructorElement targetConstructor;
-    try {
-      targetConstructor = targetClass.constructors.firstWhere(
-        (c) => (c.name ?? '').isEmpty,
-      );
-    } catch (_) {
-      targetConstructor = targetClass.constructors.first;
-    }
+    final targetConstructor =
+        targetClass.constructors
+            .where((c) => (c.name == null || c.name!.isEmpty) && !c.isPrivate)
+            .firstOrNull ??
+        targetClass.constructors.where((c) => !c.isPrivate).firstOrNull ??
+        targetClass.constructors.first;
 
     final assignedParams = <String>[];
     final codeBuffer = StringBuffer();
