@@ -87,7 +87,7 @@ For detailed documentation and advanced usage, see the [`omni_mapper` package RE
 To make OmniMapper the ultimate solution for the Dart/Flutter ecosystem (similar to MapStruct/AutoMapper), we are focusing on the following features:
 
 - [x] **Multiple Sources Mapping:** Combine multiple source objects into a single target object.
-- [ ] **Full Freezed/BuiltValue Compatibility:** Flawless support for Factory Constructors.
+- [x] **Full Freezed/BuiltValue Compatibility:** Flawless support for Factory Constructors.
 - [ ] **Context Passing (`@Context`):** Pass dependencies/state down the mapping tree.
 - [ ] **Polymorphic Mapping:** Handle subclasses and inheritance dynamically (`@SubclassMapping`).
 - [ ] **Utilizing other Mappers:** Reference existing injectable mappers (`uses: [OtherMapper]`).
