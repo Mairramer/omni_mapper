@@ -1,3 +1,10 @@
+## 0.3.0
+
+- **Feat**: Code generation support for multiple sources in mapper methods.
+- **Feat**: Code generation for automatic Enum mapping.
+- **Feat**: Implemented deep auto-flattening code generation for nested fields (`address.street`).
+- **Feat**: Code generation for automatic reverse mapping (`generateReverse`).
+
 ## 0.2.0
 
 - **Feat**: Implemented `strictMode` generation logic and validation.

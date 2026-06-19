@@ -3,7 +3,7 @@ library;
 export 'src/omni_converter.dart';
 export 'src/omni_hook.dart';
 
-/// Annotation used to generate mapping code for a class.
+/// Configures the generation of mapping code.
 ///
 /// The `omni_mapper_generator` supports two main approaches:
 ///
@@ -34,63 +34,60 @@ export 'src/omni_hook.dart';
 /// }
 /// ```
 class OmniMapper {
-  /// The target type to convert the annotated class INTO.
-  /// Use this when generating an extension ON the annotated class.
+  /// The type to which the annotated class is converted.
+  ///
+  /// Used when generating an extension on the annotated class.
   final Type? target;
 
-  /// The source type to convert FROM into the annotated class.
-  /// Use this when generating an extension ON the `from` type.
+  /// The type from which the annotated class is converted.
+  ///
+  /// Used when generating an extension on the `from` type.
   final Type? from;
 
-  /// The name of the generated method. Defaults to 'toEntity'.
+  /// The name of the generated method.
+  ///
+  /// Defaults to 'toEntity'.
   final String methodName;
 
-  /// A list of field names that should be ignored during mapping.
-  /// Useful when the target has a field that the source doesn't, or when you want to skip a specific field.
+  /// The field names to ignore during mapping.
   final List<String> ignoreFields;
 
-  /// A map defining custom field mappings.
-  /// The key is the source field name, and the value is the target field name.
-  /// Example: `{'user_id': 'id'}` maps `source.user_id` to `target.id`.
+  /// Custom field mappings from source field name to target field name.
+  ///
+  /// For example, `{'user_id': 'id'}` maps `source.user_id` to `target.id`.
   final Map<String, String> fieldMaps;
 
-  /// A map defining default values for target fields if they are missing in the source.
-  /// The value should be a valid Dart code snippet (e.g., `'true'` or `'"active"'`).
+  /// Default values for target fields missing in the source.
+  ///
+  /// Values must be valid Dart code snippets (e.g., `'true'` or `'"active"'`).
   final Map<String, String> defaultValues;
 
-  /// A list of converter types that implement `OmniConverter`.
-  /// These are used when there's a type mismatch between source and target fields.
+  /// The [OmniConverter] types used for type mismatches.
   final List<Type> converters;
 
   /// Whether to generate a list mapping method.
-  /// If true, generates an extension like `List<Target> toTargetList()`.
   final bool generateListMapper;
 
   /// Whether to generate an update method.
-  /// If true, generates an extension like `void updateTarget(Target target)`.
   final bool generateUpdateMethod;
 
-  /// Enables strict mode for mapping.
-  /// If true, the generator will throw an error if any field in the target class
-  /// is left unmapped (i.e. neither mapped from source, nor ignored, nor having a default value).
-  /// This helps prevent silent bugs when target classes are updated but mappers are not.
+  /// Whether to enforce mapping of all target fields.
+  ///
+  /// If true, the generator throws an error if any target field is unmapped.
   final bool strictMode;
 
-  /// If true, fields in the source object that are null will be ignored during an update.
-  /// This is useful for "PATCH" semantics where you only want to update fields that are provided.
-  /// Only affects the generated `updateTarget` method.
+  /// Whether to ignore null source fields during updates.
   final bool ignoreIfNull;
 
-  /// A hook class that implements `OmniHook<Source, Target>`.
-  /// Provides `before` and `after` callbacks to inject custom logic during the mapping process.
+  /// The [OmniHook] used to inject custom logic.
   final Type? hook;
 
   /// Whether to automatically generate a reverse mapping extension.
-  /// If true, it will invert the source and target classes and swap the keys/values in `fieldMaps`.
   final bool generateReverse;
 
-  /// The name of the method for the generated reverse mapping.
-  /// If left empty, it defaults to `to${SourceClassName}`.
+  /// The name of the generated reverse mapping method.
+  ///
+  /// Defaults to `to${SourceClassName}`.
   final String reverseMethodName;
 
   const OmniMapper({
@@ -114,7 +111,7 @@ class OmniMapper {
        );
 }
 
-/// Annotation used to define multiple [OmniMapper] mappings for a single class.
+/// Configures multiple [OmniMapper] mappings for a single class.
 ///
 /// Example:
 /// ```dart

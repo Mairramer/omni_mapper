@@ -3,7 +3,7 @@ description: >-
   Code generator for the omni_mapper package. Automatically generates type-safe
   object-to-object mapping code with support for field mapping, type converters,
   default values, list generation, and in-place updates.
-version: 0.2.0
+version: 0.3.0
 homepage: https://github.com/Mairramer/omni_mapper
 repository: https://github.com/Mairramer/omni_mapper
 issue_tracker: https://github.com/Mairramer/omni_mapper/issues
@@ -23,7 +23,7 @@ dependencies:
   analyzer: '>=10.0.0 <15.0.0'
   build: '>=2.4.1 <5.0.0'
   code_builder: '>=4.10.0 <5.0.0'
-  omni_mapper: ^0.2.0
+  omni_mapper: ^0.3.0
   source_gen: '>=1.5.0 <5.0.0'
   dart_style: ^3.1.7
 

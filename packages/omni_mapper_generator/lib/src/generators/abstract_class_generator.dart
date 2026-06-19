@@ -1,8 +1,11 @@
 import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/dart/element/type.dart';
 import 'package:code_builder/code_builder.dart';
 import 'package:source_gen/source_gen.dart';
+
 import '../core/mapping_body_builder.dart';
 
+/// Generates an implementation class for an abstract mapper class.
 class AbstractClassGenerator {
   static String generate({
     required ClassElement element,
@@ -29,20 +32,32 @@ class AbstractClassGenerator {
     ConstantReader annotation,
   ) {
     final methodParams = method.formalParameters;
-    if (methodParams.length != 1) {
+    if (methodParams.isEmpty) {
       throw InvalidGenerationSourceError(
-        'Mapper methods must have exactly one parameter.',
+        'Mapper methods must have at least one parameter.',
         element: method,
       );
     }
 
-    final sourceParam = methodParams.first;
-    final sourceClass = sourceParam.type.element as ClassElement?;
+    final sourceClasses = <ClassElement>[];
+    final sourceVarNames = <String>[];
+    for (final param in methodParams) {
+      final paramClass = param.type.element as ClassElement?;
+      if (paramClass == null) {
+        throw InvalidGenerationSourceError(
+          'Mapper method parameters must be classes.',
+          element: method,
+        );
+      }
+      sourceClasses.add(paramClass);
+      sourceVarNames.add(param.name ?? '');
+    }
+
     final targetClass = method.returnType.element as ClassElement?;
 
-    if (sourceClass == null || targetClass == null) {
+    if (targetClass == null) {
       throw InvalidGenerationSourceError(
-        'Mapper methods must use classes as parameters and return types.',
+        'Mapper methods must return a class.',
         element: method,
       );
     }
@@ -56,16 +71,52 @@ class AbstractClassGenerator {
             .toList() ??
         const [];
 
+    final fieldMapsObj = annotation.peek('fieldMaps')?.mapValue;
+    final fieldMaps = <String, String>{};
+    if (fieldMapsObj != null) {
+      for (final entry in fieldMapsObj.entries) {
+        final key = entry.key?.toStringValue();
+        final value = entry.value?.toStringValue();
+        if (key != null && value != null) {
+          fieldMaps[key] = value;
+        }
+      }
+    }
+
+    final defaultValuesObj = annotation.peek('defaultValues')?.mapValue;
+    final defaultValues = <String, String>{};
+    if (defaultValuesObj != null) {
+      for (final entry in defaultValuesObj.entries) {
+        final key = entry.key?.toStringValue();
+        final value = entry.value?.toStringValue();
+        if (key != null && value != null) {
+          defaultValues[key] = value;
+        }
+      }
+    }
+
+    final converters =
+        annotation
+            .peek('converters')
+            ?.listValue
+            .map((e) => e.toTypeValue())
+            .whereType<DartType>()
+            .toList() ??
+        const [];
+
     final strictMode = annotation.peek('strictMode')?.boolValue ?? false;
     final hookType = annotation.peek('hook')?.typeValue;
 
     final codeBody = MappingBodyBuilder.build(
-      sourceClass: sourceClass,
+      sourceClasses: sourceClasses,
       targetClass: targetClass,
-      sourceVarName: sourceParam.name ?? '',
+      sourceVarNames: sourceVarNames,
       mapperClass: mapperClass,
       elementContext: mapperClass,
       ignoreFields: ignoreFields,
+      fieldMaps: fieldMaps,
+      defaultValues: defaultValues,
+      converters: converters,
       strictMode: strictMode,
       hookType: hookType,
     );
@@ -75,11 +126,13 @@ class AbstractClassGenerator {
         ..name = method.name
         ..annotations.add(refer('override'))
         ..returns = refer(targetClass.name ?? '')
-        ..requiredParameters.add(
-          Parameter(
-            (p) => p
-              ..name = sourceParam.name ?? ''
-              ..type = refer(sourceClass.name ?? ''),
+        ..requiredParameters.addAll(
+          methodParams.map(
+            (p) => Parameter(
+              (pb) => pb
+                ..name = p.name ?? ''
+                ..type = refer(p.type.getDisplayString()),
+            ),
           ),
         )
         ..body = Code(codeBody),
