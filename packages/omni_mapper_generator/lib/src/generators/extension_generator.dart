@@ -124,8 +124,13 @@ class ExtensionGenerator {
       final sType = sTypeDart?.getDisplayString();
       final tType = tTypeDart?.getDisplayString();
       final sMethodName = subclassObj.getField('methodName')?.toStringValue();
-      if (sType != null && tType != null) {
-        subclasses[sType] = sMethodName ?? 'to${tTypeDart?.element?.name}';
+      if (sType != null &&
+          tType != null &&
+          sTypeDart?.element != null &&
+          tTypeDart?.element != null &&
+          sType != 'dynamic' &&
+          tType != 'dynamic') {
+        subclasses[sType] = sMethodName ?? 'to${tTypeDart!.element!.name}';
       } else {
         throw InvalidGenerationSourceError(
           'Both source and target types must be provided in @SubclassMapping.',

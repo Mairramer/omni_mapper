@@ -25,7 +25,7 @@ class DummyTarget {
 @OmniMapper(
   target: DummyTarget,
   subclasses: [
-    SubclassMapping(source: DummyModel),
+    SubclassMapping(source: DummyModel, target: dynamic),
   ],
 )
 class InvalidSubclassMappingSource {

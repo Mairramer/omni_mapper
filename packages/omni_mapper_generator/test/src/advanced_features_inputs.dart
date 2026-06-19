@@ -475,7 +475,7 @@ class HookTarget {
   HookTarget(this.id);
 }
 
-class MyHook extends OmniHook<DummyModel, HookTarget> {
+class DummyHook extends OmniHook<DummyModel, HookTarget> {
   @override
   void before(DummyModel source) {}
   @override
@@ -485,9 +485,9 @@ class MyHook extends OmniHook<DummyModel, HookTarget> {
 @ShouldGenerate(r'''
 extension DummyModelToHookTarget on DummyModel {
   HookTarget toHookTarget() {
-    MyHook().before(this);
+    DummyHook().before(this);
     final target = HookTarget(id);
-    MyHook().after(this, target);
+    DummyHook().after(this, target);
     return target;
   }
 
@@ -500,7 +500,7 @@ extension DummyModelToHookTargetList on Iterable<DummyModel> {
   }
 }
 ''')
-@OmniMapper(target: HookTarget, hook: MyHook, methodName: 'toHookTarget')
+@OmniMapper(target: HookTarget, hook: DummyHook, methodName: 'toHookTarget')
 class DummyModel {
   final int id;
   DummyModel(this.id);
