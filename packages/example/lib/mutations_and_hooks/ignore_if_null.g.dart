@@ -8,12 +8,11 @@ part of 'ignore_if_null.dart';
 
 extension PatchUserModelToEntity on PatchUserModel {
   PatchUserEntity toEntity() {
-    final target = PatchUserEntity(
+    return PatchUserEntity(
       id: id,
       name: name,
       bio: bio,
     );
-    return target;
   }
 
   void updatePatchUserEntity(PatchUserEntity target) {

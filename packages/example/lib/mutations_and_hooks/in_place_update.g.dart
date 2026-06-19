@@ -8,12 +8,11 @@ part of 'in_place_update.dart';
 
 extension FormModelToEntity on FormModel {
   MutableEntity toEntity() {
-    final target = MutableEntity(
+    return MutableEntity(
       id: id,
       name: name,
       isActive: isActive,
     );
-    return target;
   }
 
   void updateMutableEntity(MutableEntity target) {

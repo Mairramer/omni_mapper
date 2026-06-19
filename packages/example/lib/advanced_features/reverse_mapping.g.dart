@@ -8,13 +8,12 @@ part of 'reverse_mapping.dart';
 
 extension EntityModelToDto on EntityModel {
   DtoModel toDto() {
-    final target = DtoModel(
+    return DtoModel(
       id: userId,
       name: fullName,
       age: age,
       status: "active",
     );
-    return target;
   }
 
   void updateDtoModel(DtoModel target) {}
@@ -28,12 +27,11 @@ extension EntityModelToDtoList on Iterable<EntityModel> {
 
 extension DtoModelToEntity on DtoModel {
   EntityModel toEntity() {
-    final target = EntityModel(
+    return EntityModel(
       userId: id,
       fullName: name,
       age: age,
     );
-    return target;
   }
 
   void updateEntityModel(EntityModel target) {}

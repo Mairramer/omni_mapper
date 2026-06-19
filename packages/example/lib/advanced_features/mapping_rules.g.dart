@@ -8,12 +8,11 @@ part of 'mapping_rules.dart';
 
 extension ModelRuleToTargetRule on ModelRule {
   TargetRule toTargetRule() {
-    final target = TargetRule(
+    return TargetRule(
       fullName: firstName + " " + lastName,
       id: userId,
       status: "active",
     );
-    return target;
   }
 
   void updateTargetRule(TargetRule target) {}

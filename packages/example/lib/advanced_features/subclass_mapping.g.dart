@@ -28,11 +28,10 @@ extension VehicleToEntityList on Iterable<Vehicle> {
 
 extension CarToCarDto on Car {
   CarDto toCarDto() {
-    final target = CarDto(
+    return CarDto(
       wheels: wheels,
       doors: doors,
     );
-    return target;
   }
 
   void updateCarDto(CarDto target) {}
@@ -46,11 +45,10 @@ extension CarToCarDtoList on Iterable<Car> {
 
 extension MotorcycleToMotorcycleDto on Motorcycle {
   MotorcycleDto toMotorcycleDto() {
-    final target = MotorcycleDto(
+    return MotorcycleDto(
       wheels: wheels,
       hasSidecar: hasSidecar,
     );
-    return target;
   }
 
   void updateMotorcycleDto(MotorcycleDto target) {}
@@ -76,19 +74,17 @@ class VehicleMapperImpl extends VehicleMapper {
 
   @override
   CarDto carToDto(Car car) {
-    final target = CarDto(
+    return CarDto(
       wheels: car.wheels,
       doors: car.doors,
     );
-    return target;
   }
 
   @override
   MotorcycleDto motorcycleToDto(Motorcycle motorcycle) {
-    final target = MotorcycleDto(
+    return MotorcycleDto(
       wheels: motorcycle.wheels,
       hasSidecar: motorcycle.hasSidecar,
     );
-    return target;
   }
 }
