@@ -122,13 +122,11 @@ class ExtensionGenerator {
       final sType = subclassObj
           .getField('source')
           ?.toTypeValue()
-          ?.element
-          ?.name;
+          ?.getDisplayString();
       final tType = subclassObj
           .getField('target')
           ?.toTypeValue()
-          ?.element
-          ?.name;
+          ?.getDisplayString();
       final sMethodName = subclassObj.getField('methodName')?.toStringValue();
       if (sType != null && tType != null) {
         subclasses[sType] = sMethodName ?? 'to$tType';
@@ -208,13 +206,17 @@ class ExtensionGenerator {
           for (final f in element.fields) {
             if (!f.isStatic && f.name != null) {
               sourceFieldNames.add(f.name!);
-              sourceFieldTypes[f.name!] = f.type;
+              if (!sourceFieldTypes.containsKey(f.name!)) {
+                sourceFieldTypes[f.name!] = f.type;
+              }
             }
           }
           for (final g in element.getters) {
             if (!g.isStatic && g.name != null) {
               sourceFieldNames.add(g.name!);
-              sourceFieldTypes[g.name!] = g.returnType;
+              if (!sourceFieldTypes.containsKey(g.name!)) {
+                sourceFieldTypes[g.name!] = g.returnType;
+              }
             }
           }
         }

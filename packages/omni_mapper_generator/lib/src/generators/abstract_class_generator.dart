@@ -142,8 +142,8 @@ class AbstractClassGenerator {
     for (final meta in method.metadata.annotations) {
       final obj = meta.computeConstantValue();
       if (obj != null && obj.type?.element?.name == 'SubclassMapping') {
-        final sType = obj.getField('source')?.toTypeValue()?.element?.name;
-        final tType = obj.getField('target')?.toTypeValue()?.element?.name;
+        final sType = obj.getField('source')?.toTypeValue()?.getDisplayString();
+        final tType = obj.getField('target')?.toTypeValue()?.getDisplayString();
         final sMethodName = obj.getField('methodName')?.toStringValue();
         if (sType != null && tType != null) {
           if (sMethodName != null) {
@@ -153,8 +153,8 @@ class AbstractClassGenerator {
             String? foundMethod;
             for (final m in mapperClass.methods) {
               if (m.isAbstract && m.formalParameters.length == 1) {
-                if (m.returnType.element?.name == tType &&
-                    m.formalParameters.first.type.element?.name == sType) {
+                if (m.returnType.getDisplayString() == tType &&
+                    m.formalParameters.first.type.getDisplayString() == sType) {
                   foundMethod = m.name;
                   break;
                 }
