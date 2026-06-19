@@ -444,3 +444,65 @@ class CarBase extends VehicleBase {
 class MotorcycleBase extends VehicleBase {
   MotorcycleBase(super.wheels);
 }
+
+// -----------------------------------------------------------------------------
+// APPROACH P: Abstract Target Fallback Exception
+// -----------------------------------------------------------------------------
+
+abstract class AbstractTarget { }
+
+@ShouldGenerate(r'''
+class AbstractTargetMapperImpl extends AbstractTargetMapper {
+  @override
+  AbstractTarget toTarget(VehicleBase source) {
+    throw UnsupportedError(
+      'Cannot instantiate abstract class AbstractTarget. Did you forget to map all subclasses?',
+    );
+  }
+}
+''')
+@OmniMapper()
+abstract class AbstractTargetMapper {
+  AbstractTarget toTarget(VehicleBase source);
+}
+
+// -----------------------------------------------------------------------------
+// APPROACH Q: Hooks with optimization disabled
+// -----------------------------------------------------------------------------
+
+class HookTarget {
+  final int id;
+  HookTarget(this.id);
+}
+
+class MyHook extends OmniHook<DummyModel, HookTarget> {
+  @override
+  void before(DummyModel source) {}
+  @override
+  void after(DummyModel source, HookTarget target) {}
+}
+
+@ShouldGenerate(r'''
+extension DummyModelToHookTarget on DummyModel {
+  HookTarget toHookTarget() {
+    MyHook().before(this);
+    final target = HookTarget(id);
+    MyHook().after(this, target);
+    return target;
+  }
+
+  void updateHookTarget(HookTarget target) {}
+}
+
+extension DummyModelToHookTargetList on Iterable<DummyModel> {
+  List<HookTarget> toHookTargetList() {
+    return map((e) => e.toHookTarget()).toList();
+  }
+}
+''')
+@OmniMapper(target: HookTarget, hook: MyHook, methodName: 'toHookTarget')
+class DummyModel {
+  final int id;
+  DummyModel(this.id);
+}
+

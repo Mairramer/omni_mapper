@@ -144,8 +144,8 @@ class AbstractClassGenerator {
       if (obj != null && obj.type?.element?.name == 'SubclassMapping') {
         final sTypeDart = obj.getField('source')?.toTypeValue();
         final tTypeDart = obj.getField('target')?.toTypeValue();
-        final sType = sTypeDart?.getDisplayString(withNullability: false);
-        final tType = tTypeDart?.getDisplayString(withNullability: false);
+        final sType = sTypeDart?.getDisplayString();
+        final tType = tTypeDart?.getDisplayString();
         final sMethodName = obj.getField('methodName')?.toStringValue();
         if (sType != null && tType != null) {
           if (sMethodName != null) {
@@ -156,7 +156,8 @@ class AbstractClassGenerator {
             for (final m in mapperClass.methods) {
               if (m.isAbstract && m.formalParameters.length == 1) {
                 if (m.returnType.element == tTypeDart?.element &&
-                    m.formalParameters.first.type.element == sTypeDart?.element) {
+                    m.formalParameters.first.type.element ==
+                        sTypeDart?.element) {
                   foundMethod = m.name;
                   break;
                 }

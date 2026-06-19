@@ -121,8 +121,8 @@ class ExtensionGenerator {
     for (final subclassObj in subclassesList) {
       final sTypeDart = subclassObj.getField('source')?.toTypeValue();
       final tTypeDart = subclassObj.getField('target')?.toTypeValue();
-      final sType = sTypeDart?.getDisplayString(withNullability: false);
-      final tType = tTypeDart?.getDisplayString(withNullability: false);
+      final sType = sTypeDart?.getDisplayString();
+      final tType = tTypeDart?.getDisplayString();
       final sMethodName = subclassObj.getField('methodName')?.toStringValue();
       if (sType != null && tType != null) {
         subclasses[sType] = sMethodName ?? 'to${tTypeDart?.element?.name}';
