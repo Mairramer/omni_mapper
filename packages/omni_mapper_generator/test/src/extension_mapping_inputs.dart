@@ -11,8 +11,7 @@ class EntityB {
 @ShouldGenerate(r'''
 extension ModelBToEntity on ModelB {
   EntityB toEntity() {
-    final target = EntityB(id: id, title: title);
-    return target;
+    return EntityB(id: id, title: title);
   }
 
   void updateEntityB(EntityB target) {}
@@ -41,8 +40,7 @@ class EntityC {
 @ShouldGenerate(r'''
 extension EntityCToModel on EntityC {
   ModelC toModel() {
-    final target = ModelC(id: id, title: title);
-    return target;
+    return ModelC(id: id, title: title);
   }
 
   void updateModelC(ModelC target) {}
@@ -71,8 +69,7 @@ class MutableEntityE {
 @ShouldGenerate(r'''
 extension ModelEToMutableEntityE on ModelE {
   MutableEntityE toMutableEntityE() {
-    final target = MutableEntityE(id: id, name: name);
-    return target;
+    return MutableEntityE(id: id, name: name);
   }
 
   void updateMutableEntityE(MutableEntityE target) {

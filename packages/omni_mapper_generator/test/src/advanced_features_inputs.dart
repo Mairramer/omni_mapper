@@ -18,12 +18,11 @@ class StringDateConverter extends OmniConverter<String, DateTime> {
 @ShouldGenerate(r'''
 extension ModelDToEntity on ModelD {
   EntityD toEntity() {
-    final target = EntityD(
+    return EntityD(
       id: userId,
       status: "active",
       createdAt: const StringDateConverter().convert(createdAt),
     );
-    return target;
   }
 
   void updateEntityD(EntityD target) {}
@@ -57,8 +56,7 @@ class TargetH {
 @ShouldGenerate(r'''
 extension ModelHToTargetH on ModelH {
   TargetH toTargetH() {
-    final target = TargetH(id: id, name: name);
-    return target;
+    return TargetH(id: id, name: name);
   }
 
   void updateTargetH(TargetH target) {
@@ -132,13 +130,12 @@ class TargetJ {
 @ShouldGenerate(r'''
 extension ModelJToTargetJ on ModelJ {
   TargetJ toTargetJ() {
-    final target = TargetJ(
+    return TargetJ(
       status: TargetEnum.values.byName(status.name),
       optionalStatus: optionalStatus != null
           ? TargetEnum.values.byName((optionalStatus)!.name)
           : null,
     );
-    return target;
   }
 
   void updateTargetJ(TargetJ target) {
@@ -203,11 +200,10 @@ class ProfileK {
 @ShouldGenerate(r'''
 extension ModelKToTargetK on ModelK {
   TargetK toTargetK() {
-    final target = TargetK(
+    return TargetK(
       userAddressCityName: this.userAddress?.city?.name,
       profileSettingsThemeId: this.profile.settings.theme?.id,
     )..profileSettingsThemeMode = this.profile.settings.theme?.mode;
-    return target;
   }
 
   void updateTargetK(TargetK target) {
@@ -240,8 +236,7 @@ class TargetL {
 @ShouldGenerate(r'''
 extension ModelLToTargetL on ModelL {
   TargetL toTargetL() {
-    final target = TargetL(id: userId, title: title, status: "active");
-    return target;
+    return TargetL(id: userId, title: title, status: "active");
   }
 
   void updateTargetL(TargetL target) {}
@@ -255,8 +250,7 @@ extension ModelLToTargetLList on Iterable<ModelL> {
 
 extension TargetLToModelL on TargetL {
   ModelL toModelL() {
-    final target = ModelL(userId: id, title: title);
-    return target;
+    return ModelL(userId: id, title: title);
   }
 
   void updateModelL(ModelL target) {}
@@ -300,12 +294,11 @@ class TargetM {
 @ShouldGenerate(r'''
 extension ModelMToTargetM on ModelM {
   TargetM toTargetM() {
-    final target = TargetM(
+    return TargetM(
       fullName: firstName + ' ' + lastName,
       id: userId,
       status: "active",
     );
-    return target;
   }
 
   void updateTargetM(TargetM target) {}
@@ -386,14 +379,12 @@ class VehicleMapperImpl extends VehicleMapper {
 
   @override
   CarEntity carToEntity(Car car) {
-    final target = CarEntity(car.wheels, car.doors);
-    return target;
+    return CarEntity(car.wheels, car.doors);
   }
 
   @override
   MotorcycleEntity motoToEntity(Motorcycle moto) {
-    final target = MotorcycleEntity(moto.wheels, moto.hasSidecar);
-    return target;
+    return MotorcycleEntity(moto.wheels, moto.hasSidecar);
   }
 }
 ''')

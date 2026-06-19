@@ -192,7 +192,7 @@ class AbstractClassGenerator {
       }
 
       final simpleConstructorRegex =
-          RegExp(r'^final target = ([\s\S]+);\s*return target;\s*$');
+          RegExp(r'^return ([\s\S]+);\s*$');
       final match = simpleConstructorRegex.firstMatch(codeBody.trim());
 
       if (match != null) {
