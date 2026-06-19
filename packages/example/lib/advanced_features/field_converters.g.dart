@@ -8,13 +8,12 @@ part of 'field_converters.dart';
 
 extension AdvancedModelToEntity on AdvancedModel {
   AdvancedEntity toEntity() {
-    final target = AdvancedEntity(
+    return AdvancedEntity(
       id: userId,
       title: title,
       status: "active",
       createdAt: const DateTimeStringConverter().convert(createdAt),
     );
-    return target;
   }
 
   void updateAdvancedEntity(AdvancedEntity target) {}
@@ -28,12 +27,11 @@ extension AdvancedModelToEntityList on Iterable<AdvancedModel> {
 
 extension AdvancedEntityToModel on AdvancedEntity {
   AdvancedModel toModel() {
-    final target = AdvancedModel(
+    return AdvancedModel(
       userId: id,
       title: title,
       createdAt: const StringDateTimeConverter().convert(createdAt),
     );
-    return target;
   }
 
   void updateAdvancedModel(AdvancedModel target) {}

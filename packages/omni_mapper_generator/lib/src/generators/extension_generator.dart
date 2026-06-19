@@ -116,7 +116,30 @@ class ExtensionGenerator {
         ? 'to${sourceClass.name}'
         : reverseMethodNameRaw;
 
-    final codeBody = MappingBodyBuilder.build(
+    final subclassesList = annotation.peek('subclasses')?.listValue ?? [];
+    final subclasses = <String, String>{};
+    for (final subclassObj in subclassesList) {
+      final sTypeDart = subclassObj.getField('source')?.toTypeValue();
+      final tTypeDart = subclassObj.getField('target')?.toTypeValue();
+      final sType = sTypeDart?.getDisplayString();
+      final tType = tTypeDart?.getDisplayString();
+      final sMethodName = subclassObj.getField('methodName')?.toStringValue();
+      if (sType != null &&
+          tType != null &&
+          sTypeDart?.element != null &&
+          tTypeDart?.element != null &&
+          sType != 'dynamic' &&
+          tType != 'dynamic') {
+        subclasses[sType] = sMethodName ?? 'to${tTypeDart!.element!.name}';
+      } else {
+        throw InvalidGenerationSourceError(
+          'Both source and target types must be provided in @SubclassMapping.',
+          element: sourceClass,
+        );
+      }
+    }
+
+    var codeBody = MappingBodyBuilder.build(
       sourceClasses: [sourceClass],
       targetClass: targetClass,
       sourceVarNames: ['this'],
@@ -131,6 +154,32 @@ class ExtensionGenerator {
       strictMode: strictMode,
       hookType: hookType,
     );
+
+    if (subclasses.isNotEmpty) {
+      final switchBuffer = StringBuffer();
+      switchBuffer.writeln('return switch (this) {');
+      for (final entry in subclasses.entries) {
+        switchBuffer.writeln('  ${entry.key} s => s.${entry.value}(),');
+      }
+
+      final simpleConstructorRegex = RegExp(r'^return ([^;]+);\s*$');
+      final simpleThrowRegex = RegExp(r'^(throw\s+[^;]+);\s*$');
+      final trimmedBody = codeBody.trim();
+      final match = simpleConstructorRegex.firstMatch(trimmedBody);
+      final matchThrow = simpleThrowRegex.firstMatch(trimmedBody);
+
+      if (match != null) {
+        switchBuffer.writeln('  _ => ${match.group(1)},');
+      } else if (matchThrow != null) {
+        switchBuffer.writeln('  _ => ${matchThrow.group(1)},');
+      } else {
+        switchBuffer.writeln('  _ => () {');
+        switchBuffer.writeln(codeBody);
+        switchBuffer.writeln('  }(),');
+      }
+      switchBuffer.writeln('};');
+      codeBody = switchBuffer.toString();
+    }
 
     final extensionBuilder = Extension((e) {
       e
@@ -150,16 +199,31 @@ class ExtensionGenerator {
 
         final sourceFieldNames = <String>{};
         final sourceFieldTypes = <String, DartType>{};
-        for (final f in sourceClass.fields) {
-          if (!f.isStatic && f.name != null) {
-            sourceFieldNames.add(f.name!);
-            sourceFieldTypes[f.name!] = f.type;
+        final typesToCheck = <InterfaceElement>[
+          sourceClass,
+          ...sourceClass.allSupertypes
+              .map((t) => t.element)
+              .whereType<InterfaceElement>(),
+        ];
+        for (final element in typesToCheck) {
+          if (element.name == 'Object') {
+            continue;
           }
-        }
-        for (final g in sourceClass.getters) {
-          if (!g.isStatic && g.name != null) {
-            sourceFieldNames.add(g.name!);
-            sourceFieldTypes[g.name!] = g.returnType;
+          for (final f in element.fields) {
+            if (!f.isStatic && f.name != null) {
+              sourceFieldNames.add(f.name!);
+              if (!sourceFieldTypes.containsKey(f.name!)) {
+                sourceFieldTypes[f.name!] = f.type;
+              }
+            }
+          }
+          for (final g in element.getters) {
+            if (!g.isStatic && g.name != null) {
+              sourceFieldNames.add(g.name!);
+              if (!sourceFieldTypes.containsKey(g.name!)) {
+                sourceFieldTypes[g.name!] = g.returnType;
+              }
+            }
           }
         }
 

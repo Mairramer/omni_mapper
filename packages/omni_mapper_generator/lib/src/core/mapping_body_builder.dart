@@ -52,14 +52,26 @@ class MappingBodyBuilder {
         }
       }
 
-      for (final f in sClass.fields) {
-        if (!f.isStatic && f.name != null) {
-          tryAdd(f.name!, f.type);
+      final typesToCheck = <InterfaceElement>[
+        sClass,
+        ...sClass.allSupertypes
+            .map((t) => t.element)
+            .whereType<InterfaceElement>(),
+      ];
+
+      for (final element in typesToCheck) {
+        if (element.name == 'Object') {
+          continue;
         }
-      }
-      for (final g in sClass.getters) {
-        if (!g.isStatic && g.name != null) {
-          tryAdd(g.name!, g.returnType);
+        for (final f in element.fields) {
+          if (!f.isStatic && f.name != null) {
+            tryAdd(f.name!, f.type);
+          }
+        }
+        for (final g in element.getters) {
+          if (!g.isStatic && g.name != null) {
+            tryAdd(g.name!, g.returnType);
+          }
         }
       }
     }
@@ -159,6 +171,10 @@ class MappingBodyBuilder {
       }
 
       return null;
+    }
+
+    if (targetClass.isAbstract) {
+      return "throw UnsupportedError('Cannot instantiate abstract class ${targetClass.name}. Did you forget to map all subclasses?');\n";
     }
 
     final targetConstructor =
@@ -403,6 +419,19 @@ class MappingBodyBuilder {
     }
 
     codeBuffer.writeln('return target;');
-    return codeBuffer.toString();
+    var body = codeBuffer.toString();
+
+    // Optimize single expression returns
+    if (hookName == null) {
+      final simpleRegex = RegExp(
+        r'^final target = ([^;]+);\s*return target;\s*$',
+      );
+      final match = simpleRegex.firstMatch(body.trim());
+      if (match != null) {
+        body = 'return ${match.group(1)};\n';
+      }
+    }
+
+    return body;
   }
 }

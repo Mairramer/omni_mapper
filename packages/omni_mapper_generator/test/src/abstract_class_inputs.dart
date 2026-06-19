@@ -18,8 +18,7 @@ class ModelA {
 class MapperAImpl extends MapperA {
   @override
   EntityA toEntity(ModelA model) {
-    final target = EntityA(id: model.id, title: model.title);
-    return target;
+    return EntityA(id: model.id, title: model.title);
   }
 }
 ''')
@@ -48,8 +47,7 @@ class TargetMultiple {
 class MultipleSourcesMapperImpl extends MultipleSourcesMapper {
   @override
   TargetMultiple toTarget(SourceX x, SourceY y) {
-    final target = TargetMultiple(id: x.id, name: y.name);
-    return target;
+    return TargetMultiple(id: x.id, name: y.name);
   }
 }
 ''')
@@ -76,8 +74,7 @@ class SourceFreezed {
 class FreezedMapperImpl extends FreezedMapper {
   @override
   FreezedLikeModel toFreezed(SourceFreezed source) {
-    final target = FreezedLikeModel(title: source.title);
-    return target;
+    return FreezedLikeModel(title: source.title);
   }
 }
 ''')

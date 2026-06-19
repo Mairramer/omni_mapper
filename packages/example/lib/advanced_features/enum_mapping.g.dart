@@ -8,14 +8,13 @@ part of 'enum_mapping.dart';
 
 extension UserModelToEntity on UserModel {
   UserEntity toEntity() {
-    final target = UserEntity(
+    return UserEntity(
       id: id,
       role: UserRole.values.byName(role.name),
       secondaryRole: secondaryRole != null
           ? UserRole.values.byName((secondaryRole)!.name)
           : null,
     );
-    return target;
   }
 
   void updateUserEntity(UserEntity target) {}

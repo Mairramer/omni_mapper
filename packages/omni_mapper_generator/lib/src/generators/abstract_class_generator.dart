@@ -138,7 +138,56 @@ class AbstractClassGenerator {
     final strictMode = annotation.peek('strictMode')?.boolValue ?? false;
     final hookType = annotation.peek('hook')?.typeValue;
 
-    final codeBody = MappingBodyBuilder.build(
+    final subclasses = <String, String>{};
+    for (final meta in method.metadata.annotations) {
+      final obj = meta.computeConstantValue();
+      if (obj != null && obj.type?.element?.name == 'SubclassMapping') {
+        final sTypeDart = obj.getField('source')?.toTypeValue();
+        final tTypeDart = obj.getField('target')?.toTypeValue();
+        final sType = sTypeDart?.getDisplayString();
+        final tType = tTypeDart?.getDisplayString();
+        final sMethodName = obj.getField('methodName')?.toStringValue();
+        if (sType != null &&
+            tType != null &&
+            sTypeDart?.element != null &&
+            tTypeDart?.element != null &&
+            sType != 'dynamic' &&
+            tType != 'dynamic') {
+          if (sMethodName != null) {
+            subclasses[sType] = sMethodName;
+          } else {
+            // Find a method in the abstract class that matches source and target
+            String? foundMethod;
+            for (final m in mapperClass.methods) {
+              if (m.isAbstract && m.formalParameters.length == 1) {
+                if (m.returnType.element == tTypeDart?.element &&
+                    m.formalParameters.first.type.element ==
+                        sTypeDart?.element) {
+                  foundMethod = m.name;
+                  break;
+                }
+              }
+            }
+
+            if (foundMethod != null) {
+              subclasses[sType] = foundMethod;
+            } else {
+              throw InvalidGenerationSourceError(
+                'Could not find a method in ${mapperClass.name} that maps from $sType to $tType. Please define one, or specify the methodName in @SubclassMapping.',
+                element: method,
+              );
+            }
+          }
+        } else {
+          throw InvalidGenerationSourceError(
+            'Both source and target types must be provided in @SubclassMapping.',
+            element: method,
+          );
+        }
+      }
+    }
+
+    var codeBody = MappingBodyBuilder.build(
       sourceClasses: sourceClasses,
       targetClass: targetClass,
       sourceVarNames: sourceVarNames,
@@ -152,6 +201,33 @@ class AbstractClassGenerator {
       strictMode: strictMode,
       hookType: hookType,
     );
+
+    if (subclasses.isNotEmpty) {
+      final sourceVarName = sourceVarNames.first;
+      final switchBuffer = StringBuffer();
+      switchBuffer.writeln('return switch ($sourceVarName) {');
+      for (final entry in subclasses.entries) {
+        switchBuffer.writeln('  ${entry.key} s => ${entry.value}(s),');
+      }
+
+      final simpleConstructorRegex = RegExp(r'^return ([^;]+);\s*$');
+      final simpleThrowRegex = RegExp(r'^(throw\s+[^;]+);\s*$');
+      final trimmedBody = codeBody.trim();
+      final match = simpleConstructorRegex.firstMatch(trimmedBody);
+      final matchThrow = simpleThrowRegex.firstMatch(trimmedBody);
+
+      if (match != null) {
+        switchBuffer.writeln('  _ => ${match.group(1)},');
+      } else if (matchThrow != null) {
+        switchBuffer.writeln('  _ => ${matchThrow.group(1)},');
+      } else {
+        switchBuffer.writeln('  _ => () {');
+        switchBuffer.writeln(codeBody);
+        switchBuffer.writeln('  }(),');
+      }
+      switchBuffer.writeln('};');
+      codeBody = switchBuffer.toString();
+    }
 
     return Method(
       (m) => m

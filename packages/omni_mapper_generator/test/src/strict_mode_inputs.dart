@@ -13,8 +13,7 @@ class TargetF {
 @ShouldGenerate(r'''
 extension ModelFToTargetF on ModelF {
   TargetF toTargetF() {
-    final target = TargetF(id: id);
-    return target;
+    return TargetF(id: id);
   }
 
   void updateTargetF(TargetF target) {}

@@ -8,11 +8,10 @@ part of 'extension_from.dart';
 
 extension EntityCToModel on EntityC {
   ModelC toModel() {
-    final target = ModelC(
+    return ModelC(
       id: id,
       title: title,
     );
-    return target;
   }
 
   void updateModelC(ModelC target) {}

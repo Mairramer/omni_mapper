@@ -8,11 +8,10 @@ part of 'strict_validation.dart';
 
 extension StrictUserModelToEntity on StrictUserModel {
   StrictUserEntity toEntity() {
-    final target = StrictUserEntity(
+    return StrictUserEntity(
       id: id,
       name: name,
     );
-    return target;
   }
 
   void updateStrictUserEntity(StrictUserEntity target) {}

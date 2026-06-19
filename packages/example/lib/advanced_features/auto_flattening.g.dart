@@ -8,11 +8,10 @@ part of 'auto_flattening.dart';
 
 extension FlattenModelToEntity on FlattenModel {
   FlattenTarget toEntity() {
-    final target = FlattenTarget(
+    return FlattenTarget(
       userAddressCityName: this.userAddress?.city?.name,
       profileSettingsThemeId: this.profile.settings.theme?.id,
     )..profileSettingsThemeMode = this.profile.settings.theme?.mode;
-    return target;
   }
 
   void updateFlattenTarget(FlattenTarget target) {

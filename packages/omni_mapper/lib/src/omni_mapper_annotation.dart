@@ -3,6 +3,7 @@
 library;
 
 import 'mapping_rule.dart';
+import 'subclass_mapping.dart';
 
 /// An annotation used to configure the generation of mapping code.
 ///
@@ -140,6 +141,12 @@ class OmniMapper {
   /// [ignoreFields], and [defaultValues], and allows for custom Dart expressions.
   final List<MappingRule> mappings;
 
+  /// A list of polymorphic mappings for decentralized extensions.
+  ///
+  /// This instructs the generator to output dynamic routing based on the
+  /// runtime type of the source object.
+  final List<SubclassMapping> subclasses;
+
   const OmniMapper({
     this.target,
     this.from,
@@ -156,6 +163,7 @@ class OmniMapper {
     this.generateReverse = false,
     this.reverseMethodName = '',
     this.mappings = const [],
+    this.subclasses = const [],
   }) : assert(
          !(target != null && from != null),
          'You cannot specify both `target` and `from` in the same annotation. Use multiple @OmniMapper annotations instead.',

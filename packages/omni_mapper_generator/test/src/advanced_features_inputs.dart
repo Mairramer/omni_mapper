@@ -18,12 +18,11 @@ class StringDateConverter extends OmniConverter<String, DateTime> {
 @ShouldGenerate(r'''
 extension ModelDToEntity on ModelD {
   EntityD toEntity() {
-    final target = EntityD(
+    return EntityD(
       id: userId,
       status: "active",
       createdAt: const StringDateConverter().convert(createdAt),
     );
-    return target;
   }
 
   void updateEntityD(EntityD target) {}
@@ -57,8 +56,7 @@ class TargetH {
 @ShouldGenerate(r'''
 extension ModelHToTargetH on ModelH {
   TargetH toTargetH() {
-    final target = TargetH(id: id, name: name);
-    return target;
+    return TargetH(id: id, name: name);
   }
 
   void updateTargetH(TargetH target) {
@@ -132,13 +130,12 @@ class TargetJ {
 @ShouldGenerate(r'''
 extension ModelJToTargetJ on ModelJ {
   TargetJ toTargetJ() {
-    final target = TargetJ(
+    return TargetJ(
       status: TargetEnum.values.byName(status.name),
       optionalStatus: optionalStatus != null
           ? TargetEnum.values.byName((optionalStatus)!.name)
           : null,
     );
-    return target;
   }
 
   void updateTargetJ(TargetJ target) {
@@ -203,11 +200,10 @@ class ProfileK {
 @ShouldGenerate(r'''
 extension ModelKToTargetK on ModelK {
   TargetK toTargetK() {
-    final target = TargetK(
+    return TargetK(
       userAddressCityName: this.userAddress?.city?.name,
       profileSettingsThemeId: this.profile.settings.theme?.id,
     )..profileSettingsThemeMode = this.profile.settings.theme?.mode;
-    return target;
   }
 
   void updateTargetK(TargetK target) {
@@ -240,8 +236,7 @@ class TargetL {
 @ShouldGenerate(r'''
 extension ModelLToTargetL on ModelL {
   TargetL toTargetL() {
-    final target = TargetL(id: userId, title: title, status: "active");
-    return target;
+    return TargetL(id: userId, title: title, status: "active");
   }
 
   void updateTargetL(TargetL target) {}
@@ -255,8 +250,7 @@ extension ModelLToTargetLList on Iterable<ModelL> {
 
 extension TargetLToModelL on TargetL {
   ModelL toModelL() {
-    final target = ModelL(userId: id, title: title);
-    return target;
+    return ModelL(userId: id, title: title);
   }
 
   void updateModelL(ModelL target) {}
@@ -300,12 +294,11 @@ class TargetM {
 @ShouldGenerate(r'''
 extension ModelMToTargetM on ModelM {
   TargetM toTargetM() {
-    final target = TargetM(
+    return TargetM(
       fullName: firstName + ' ' + lastName,
       id: userId,
       status: "active",
     );
-    return target;
   }
 
   void updateTargetM(TargetM target) {}
@@ -337,4 +330,178 @@ class ModelM {
     required this.lastName,
     required this.userId,
   });
+}
+
+// -----------------------------------------------------------------------------
+// APPROACH N: Polymorphic Subclass Mapping (Abstract Class)
+// -----------------------------------------------------------------------------
+
+class Vehicle {
+  final int wheels;
+  Vehicle(this.wheels);
+}
+
+class Car extends Vehicle {
+  final int doors;
+  Car(super.wheels, this.doors);
+}
+
+class Motorcycle extends Vehicle {
+  final bool hasSidecar;
+  Motorcycle(super.wheels, this.hasSidecar);
+}
+
+class VehicleEntity {
+  final int wheels;
+  VehicleEntity(this.wheels);
+}
+
+class CarEntity extends VehicleEntity {
+  final int doors;
+  CarEntity(super.wheels, this.doors);
+}
+
+class MotorcycleEntity extends VehicleEntity {
+  final bool hasSidecar;
+  MotorcycleEntity(super.wheels, this.hasSidecar);
+}
+
+@ShouldGenerate(r'''
+class VehicleMapperImpl extends VehicleMapper {
+  @override
+  VehicleEntity toEntity(Vehicle vehicle) {
+    return switch (vehicle) {
+      Car s => carToEntity(s),
+      Motorcycle s => motoToEntity(s),
+      _ => VehicleEntity(vehicle.wheels),
+    };
+  }
+
+  @override
+  CarEntity carToEntity(Car car) {
+    return CarEntity(car.wheels, car.doors);
+  }
+
+  @override
+  MotorcycleEntity motoToEntity(Motorcycle moto) {
+    return MotorcycleEntity(moto.wheels, moto.hasSidecar);
+  }
+}
+''')
+@OmniMapper()
+abstract class VehicleMapper {
+  @SubclassMapping(source: Car, target: CarEntity)
+  @SubclassMapping(source: Motorcycle, target: MotorcycleEntity)
+  VehicleEntity toEntity(Vehicle vehicle);
+
+  CarEntity carToEntity(Car car);
+  MotorcycleEntity motoToEntity(Motorcycle moto);
+}
+
+// -----------------------------------------------------------------------------
+// APPROACH O: Polymorphic Subclass Mapping (Extension)
+// -----------------------------------------------------------------------------
+
+@ShouldGenerate(r'''
+extension VehicleBaseToEntity on VehicleBase {
+  VehicleEntity toEntity() {
+    return switch (this) {
+      CarBase s => s.toCarEntity(),
+      MotorcycleBase s => s.toMotorcycleEntity(),
+      _ => VehicleEntity(wheels),
+    };
+  }
+
+  void updateVehicleEntity(VehicleEntity target) {}
+}
+
+extension VehicleBaseToEntityList on Iterable<VehicleBase> {
+  List<VehicleEntity> toEntityList() {
+    return map((e) => e.toEntity()).toList();
+  }
+}
+''')
+@OmniMapper(
+  target: VehicleEntity,
+  subclasses: [
+    SubclassMapping(
+      source: CarBase,
+      target: CarEntity,
+      methodName: 'toCarEntity',
+    ),
+    SubclassMapping(source: MotorcycleBase, target: MotorcycleEntity),
+  ],
+)
+class VehicleBase {
+  final int wheels;
+  VehicleBase(this.wheels);
+}
+
+class CarBase extends VehicleBase {
+  CarBase(super.wheels);
+}
+
+class MotorcycleBase extends VehicleBase {
+  MotorcycleBase(super.wheels);
+}
+
+// -----------------------------------------------------------------------------
+// APPROACH P: Abstract Target Fallback Exception
+// -----------------------------------------------------------------------------
+
+abstract class AbstractTarget {}
+
+@ShouldGenerate(r'''
+class AbstractTargetMapperImpl extends AbstractTargetMapper {
+  @override
+  AbstractTarget toTarget(VehicleBase source) {
+    throw UnsupportedError(
+      'Cannot instantiate abstract class AbstractTarget. Did you forget to map all subclasses?',
+    );
+  }
+}
+''')
+@OmniMapper()
+abstract class AbstractTargetMapper {
+  AbstractTarget toTarget(VehicleBase source);
+}
+
+// -----------------------------------------------------------------------------
+// APPROACH Q: Hooks with optimization disabled
+// -----------------------------------------------------------------------------
+
+class HookTarget {
+  final int id;
+  HookTarget(this.id);
+}
+
+class DummyHook extends OmniHook<DummyModel, HookTarget> {
+  @override
+  void before(DummyModel source) {}
+  @override
+  void after(DummyModel source, HookTarget target) {}
+}
+
+@ShouldGenerate(r'''
+extension DummyModelToHookTarget on DummyModel {
+  HookTarget toHookTarget() {
+    DummyHook().before(this);
+    final target = HookTarget(id);
+    DummyHook().after(this, target);
+    return target;
+  }
+
+  void updateHookTarget(HookTarget target) {}
+}
+
+extension DummyModelToHookTargetList on Iterable<DummyModel> {
+  List<HookTarget> toHookTargetList() {
+    return map((e) => e.toHookTarget()).toList();
+  }
+}
+''')
+@OmniMapper(target: HookTarget, hook: DummyHook, methodName: 'toHookTarget')
+class DummyModel {
+  final int id;
+  DummyModel(this.id);
 }
