@@ -424,9 +424,13 @@ extension VehicleBaseToEntityList on Iterable<VehicleBase> {
 @OmniMapper(
   target: VehicleEntity,
   subclasses: [
-    SubclassMapping(source: CarBase, target: CarEntity, methodName: 'toCarEntity'),
+    SubclassMapping(
+      source: CarBase,
+      target: CarEntity,
+      methodName: 'toCarEntity',
+    ),
     SubclassMapping(source: MotorcycleBase, target: MotorcycleEntity),
-  ]
+  ],
 )
 class VehicleBase {
   final int wheels;

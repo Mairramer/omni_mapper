@@ -10,7 +10,11 @@ part 'subclass_mapping.g.dart';
   target: VehicleDto,
   subclasses: [
     SubclassMapping(source: Car, target: CarDto, methodName: 'toCarDto'),
-    SubclassMapping(source: Motorcycle, target: MotorcycleDto, methodName: 'toMotorcycleDto'),
+    SubclassMapping(
+      source: Motorcycle,
+      target: MotorcycleDto,
+      methodName: 'toMotorcycleDto',
+    ),
   ],
 )
 class Vehicle {

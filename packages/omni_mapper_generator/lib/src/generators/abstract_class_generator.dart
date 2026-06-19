@@ -202,8 +202,7 @@ class AbstractClassGenerator {
         switchBuffer.writeln('  ${entry.key} s => ${entry.value}(s),');
       }
 
-      final simpleConstructorRegex =
-          RegExp(r'^return ([\s\S]+);\s*$');
+      final simpleConstructorRegex = RegExp(r'^return ([\s\S]+);\s*$');
       final match = simpleConstructorRegex.firstMatch(codeBody.trim());
 
       if (match != null) {
