@@ -6,6 +6,7 @@ import 'package:source_gen/source_gen.dart';
 import 'generators/abstract_class_generator.dart';
 import 'generators/extension_generator.dart';
 
+/// Generates mapping code for classes annotated with [OmniMapper].
 class MapperGenerator extends GeneratorForAnnotation<OmniMapper> {
   @override
   String? generateForAnnotatedElement(
@@ -64,6 +65,7 @@ class MapperGenerator extends GeneratorForAnnotation<OmniMapper> {
   }
 }
 
+/// Generates mapping code for classes annotated with [OmniMappers].
 class MultiMapperGenerator extends GeneratorForAnnotation<OmniMappers> {
   @override
   String? generateForAnnotatedElement(

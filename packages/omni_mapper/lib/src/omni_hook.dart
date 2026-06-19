@@ -1,5 +1,6 @@
-/// Base class for custom mapping hooks.
-/// Subclass this to inject logic before or after a mapping completes.
+/// A hook to inject custom logic during mapping.
+///
+/// Subclass this to execute code before or after a mapping completes.
 /// Provide your subclass type to the [OmniMapper.hook] parameter.
 abstract class OmniHook<S, T> {
   const OmniHook();
