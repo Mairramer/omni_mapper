@@ -92,7 +92,7 @@ To make OmniMapper the ultimate solution for the Dart/Flutter ecosystem (similar
 - [ ] **Polymorphic Mapping:** Handle subclasses and inheritance dynamically (`@SubclassMapping`).
 - [ ] **Utilizing other Mappers:** Reference existing injectable mappers (`uses: [OtherMapper]`).
 - [ ] **Collection Update Strategies:** Option to `clear()` and `addAll()` instead of replacing the list reference.
-- [ ] **Custom Field Expressions:** Pure Dart code passed as a string for extreme flexibility.
+- [x] **Custom Field Expressions:** Pure Dart code passed as a string for extreme flexibility.
 
 ## Contributing
 

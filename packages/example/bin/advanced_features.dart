@@ -1,6 +1,7 @@
 import 'package:example/advanced_features/auto_flattening.dart';
 import 'package:example/advanced_features/enum_mapping.dart';
 import 'package:example/advanced_features/field_converters.dart';
+import 'package:example/advanced_features/mapping_rules.dart';
 import 'package:example/advanced_features/reverse_mapping.dart';
 
 void main() {
@@ -64,4 +65,15 @@ void main() {
   print(
     '  ↳ Dto -> Entity: userId=${reversedEntity.userId}, fullName=${reversedEntity.fullName}, age=${reversedEntity.age}',
   );
+  print('\n[Approach M] Mapping Rules');
+  final ruleModel = ModelRule(
+    firstName: 'Jane',
+    lastName: 'Doe',
+    userId: 42,
+  );
+  final ruleTarget = ruleModel.toTargetRule();
+  print('  ↳ fullName=${ruleTarget.fullName} (from custom expression)');
+  print('  ↳ id=${ruleTarget.id} (from source: userId)');
+  print('  ↳ status=${ruleTarget.status} (from defaultValue)');
+  print('  ↳ ignoredField=${ruleTarget.ignoredField} (was ignored)');
 }

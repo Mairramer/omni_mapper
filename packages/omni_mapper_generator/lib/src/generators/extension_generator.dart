@@ -38,7 +38,7 @@ class ExtensionGenerator {
             .map((e) => e.toStringValue() ?? '')
             .where((e) => e.isNotEmpty)
             .toList() ??
-        const [];
+        [];
 
     final fieldMaps =
         annotation
@@ -48,7 +48,7 @@ class ExtensionGenerator {
               (k, v) =>
                   MapEntry(k?.toStringValue() ?? '', v?.toStringValue() ?? ''),
             ) ??
-        const {};
+        <String, String>{};
 
     final defaultValues =
         annotation
@@ -58,7 +58,38 @@ class ExtensionGenerator {
               (k, v) =>
                   MapEntry(k?.toStringValue() ?? '', v?.toStringValue() ?? ''),
             ) ??
-        const {};
+        <String, String>{};
+
+    final customMappings = <String, String>{};
+    final mappingsList = annotation.peek('mappings')?.listValue;
+    if (mappingsList != null) {
+      for (final mapping in mappingsList) {
+        final target = mapping.getField('target')?.toStringValue();
+        if (target == null) {
+          continue;
+        }
+
+        final source = mapping.getField('source')?.toStringValue();
+        if (source != null) {
+          fieldMaps[source] = target;
+        }
+
+        final custom = mapping.getField('custom')?.toStringValue();
+        if (custom != null) {
+          customMappings[target] = custom;
+        }
+
+        final ignore = mapping.getField('ignore')?.toBoolValue() ?? false;
+        if (ignore) {
+          ignoreFields.add(target);
+        }
+
+        final defaultValue = mapping.getField('defaultValue')?.toStringValue();
+        if (defaultValue != null) {
+          defaultValues[target] = defaultValue;
+        }
+      }
+    }
 
     final converters =
         annotation
@@ -95,6 +126,7 @@ class ExtensionGenerator {
       ignoreFields: ignoreFields,
       fieldMaps: fieldMaps,
       defaultValues: defaultValues,
+      customMappings: customMappings,
       converters: converters,
       strictMode: strictMode,
       hookType: hookType,
@@ -265,6 +297,8 @@ class ExtensionGenerator {
         extensionMethodName: reverseMethodName,
         ignoreFields: reverseIgnoreFields,
         fieldMaps: reverseFieldMaps,
+        customMappings:
+            {}, // Reverse mappings don't automatically mirror custom mappings
         converters: converters,
         strictMode: strictMode,
       );
