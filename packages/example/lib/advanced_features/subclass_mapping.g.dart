@@ -61,6 +61,8 @@ extension MotorcycleToMotorcycleDtoList on Iterable<Motorcycle> {
 }
 
 class VehicleMapperImpl extends VehicleMapper {
+  VehicleMapperImpl.new() : super();
+
   @override
   VehicleDto toDto(Vehicle vehicle) {
     return switch (vehicle) {

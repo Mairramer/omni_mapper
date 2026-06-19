@@ -7,6 +7,8 @@ part of 'multiple_sources.dart';
 // **************************************************************************
 
 class UserProfileMapperImpl extends UserProfileMapper {
+  UserProfileMapperImpl.new() : super();
+
   @override
   UserProfile toProfile(
     User user,

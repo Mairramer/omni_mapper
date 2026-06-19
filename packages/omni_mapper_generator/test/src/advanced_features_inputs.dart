@@ -368,6 +368,8 @@ class MotorcycleEntity extends VehicleEntity {
 
 @ShouldGenerate(r'''
 class VehicleMapperImpl extends VehicleMapper {
+  VehicleMapperImpl.new() : super();
+
   @override
   VehicleEntity toEntity(Vehicle vehicle) {
     return switch (vehicle) {
@@ -453,6 +455,8 @@ abstract class AbstractTarget {}
 
 @ShouldGenerate(r'''
 class AbstractTargetMapperImpl extends AbstractTargetMapper {
+  AbstractTargetMapperImpl.new() : super();
+
   @override
   AbstractTarget toTarget(VehicleBase source) {
     throw UnsupportedError(

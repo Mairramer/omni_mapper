@@ -7,6 +7,8 @@ part of 'abstract_class.dart';
 // **************************************************************************
 
 class MapperAImpl extends MapperA {
+  MapperAImpl.new() : super();
+
   @override
   EntityA toEntity(ModelA model) {
     return EntityA(

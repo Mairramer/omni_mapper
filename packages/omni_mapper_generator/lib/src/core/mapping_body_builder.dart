@@ -28,6 +28,7 @@ class MappingBodyBuilder {
     Map<String, String> defaultValues = const {},
     Map<String, String> customMappings = const {},
     List<DartType> converters = const [],
+    List<DartType> uses = const [],
     bool strictMode = false,
     DartType? hookType,
   }) {
@@ -268,59 +269,180 @@ class MappingBodyBuilder {
           }
         }
 
+        String? usesInvocation;
+        if (sourceFieldType != targetFieldType &&
+            matchingConverter == null &&
+            nestedMapper == null) {
+          for (final useType in uses) {
+            final classElement = useType.element;
+            if (classElement is ClassElement) {
+              final isListMapping =
+                  sourceFieldType.isDartCoreList &&
+                  targetFieldType.isDartCoreList;
+
+              DartType expectedSource = sourceFieldType;
+              DartType expectedTarget = targetFieldType;
+
+              if (isListMapping &&
+                  sourceFieldType is ParameterizedType &&
+                  targetFieldType is ParameterizedType) {
+                expectedSource = (sourceFieldType).typeArguments.first;
+                expectedTarget = (targetFieldType).typeArguments.first;
+              }
+
+              MethodElement? matchingMethod;
+              for (final m in classElement.methods) {
+                if (m.formalParameters.length == 1) {
+                  if (m.returnType.element == expectedTarget.element &&
+                      m.formalParameters.first.type.element ==
+                          expectedSource.element) {
+                    matchingMethod = m;
+                    break;
+                  }
+                }
+              }
+
+              if (matchingMethod != null) {
+                String caller = '${classElement.name}Impl()';
+
+                if (mapperClass != null) {
+                  String? injectedFieldName;
+                  for (final field in mapperClass.fields) {
+                    if (field.type.element == classElement) {
+                      injectedFieldName = field.name;
+                      break;
+                    }
+                  }
+                  if (injectedFieldName == null) {
+                    for (final getter in mapperClass.getters) {
+                      if (getter.returnType.element == classElement) {
+                        injectedFieldName = getter.name;
+                        break;
+                      }
+                    }
+                  }
+
+                  if (injectedFieldName != null) {
+                    caller = 'this.$injectedFieldName';
+                  }
+                }
+
+                final isPathNullable =
+                    sourceFieldType.nullabilitySuffix ==
+                        NullabilitySuffix.question ||
+                    accessString.contains('?.');
+
+                if (isListMapping) {
+                  usesInvocation =
+                      '$accessString${isPathNullable ? '?' : ''}.map((e) => $caller.${matchingMethod.name}(e)).toList()';
+                } else {
+                  if (isPathNullable) {
+                    usesInvocation =
+                        '$accessString != null ? $caller.${matchingMethod.name}(($accessString)!) : null';
+                  } else {
+                    usesInvocation =
+                        '$caller.${matchingMethod.name}($accessString)';
+                  }
+                }
+                break;
+              }
+            }
+          }
+        }
+
         if (matchingConverter != null) {
           final converterName = matchingConverter.element?.name;
-          codeBuffer.writeln(
-            '$paramName: const $converterName().convert($accessString),',
-          );
+          if (param.isNamed) {
+            codeBuffer.writeln(
+              '$paramName: const $converterName().convert($accessString),',
+            );
+          } else {
+            codeBuffer.writeln(
+              'const $converterName().convert($accessString),',
+            );
+          }
         } else if (nestedMapper != null) {
-          codeBuffer.writeln(
-            '$paramName: $accessString != null ? ${nestedMapper.name}(($accessString)!) : null,',
-          );
+          if (param.isNamed) {
+            codeBuffer.writeln(
+              '$paramName: $accessString != null ? ${nestedMapper.name}(($accessString)!) : null,',
+            );
+          } else {
+            codeBuffer.writeln(
+              '$accessString != null ? ${nestedMapper.name}(($accessString)!) : null,',
+            );
+          }
+        } else if (usesInvocation != null) {
+          if (param.isNamed) {
+            codeBuffer.writeln('$paramName: $usesInvocation,');
+          } else {
+            codeBuffer.writeln('$usesInvocation,');
+          }
         } else {
-          if (mapperClass == null) {
-            final sourceTypeElement = sourceFieldType.element;
-            final targetTypeElement = param.type.element;
-            if (sourceTypeElement != null &&
-                targetTypeElement != null &&
-                sourceTypeElement != targetTypeElement) {
-              final isPathNullable =
-                  sourceFieldType.nullabilitySuffix ==
-                      NullabilitySuffix.question ||
-                  accessString.contains('?.');
+          final sourceTypeElement = sourceFieldType.element;
+          final targetTypeElement = param.type.element;
+          if (sourceTypeElement != null &&
+              targetTypeElement != null &&
+              sourceTypeElement != targetTypeElement) {
+            final isPathNullable =
+                sourceFieldType.nullabilitySuffix ==
+                    NullabilitySuffix.question ||
+                accessString.contains('?.');
 
-              // Automatic Enum Mapping
-              if (sourceTypeElement is EnumElement &&
-                  targetTypeElement is EnumElement) {
-                final targetEnumName = targetTypeElement.name;
-                if (isPathNullable) {
+            // Automatic Enum Mapping
+            if (sourceTypeElement is EnumElement &&
+                targetTypeElement is EnumElement) {
+              final targetEnumName = targetTypeElement.name;
+              if (isPathNullable) {
+                if (param.isNamed) {
                   codeBuffer.writeln(
                     '$paramName: $accessString != null ? $targetEnumName.values.byName(($accessString)!.name) : null,',
                   );
                 } else {
                   codeBuffer.writeln(
-                    '$paramName: $targetEnumName.values.byName($accessString.name),',
+                    '$accessString != null ? $targetEnumName.values.byName(($accessString)!.name) : null,',
                   );
                 }
-                assignedParams.add(paramName);
-                continue;
+              } else {
+                if (param.isNamed) {
+                  codeBuffer.writeln(
+                    '$paramName: $targetEnumName.values.byName($accessString.name),',
+                  );
+                } else {
+                  codeBuffer.writeln(
+                    '$targetEnumName.values.byName($accessString.name),',
+                  );
+                }
               }
+              assignedParams.add(paramName);
+              continue;
+            }
 
-              // Automatic Nested Mapping
-              if (sourceFieldType.isDartCoreList &&
-                  targetFieldType.isDartCoreList) {
-                // If it's a list, map it
+            // Automatic Nested Mapping
+            if (sourceFieldType.isDartCoreList &&
+                targetFieldType.isDartCoreList) {
+              // If it's a list, map it
+              if (param.isNamed) {
                 codeBuffer.writeln(
                   '$paramName: $accessString${isPathNullable ? '?' : ''}.map((e) => e.$extensionMethodName()).toList(),',
                 );
               } else {
                 codeBuffer.writeln(
-                  '$paramName: $accessString${isPathNullable ? '?' : ''}.$extensionMethodName(),',
+                  '$accessString${isPathNullable ? '?' : ''}.map((e) => e.$extensionMethodName()).toList(),',
                 );
               }
-              assignedParams.add(paramName);
-              continue;
+            } else {
+              if (param.isNamed) {
+                codeBuffer.writeln(
+                  '$paramName: $accessString${isPathNullable ? '?' : ''}.$extensionMethodName(),',
+                );
+              } else {
+                codeBuffer.writeln(
+                  '$accessString${isPathNullable ? '?' : ''}.$extensionMethodName(),',
+                );
+              }
             }
+            assignedParams.add(paramName);
+            continue;
           }
 
           if (param.isNamed) {

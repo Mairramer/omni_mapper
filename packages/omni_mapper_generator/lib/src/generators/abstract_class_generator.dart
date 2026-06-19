@@ -12,16 +12,63 @@ class AbstractClassGenerator {
     required ClassElement element,
     required ConstantReader annotation,
   }) {
-    final classBuilder = Class(
-      (c) => c
+    final constructors = element.constructors
+        .where((c) => !c.isFactory)
+        .toList();
+
+    final classBuilder = Class((c) {
+      c
         ..name = '${element.name}Impl'
         ..extend = refer(element.name ?? '')
         ..methods.addAll(
           element.methods
               .where((m) => m.isAbstract)
               .map((m) => _generateMethod(m, element, annotation)),
-        ),
-    );
+        );
+
+      for (final constructor in constructors) {
+        if ((constructor.name == null || constructor.name!.isEmpty) &&
+            constructor.formalParameters.isEmpty) {
+          continue;
+        }
+
+        c.constructors.add(
+          Constructor((cb) {
+            final cName = constructor.name;
+            cb.name = (cName == null || cName.isEmpty) ? null : cName;
+            for (final param in constructor.formalParameters) {
+              final parameterBuilder = Parameter((pb) {
+                pb
+                  ..name = param.name ?? ''
+                  ..type = refer(param.type.getDisplayString())
+                  ..named = param.isNamed
+                  ..required = param.isRequiredNamed;
+                if (param.hasDefaultValue && param.defaultValueCode != null) {
+                  pb.defaultTo = Code(param.defaultValueCode!);
+                }
+              });
+              if (param.isOptional) {
+                cb.optionalParameters.add(parameterBuilder);
+              } else {
+                cb.requiredParameters.add(parameterBuilder);
+              }
+            }
+            final positionalArgs = constructor.formalParameters
+                .where((p) => p.isPositional)
+                .map((p) => refer(p.name!));
+            final namedArgs = <String, Expression>{
+              for (var p in constructor.formalParameters.where(
+                (p) => p.isNamed && p.name != null && p.name!.isNotEmpty,
+              ))
+                p.name!: refer(p.name!),
+            };
+            cb.initializers.add(
+              refer('super').call(positionalArgs, namedArgs).code,
+            );
+          }),
+        );
+      }
+    });
 
     final emitter = DartEmitter();
     return classBuilder.accept(emitter).toString();
@@ -124,6 +171,7 @@ class AbstractClassGenerator {
       defaultValues: config.defaultValues,
       customMappings: config.customMappings,
       converters: config.converters,
+      uses: config.uses,
       strictMode: config.strictMode,
       hookType: config.hookType,
     );

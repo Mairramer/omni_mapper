@@ -81,6 +81,15 @@ class AnnotationParser {
     final strictMode = annotation.peek('strictMode')?.boolValue ?? false;
     final hookType = annotation.peek('hook')?.typeValue;
 
+    final uses =
+        annotation
+            .peek('uses')
+            ?.listValue
+            .map((e) => e.toTypeValue())
+            .whereType<DartType>()
+            .toList() ??
+        const [];
+
     final generateListMapper =
         annotation.peek('generateListMapper')?.boolValue ?? true;
     final generateUpdateMethod =
@@ -100,6 +109,7 @@ class AnnotationParser {
       converters: converters,
       strictMode: strictMode,
       hookType: hookType,
+      uses: uses,
       generateListMapper: generateListMapper,
       generateUpdateMethod: generateUpdateMethod,
       ignoreIfNull: ignoreIfNull,

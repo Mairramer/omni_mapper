@@ -16,6 +16,8 @@ class ModelA {
 
 @ShouldGenerate(r'''
 class MapperAImpl extends MapperA {
+  MapperAImpl.new() : super();
+
   @override
   EntityA toEntity(ModelA model) {
     return EntityA(id: model.id, title: model.title);
@@ -45,6 +47,8 @@ class TargetMultiple {
 
 @ShouldGenerate(r'''
 class MultipleSourcesMapperImpl extends MultipleSourcesMapper {
+  MultipleSourcesMapperImpl.new() : super();
+
   @override
   TargetMultiple toTarget(SourceX x, SourceY y) {
     return TargetMultiple(id: x.id, name: y.name);
@@ -72,6 +76,8 @@ class SourceFreezed {
 
 @ShouldGenerate(r'''
 class FreezedMapperImpl extends FreezedMapper {
+  FreezedMapperImpl.new() : super();
+
   @override
   FreezedLikeModel toFreezed(SourceFreezed source) {
     return FreezedLikeModel(title: source.title);
