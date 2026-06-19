@@ -69,7 +69,7 @@ class AbstractClassGenerator {
             .map((e) => e.toStringValue() ?? '')
             .where((e) => e.isNotEmpty)
             .toList() ??
-        const [];
+        [];
 
     final fieldMapsObj = annotation.peek('fieldMaps')?.mapValue;
     final fieldMaps = <String, String>{};
@@ -95,6 +95,37 @@ class AbstractClassGenerator {
       }
     }
 
+    final customMappings = <String, String>{};
+    final mappingsList = annotation.peek('mappings')?.listValue;
+    if (mappingsList != null) {
+      for (final mapping in mappingsList) {
+        final target = mapping.getField('target')?.toStringValue();
+        if (target == null) {
+          continue;
+        }
+
+        final source = mapping.getField('source')?.toStringValue();
+        if (source != null) {
+          fieldMaps[source] = target;
+        }
+
+        final custom = mapping.getField('custom')?.toStringValue();
+        if (custom != null) {
+          customMappings[target] = custom;
+        }
+
+        final ignore = mapping.getField('ignore')?.toBoolValue() ?? false;
+        if (ignore) {
+          ignoreFields.add(target);
+        }
+
+        final defaultValue = mapping.getField('defaultValue')?.toStringValue();
+        if (defaultValue != null) {
+          defaultValues[target] = defaultValue;
+        }
+      }
+    }
+
     final converters =
         annotation
             .peek('converters')
@@ -116,6 +147,7 @@ class AbstractClassGenerator {
       ignoreFields: ignoreFields,
       fieldMaps: fieldMaps,
       defaultValues: defaultValues,
+      customMappings: customMappings,
       converters: converters,
       strictMode: strictMode,
       hookType: hookType,

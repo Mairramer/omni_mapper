@@ -26,6 +26,7 @@ class MappingBodyBuilder {
     List<String> ignoreFields = const [],
     Map<String, String> fieldMaps = const {},
     Map<String, String> defaultValues = const {},
+    Map<String, String> customMappings = const {},
     List<DartType> converters = const [],
     bool strictMode = false,
     DartType? hookType,
@@ -191,6 +192,16 @@ class MappingBodyBuilder {
         continue;
       }
 
+      if (customMappings.containsKey(paramName)) {
+        if (param.isNamed) {
+          codeBuffer.writeln('$paramName: ${customMappings[paramName]},');
+        } else {
+          codeBuffer.writeln('${customMappings[paramName]},');
+        }
+        assignedParams.add(paramName);
+        continue;
+      }
+
       final resolved = resolveField(paramName);
 
       if (resolved != null) {
@@ -330,6 +341,12 @@ class MappingBodyBuilder {
           field.setter == null ||
           assignedParams.contains(fieldName) ||
           ignoreFields.contains(fieldName)) {
+        continue;
+      }
+
+      if (customMappings.containsKey(fieldName)) {
+        codeBuffer.write('..$fieldName = ${customMappings[fieldName]}');
+        assignedParams.add(fieldName);
         continue;
       }
 

@@ -281,3 +281,60 @@ class ModelL {
   final String title;
   ModelL({required this.userId, required this.title});
 }
+
+// --- APPROACH M (MappingRule) ---
+class TargetM {
+  final String fullName;
+  final int id;
+  final String status;
+  final String? ignoredField;
+
+  TargetM({
+    required this.fullName,
+    required this.id,
+    required this.status,
+    this.ignoredField,
+  });
+}
+
+@ShouldGenerate(r'''
+extension ModelMToTargetM on ModelM {
+  TargetM toTargetM() {
+    final target = TargetM(
+      fullName: firstName + ' ' + lastName,
+      id: userId,
+      status: "active",
+    );
+    return target;
+  }
+
+  void updateTargetM(TargetM target) {}
+}
+
+extension ModelMToTargetMList on Iterable<ModelM> {
+  List<TargetM> toTargetMList() {
+    return map((e) => e.toTargetM()).toList();
+  }
+}
+''')
+@OmniMapper(
+  target: TargetM,
+  methodName: 'toTargetM',
+  mappings: [
+    MappingRule('fullName', custom: "firstName + ' ' + lastName"),
+    MappingRule('id', source: 'userId'),
+    MappingRule('status', defaultValue: '"active"'),
+    MappingRule('ignoredField', ignore: true),
+  ],
+)
+class ModelM {
+  final String firstName;
+  final String lastName;
+  final int userId;
+
+  ModelM({
+    required this.firstName,
+    required this.lastName,
+    required this.userId,
+  });
+}
