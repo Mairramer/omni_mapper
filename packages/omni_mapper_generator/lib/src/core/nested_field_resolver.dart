@@ -2,6 +2,7 @@ import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:analyzer/dart/element/type.dart';
 
+/// Information about a nested field resolved from a class element.
 class ResolvedNestedField {
   final String path;
   final DartType type;
@@ -9,6 +10,10 @@ class ResolvedNestedField {
   ResolvedNestedField(this.path, this.type);
 }
 
+/// Resolves a target field name against a source class by walking its nested properties.
+///
+/// Returns a [ResolvedNestedField] if the [targetName] can be satisfied by a chain of
+/// getters on the [classElement], or null otherwise.
 ResolvedNestedField? resolveNestedField(
   ClassElement classElement,
   String targetName,

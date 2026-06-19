@@ -5,6 +5,7 @@ import 'package:source_gen/source_gen.dart';
 
 import 'nested_field_resolver.dart';
 
+/// Information about a resolved field used during mapping generation.
 class ResolvedFieldInfo {
   final DartType type;
   final String accessString;
@@ -13,6 +14,7 @@ class ResolvedFieldInfo {
   ResolvedFieldInfo(this.type, this.accessString, this.sourceClass);
 }
 
+/// Builds the method body for mapping a source object to a target object.
 class MappingBodyBuilder {
   static String build({
     required List<ClassElement> sourceClasses,

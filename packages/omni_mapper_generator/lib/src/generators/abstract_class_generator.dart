@@ -5,6 +5,7 @@ import 'package:source_gen/source_gen.dart';
 
 import '../core/mapping_body_builder.dart';
 
+/// Generates an implementation class for an abstract mapper class.
 class AbstractClassGenerator {
   static String generate({
     required ClassElement element,

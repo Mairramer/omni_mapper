@@ -7,6 +7,7 @@ import 'package:source_gen/source_gen.dart';
 import '../core/mapping_body_builder.dart';
 import '../core/nested_field_resolver.dart';
 
+/// Generates extension methods for mapping between a source class and a target class.
 class ExtensionGenerator {
   static String generate({
     required ClassElement sourceClass,
