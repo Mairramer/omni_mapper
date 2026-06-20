@@ -114,3 +114,40 @@ class ExtSource {
 
   ExtSource(this.address, this.pastAddresses);
 }
+
+// --- Test 4: Concrete fallback ---
+class ConcreteMapper {
+  AddressEntity toEntity(AddressModel model) => AddressEntity(model.city);
+}
+
+class UserMapperConcreteFallbackImpl extends UserMapperConcreteFallback {
+  UserMapperConcreteFallbackImpl();
+
+  @override
+  UserEntity toEntity(UserModel model) {
+    return UserEntity(
+      model.name,
+      ConcreteMapper().toEntity(model.address),
+      model.pastAddresses.map((e) => ConcreteMapper().toEntity(e)).toList(),
+    );
+  }
+}
+
+@ShouldGenerate(r'''
+class UserMapperConcreteFallbackImpl extends UserMapperConcreteFallback {
+  UserMapperConcreteFallbackImpl();
+
+  @override
+  UserEntity toEntity(UserModel model) {
+    return UserEntity(
+      model.name,
+      ConcreteMapper().toEntity(model.address),
+      model.pastAddresses.map((e) => ConcreteMapper().toEntity(e)).toList(),
+    );
+  }
+}
+''')
+@OmniMapper(uses: [ConcreteMapper])
+abstract class UserMapperConcreteFallback {
+  UserEntity toEntity(UserModel model);
+}

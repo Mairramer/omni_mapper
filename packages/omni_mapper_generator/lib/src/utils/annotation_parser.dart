@@ -13,7 +13,11 @@ class AnnotationParser {
 
     final reader = ConstantReader(obj);
     if (reader.isString) {
-      return "'${reader.stringValue}'";
+      final escaped = reader.stringValue
+          .replaceAll(r'\', r'\\')
+          .replaceAll("'", r"\'")
+          .replaceAll(r'$', r'\$');
+      return "'$escaped'";
     }
     if (reader.isInt) {
       return reader.intValue.toString();

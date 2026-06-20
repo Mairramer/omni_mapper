@@ -292,7 +292,7 @@ class MappingBodyBuilder {
 
               MethodElement? matchingMethod;
               for (final m in classElement.methods) {
-                if (m.formalParameters.length == 1) {
+                if (!m.isStatic && m.formalParameters.length == 1) {
                   if (m.returnType.element == expectedTarget.element &&
                       m.formalParameters.first.type.element ==
                           expectedSource.element) {
@@ -303,7 +303,10 @@ class MappingBodyBuilder {
               }
 
               if (matchingMethod != null) {
-                String caller = '${classElement.name}Impl()';
+                final callerName = classElement.isAbstract
+                    ? '${classElement.name}Impl'
+                    : classElement.name;
+                String caller = '$callerName()';
 
                 if (mapperClass != null) {
                   String? injectedFieldName;
