@@ -13,8 +13,6 @@ extension ModelBToEntity on ModelB {
   EntityB toEntity() {
     return EntityB(id: id, title: title);
   }
-
-  void updateEntityB(EntityB target) {}
 }
 
 extension ModelBToEntityList on Iterable<ModelB> {
@@ -42,8 +40,6 @@ extension EntityCToModel on EntityC {
   ModelC toModel() {
     return ModelC(id: id, title: title);
   }
-
-  void updateModelC(ModelC target) {}
 }
 
 extension EntityCToModelList on Iterable<EntityC> {
@@ -84,7 +80,7 @@ extension ModelEToMutableEntityEList on Iterable<ModelE> {
   }
 }
 ''')
-@OmniMapper(target: MutableEntityE, methodName: 'toMutableEntityE')
+@OmniMapper(target: MutableEntityE, generateUpdateMethod: true, methodName: 'toMutableEntityE')
 class ModelE {
   final int id;
   final String name;

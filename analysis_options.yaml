@@ -45,7 +45,7 @@ formatter:
 
 analyzer:
   exclude:
-    - "**/*.g.dart"
+    # - "**/*.g.dart"
     - "build/**"
 
   errors:

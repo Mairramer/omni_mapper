@@ -106,7 +106,7 @@ class OmniMapper {
   /// Whether to generate a method that updates an existing target object.
   ///
   /// If true, generates a method (e.g., `updateEntity`) that mutates an existing
-  /// instance with values from the source. Defaults to true.
+  /// instance with values from the source. Defaults to false.
   final bool generateUpdateMethod;
 
   /// Whether to enforce mapping of all target fields.
@@ -162,7 +162,7 @@ class OmniMapper {
     this.defaultValues = const {},
     this.converters = const [],
     this.generateListMapper = true,
-    this.generateUpdateMethod = true,
+    this.generateUpdateMethod = false,
     this.strictMode = false,
     this.ignoreIfNull = false,
     this.hook,

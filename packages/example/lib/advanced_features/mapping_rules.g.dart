@@ -14,8 +14,6 @@ extension ModelRuleToTargetRule on ModelRule {
       status: 'active',
     );
   }
-
-  void updateTargetRule(TargetRule target) {}
 }
 
 extension ModelRuleToTargetRuleList on Iterable<ModelRule> {

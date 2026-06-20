@@ -16,8 +16,6 @@ extension DeviceModelToEntity on DeviceModel {
       version: 1.0,
     );
   }
-
-  void updateDeviceEntity(DeviceEntity target) {}
 }
 
 extension DeviceModelToEntityList on Iterable<DeviceModel> {
@@ -33,8 +31,6 @@ extension AppStateModelToEntity on AppStateModel {
       config: const CustomConfig(theme: 'dark', enableNotifications: true),
     );
   }
-
-  void updateAppStateEntity(AppStateEntity target) {}
 }
 
 extension AppStateModelToEntityList on Iterable<AppStateModel> {

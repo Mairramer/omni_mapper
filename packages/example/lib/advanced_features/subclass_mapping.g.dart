@@ -16,8 +16,6 @@ extension VehicleToEntity on Vehicle {
       ),
     };
   }
-
-  void updateVehicleDto(VehicleDto target) {}
 }
 
 extension VehicleToEntityList on Iterable<Vehicle> {
@@ -33,8 +31,6 @@ extension CarToCarDto on Car {
       doors: doors,
     );
   }
-
-  void updateCarDto(CarDto target) {}
 }
 
 extension CarToCarDtoList on Iterable<Car> {
@@ -50,8 +46,6 @@ extension MotorcycleToMotorcycleDto on Motorcycle {
       hasSidecar: hasSidecar,
     );
   }
-
-  void updateMotorcycleDto(MotorcycleDto target) {}
 }
 
 extension MotorcycleToMotorcycleDtoList on Iterable<Motorcycle> {

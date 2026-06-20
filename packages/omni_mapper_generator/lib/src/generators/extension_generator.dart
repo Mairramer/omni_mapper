@@ -24,7 +24,10 @@ class ExtensionGenerator {
       );
     }
 
-    final config = AnnotationParser.parse(annotation);
+    final config = AnnotationParser.parse(
+      annotation,
+      classElement: elementContext,
+    );
 
     final capitalizedMethodName = config.methodName.isNotEmpty
         ? '${config.methodName[0].toUpperCase()}${config.methodName.substring(1)}'

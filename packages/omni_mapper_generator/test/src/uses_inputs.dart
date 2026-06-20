@@ -97,8 +97,6 @@ extension ExtSourceToEntity on ExtSource {
       pastAddresses.map((e) => AddressMapperImpl().toEntity(e)).toList(),
     );
   }
-
-  void updateExtTarget(ExtTarget target) {}
 }
 
 extension ExtSourceToEntityList on Iterable<ExtSource> {

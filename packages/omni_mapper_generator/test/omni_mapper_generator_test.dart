@@ -12,6 +12,7 @@ Future<void> main() async {
     'error_inputs.dart',
     'uses_inputs.dart',
     'default_values_inputs.dart',
+    'omni_field_inputs.dart',
   ];
 
   for (final file in testFiles) {

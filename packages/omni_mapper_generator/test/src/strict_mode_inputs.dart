@@ -15,8 +15,6 @@ extension ModelFToTargetF on ModelF {
   TargetF toTargetF() {
     return TargetF(id: id);
   }
-
-  void updateTargetF(TargetF target) {}
 }
 
 extension ModelFToTargetFList on Iterable<ModelF> {

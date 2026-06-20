@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'enum_mapping.dart';
+part of 'omni_field_example.dart';
 
 // **************************************************************************
 // MapperGenerator
@@ -9,17 +9,30 @@ part of 'enum_mapping.dart';
 extension UserModelToEntity on UserModel {
   UserEntity toEntity() {
     return UserEntity(
-      id: id,
-      role: UserRole.values.byName(role.name),
-      secondaryRole: secondaryRole != null
-          ? UserRole.values.byName((secondaryRole)!.name)
-          : null,
+      userId: id,
+      userFullName: name,
+      status: status,
     );
   }
 }
 
 extension UserModelToEntityList on Iterable<UserModel> {
   List<UserEntity> toEntityList() {
+    return map((e) => e.toEntity()).toList();
+  }
+}
+
+extension AdminModelToEntity on AdminModel {
+  AdminEntity toEntity() {
+    return AdminEntity(
+      adminId,
+      accessLevel,
+    );
+  }
+}
+
+extension AdminModelToEntityList on Iterable<AdminModel> {
+  List<AdminEntity> toEntityList() {
     return map((e) => e.toEntity()).toList();
   }
 }

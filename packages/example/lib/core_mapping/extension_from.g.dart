@@ -13,8 +13,6 @@ extension EntityCToModel on EntityC {
       title: title,
     );
   }
-
-  void updateModelC(ModelC target) {}
 }
 
 extension EntityCToModelList on Iterable<EntityC> {

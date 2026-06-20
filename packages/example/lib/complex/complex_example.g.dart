@@ -13,8 +13,6 @@ extension ContactDtoToEntity on ContactDto {
       zip_code,
     );
   }
-
-  void updateContactEntity(ContactEntity target) {}
 }
 
 extension ContactDtoToEntityList on Iterable<ContactDto> {

@@ -175,7 +175,7 @@ formModel.updateUserEntity(existingEntity);
 // existingEntity.name is now updated — same object in memory!
 ```
 
-> Enabled by default. Disable with `generateUpdateMethod: false`.
+> Disabled by default. Enable with `generateUpdateMethod: true`.
 > Works with mutable fields only (non-`final`).
 
 ### Ignoring Fields

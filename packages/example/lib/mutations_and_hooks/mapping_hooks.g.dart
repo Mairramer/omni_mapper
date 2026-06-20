@@ -16,8 +16,6 @@ extension HookedUserModelToEntity on HookedUserModel {
     const HookedUserMapperHook().after(this, target);
     return target;
   }
-
-  void updateHookedUserEntity(HookedUserEntity target) {}
 }
 
 extension HookedUserModelToEntityList on Iterable<HookedUserModel> {

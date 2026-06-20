@@ -106,3 +106,15 @@ void someFunction() {}
 abstract class UnparseableAnnotationMapper {
   UnparseableTarget toTarget(UnparseableSource model);
 }
+
+// --- Conflict Errors ---
+@ShouldThrow(
+  'Conflict: The field "id" is mapped in both @OmniField and fieldMaps. Please remove one of the definitions.',
+  element: false,
+)
+@OmniMapper(target: DummyTarget, fieldMaps: {'id': 'id2'})
+class ConflictSource {
+  @OmniField(name: 'id3')
+  final int id;
+  ConflictSource(this.id);
+}
