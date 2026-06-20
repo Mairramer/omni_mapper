@@ -12,16 +12,57 @@ class AbstractClassGenerator {
     required ClassElement element,
     required ConstantReader annotation,
   }) {
-    final classBuilder = Class(
-      (c) => c
+    final constructors = element.constructors
+        .where((c) => !c.isFactory)
+        .toList();
+
+    final classBuilder = Class((c) {
+      c
         ..name = '${element.name}Impl'
         ..extend = refer(element.name ?? '')
         ..methods.addAll(
           element.methods
               .where((m) => m.isAbstract)
               .map((m) => _generateMethod(m, element, annotation)),
-        ),
-    );
+        );
+
+      for (final constructor in constructors) {
+        if ((constructor.name == null || constructor.name!.isEmpty) &&
+            constructor.formalParameters.isEmpty) {
+          continue;
+        }
+
+        c.constructors.add(
+          Constructor((cb) {
+            final cName = constructor.name;
+            cb.name = (cName == null || cName.isEmpty || cName == 'new')
+                ? null
+                : cName;
+
+            if (cb.name != null) {
+              cb.initializers.add(Code('super.${cb.name}()'));
+            }
+            for (final param in constructor.formalParameters) {
+              final parameterBuilder = Parameter((pb) {
+                pb
+                  ..name = param.name ?? ''
+                  ..toSuper = true
+                  ..named = param.isNamed
+                  ..required = param.isRequiredNamed;
+                if (param.hasDefaultValue && param.defaultValueCode != null) {
+                  pb.defaultTo = Code(param.defaultValueCode!);
+                }
+              });
+              if (param.isOptional) {
+                cb.optionalParameters.add(parameterBuilder);
+              } else {
+                cb.requiredParameters.add(parameterBuilder);
+              }
+            }
+          }),
+        );
+      }
+    });
 
     final emitter = DartEmitter();
     return classBuilder.accept(emitter).toString();
@@ -124,6 +165,7 @@ class AbstractClassGenerator {
       defaultValues: config.defaultValues,
       customMappings: config.customMappings,
       converters: config.converters,
+      uses: config.uses,
       strictMode: config.strictMode,
       hookType: config.hookType,
     );

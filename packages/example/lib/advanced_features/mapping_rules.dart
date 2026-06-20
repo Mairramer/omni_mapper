@@ -20,9 +20,9 @@ class TargetRule {
   target: TargetRule,
   methodName: 'toTargetRule',
   mappings: [
-    MappingRule('fullName', custom: 'firstName + " " + lastName'),
+    MappingRule('fullName', custom: r"'$firstName $lastName'"),
     MappingRule('id', source: 'userId'),
-    MappingRule('status', defaultValue: '"active"'),
+    MappingRule('status', defaultValue: 'active'),
     MappingRule('ignoredField', ignore: true),
   ],
 )

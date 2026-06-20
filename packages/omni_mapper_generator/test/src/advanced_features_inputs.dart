@@ -20,7 +20,7 @@ extension ModelDToEntity on ModelD {
   EntityD toEntity() {
     return EntityD(
       id: userId,
-      status: "active",
+      status: '"active"',
       createdAt: const StringDateConverter().convert(createdAt),
     );
   }
@@ -60,8 +60,10 @@ extension ModelHToTargetH on ModelH {
   }
 
   void updateTargetH(TargetH target) {
-    if (this.id case final id?) target.id = id;
-    target.name = this.name;
+    if (id case final id?) {
+      target.id = id;
+    }
+    target.name = name;
   }
 }
 
@@ -95,9 +97,9 @@ class MyHook extends OmniHook<ModelI, TargetI> {
 @ShouldGenerate(r'''
 extension ModelIToTargetI on ModelI {
   TargetI toTargetI() {
-    MyHook().before(this);
+    const MyHook().before(this);
     final target = TargetI(id: id);
-    MyHook().after(this, target);
+    const MyHook().after(this, target);
     return target;
   }
 
@@ -139,9 +141,9 @@ extension ModelJToTargetJ on ModelJ {
   }
 
   void updateTargetJ(TargetJ target) {
-    target.status = TargetEnum.values.byName(this.status.name);
-    target.optionalStatus = this.optionalStatus != null
-        ? TargetEnum.values.byName((this.optionalStatus)!.name)
+    target.status = TargetEnum.values.byName(status.name);
+    target.optionalStatus = optionalStatus != null
+        ? TargetEnum.values.byName((optionalStatus)!.name)
         : null;
   }
 }
@@ -201,13 +203,13 @@ class ProfileK {
 extension ModelKToTargetK on ModelK {
   TargetK toTargetK() {
     return TargetK(
-      userAddressCityName: this.userAddress?.city?.name,
-      profileSettingsThemeId: this.profile.settings.theme?.id,
-    )..profileSettingsThemeMode = this.profile.settings.theme?.mode;
+      userAddressCityName: userAddress?.city?.name,
+      profileSettingsThemeId: profile.settings.theme?.id,
+    )..profileSettingsThemeMode = profile.settings.theme?.mode;
   }
 
   void updateTargetK(TargetK target) {
-    target.profileSettingsThemeMode = this.profile.settings.theme?.mode;
+    target.profileSettingsThemeMode = profile.settings.theme?.mode;
   }
 }
 
@@ -236,7 +238,7 @@ class TargetL {
 @ShouldGenerate(r'''
 extension ModelLToTargetL on ModelL {
   TargetL toTargetL() {
-    return TargetL(id: userId, title: title, status: "active");
+    return TargetL(id: userId, title: title, status: '"active"');
   }
 
   void updateTargetL(TargetL target) {}
@@ -297,7 +299,7 @@ extension ModelMToTargetM on ModelM {
     return TargetM(
       fullName: firstName + ' ' + lastName,
       id: userId,
-      status: "active",
+      status: '"active"',
     );
   }
 
@@ -368,11 +370,13 @@ class MotorcycleEntity extends VehicleEntity {
 
 @ShouldGenerate(r'''
 class VehicleMapperImpl extends VehicleMapper {
+  VehicleMapperImpl();
+
   @override
   VehicleEntity toEntity(Vehicle vehicle) {
     return switch (vehicle) {
-      Car s => carToEntity(s),
-      Motorcycle s => motoToEntity(s),
+      final Car s => carToEntity(s),
+      final Motorcycle s => motoToEntity(s),
       _ => VehicleEntity(vehicle.wheels),
     };
   }
@@ -406,8 +410,8 @@ abstract class VehicleMapper {
 extension VehicleBaseToEntity on VehicleBase {
   VehicleEntity toEntity() {
     return switch (this) {
-      CarBase s => s.toCarEntity(),
-      MotorcycleBase s => s.toMotorcycleEntity(),
+      final CarBase s => s.toCarEntity(),
+      final MotorcycleBase s => s.toMotorcycleEntity(),
       _ => VehicleEntity(wheels),
     };
   }
@@ -453,6 +457,8 @@ abstract class AbstractTarget {}
 
 @ShouldGenerate(r'''
 class AbstractTargetMapperImpl extends AbstractTargetMapper {
+  AbstractTargetMapperImpl();
+
   @override
   AbstractTarget toTarget(VehicleBase source) {
     throw UnsupportedError(
@@ -485,9 +491,9 @@ class DummyHook extends OmniHook<DummyModel, HookTarget> {
 @ShouldGenerate(r'''
 extension DummyModelToHookTarget on DummyModel {
   HookTarget toHookTarget() {
-    DummyHook().before(this);
+    const DummyHook().before(this);
     final target = HookTarget(id);
-    DummyHook().after(this, target);
+    const DummyHook().after(this, target);
     return target;
   }
 
@@ -504,4 +510,43 @@ extension DummyModelToHookTargetList on Iterable<DummyModel> {
 class DummyModel {
   final int id;
   DummyModel(this.id);
+}
+
+// --- Nested Target Shadowing Update Method Test ---
+class NestedTargetShadowModel {
+  final String val;
+  NestedTargetShadowModel(this.val);
+}
+
+class TargetShadowTarget {
+  String val;
+  TargetShadowTarget(this.val);
+}
+
+@ShouldGenerate(r'''
+extension TargetShadowSourceToEntity on TargetShadowSource {
+  TargetShadowTarget toEntity() {
+    return TargetShadowTarget(target.val);
+  }
+
+  void updateTargetShadowTarget(TargetShadowTarget target) {
+    target.val = this.target.val;
+  }
+}
+
+extension TargetShadowSourceToEntityList on Iterable<TargetShadowSource> {
+  List<TargetShadowTarget> toEntityList() {
+    return map((e) => e.toEntity()).toList();
+  }
+}
+''')
+@OmniMapper(
+  target: TargetShadowTarget,
+  mappings: [
+    MappingRule('val', source: 'target.val'),
+  ],
+)
+class TargetShadowSource {
+  final NestedTargetShadowModel target;
+  TargetShadowSource(this.target);
 }

@@ -8,6 +8,7 @@ class MapperConfig {
   final List<DartType> converters;
   final bool strictMode;
   final DartType? hookType;
+  final List<DartType> uses;
   final bool generateListMapper;
   final bool generateUpdateMethod;
   final bool ignoreIfNull;
@@ -23,6 +24,7 @@ class MapperConfig {
     required this.converters,
     required this.strictMode,
     this.hookType,
+    this.uses = const [],
     this.generateListMapper = true,
     this.generateUpdateMethod = true,
     this.ignoreIfNull = false,

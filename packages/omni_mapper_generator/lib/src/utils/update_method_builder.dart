@@ -74,7 +74,7 @@ class UpdateMethodBuilder {
         nestedField = resolveNestedField(
           sourceClass,
           sourceFieldName,
-          'this',
+          '',
         );
         if (nestedField != null) {
           hasSourceField = true;
@@ -84,7 +84,18 @@ class UpdateMethodBuilder {
       if (hasSourceField) {
         final sourceFieldType =
             nestedField?.type ?? sourceFieldTypes[sourceFieldName];
-        final accessString = nestedField?.path ?? 'this.$sourceFieldName';
+        String accessString;
+        if (nestedField != null) {
+          accessString = nestedField.path;
+          if (accessString.startsWith('target.') ||
+              accessString.startsWith('target?.')) {
+            accessString = 'this.$accessString';
+          }
+        } else {
+          accessString = sourceFieldName == 'target'
+              ? 'this.$sourceFieldName'
+              : sourceFieldName;
+        }
         final targetFieldType = field.type;
         final sourceTypeElement = sourceFieldType?.element;
         final targetTypeElement = targetFieldType.element;
@@ -99,7 +110,7 @@ class UpdateMethodBuilder {
           final targetEnumName = targetTypeElement.name;
           if (ignoreIfNull && isNullable) {
             updateBodyBuffer.writeln(
-              'if ($accessString case final $fieldName?) target.$fieldName = $targetEnumName.values.byName($fieldName.name);',
+              'if ($accessString case final $fieldName?) {\n  target.$fieldName = $targetEnumName.values.byName($fieldName.name);\n}',
             );
           } else if (isNullable) {
             updateBodyBuffer.writeln(
@@ -113,7 +124,7 @@ class UpdateMethodBuilder {
         } else {
           if (ignoreIfNull && isNullable) {
             updateBodyBuffer.writeln(
-              'if ($accessString case final $fieldName?) target.$fieldName = $fieldName;',
+              'if ($accessString case final $fieldName?) {\n  target.$fieldName = $fieldName;\n}',
             );
           } else {
             updateBodyBuffer.writeln('target.$fieldName = $accessString;');

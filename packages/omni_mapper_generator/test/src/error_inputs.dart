@@ -43,3 +43,66 @@ abstract class AbstractMapperInvalid {
   @SubclassMapping(source: DummyModel, target: DummyTarget)
   DummyTarget toTarget(InvalidSubclassMappingSource source);
 }
+
+// --- Missing Injection Constructor Error ---
+class DependencyWithArgs {
+  final int id;
+  DependencyWithArgs(this.id);
+}
+
+class DependencyWithArgsTarget {
+  final int id;
+  DependencyWithArgsTarget(this.id);
+}
+
+@OmniMapper()
+class DependencyWithArgsMapper {
+  final int someArg;
+  DependencyWithArgsMapper(this.someArg);
+  DependencyWithArgsTarget toTarget(DependencyWithArgs model) =>
+      throw UnimplementedError();
+}
+
+class ParentSource {
+  final DependencyWithArgs child;
+  ParentSource(this.child);
+}
+
+class ParentTarget {
+  final DependencyWithArgsTarget child;
+  ParentTarget(this.child);
+}
+
+@ShouldThrow(
+  'The dependency DependencyWithArgsMapper requires arguments in its constructor. You must inject it via a field or getter.',
+)
+@OmniMapper(uses: [DependencyWithArgsMapper])
+abstract class MissingInjectionMapper {
+  ParentTarget toTarget(ParentSource model);
+}
+
+// --- Unparseable Annotation Value Error ---
+class UnparseableSource {
+  final String id;
+  UnparseableSource(this.id);
+}
+
+class UnparseableTarget {
+  final String id;
+  UnparseableTarget(this.id);
+}
+
+void someFunction() {}
+
+@ShouldThrow(
+  'Could not parse list item Type (String). Ensure it is a supported constant type.',
+  element: false,
+)
+@OmniMapper(
+  mappings: [
+    MappingRule('id', custom: [String]),
+  ],
+)
+abstract class UnparseableAnnotationMapper {
+  UnparseableTarget toTarget(UnparseableSource model);
+}

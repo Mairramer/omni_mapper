@@ -12,7 +12,7 @@ extension EntityModelToDto on EntityModel {
       id: userId,
       name: fullName,
       age: age,
-      status: "active",
+      status: 'active',
     );
   }
 

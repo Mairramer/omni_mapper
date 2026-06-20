@@ -7,12 +7,14 @@ part of 'multiple_sources.dart';
 // **************************************************************************
 
 class UserProfileMapperImpl extends UserProfileMapper {
+  UserProfileMapperImpl();
+
   @override
   UserProfile toProfile(
     User user,
     Address address,
   ) {
-    UserProfileHook().before(user);
+    const UserProfileHook().before(user);
     final target = UserProfile(
       id: user.id,
       name: user.name,
@@ -20,7 +22,7 @@ class UserProfileMapperImpl extends UserProfileMapper {
       city: address.city,
       zipCode: address.zipCode,
     );
-    UserProfileHook().after(user, target);
+    const UserProfileHook().after(user, target);
     return target;
   }
 }

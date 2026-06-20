@@ -28,6 +28,7 @@ class MappingBodyBuilder {
     Map<String, String> defaultValues = const {},
     Map<String, String> customMappings = const {},
     List<DartType> converters = const [],
+    List<DartType> uses = const [],
     bool strictMode = false,
     DartType? hookType,
   }) {
@@ -99,7 +100,7 @@ class MappingBodyBuilder {
             final nestedField = resolveNestedField(
               sClass,
               rest,
-              sourceVarNames[i] == 'this' ? 'this' : sourceVarNames[i],
+              sourceVarNames[i] == 'this' ? '' : sourceVarNames[i],
             );
             if (nestedField != null) {
               return ResolvedFieldInfo(
@@ -118,7 +119,7 @@ class MappingBodyBuilder {
           final nestedField = resolveNestedField(
             sClass,
             sourceFieldName,
-            varName == 'this' ? 'this' : varName,
+            varName == 'this' ? '' : varName,
           );
           if (nestedField != null) {
             return ResolvedFieldInfo(
@@ -147,7 +148,7 @@ class MappingBodyBuilder {
         final nestedField = resolveNestedField(
           sourceClasses[i],
           sourceFieldName,
-          sourceVarNames[i] == 'this' ? 'this' : sourceVarNames[i],
+          sourceVarNames[i] == 'this' ? '' : sourceVarNames[i],
         );
         if (nestedField != null) {
           nestedMatches.add(
@@ -192,7 +193,7 @@ class MappingBodyBuilder {
     // Before Hook
     if (hookName != null) {
       codeBuffer.writeln(
-        '$hookName().before(${sourceVarNames.first == 'this' ? 'this' : sourceVarNames.first});',
+        'const $hookName().before(${sourceVarNames.first == 'this' ? 'this' : sourceVarNames.first});',
       );
     }
 
@@ -257,9 +258,13 @@ class MappingBodyBuilder {
               sourceTypeElement != targetTypeElement) {
             for (final m in mapperClass.methods) {
               if (m.isAbstract && m.formalParameters.length == 1) {
-                if (m.returnType.element == targetTypeElement &&
-                    m.formalParameters.first.type.element ==
-                        sourceTypeElement) {
+                final retStr = m.returnType.getDisplayString();
+                final tgtStr = targetFieldType.getDisplayString();
+                final paramStr = m.formalParameters.first.type
+                    .getDisplayString();
+                final srcStr = sourceFieldType.getDisplayString();
+
+                if (retStr == tgtStr && paramStr == srcStr) {
                   nestedMapper = m;
                   break;
                 }
@@ -268,65 +273,267 @@ class MappingBodyBuilder {
           }
         }
 
+        String? usesInvocation;
+        final sTypeStr = sourceFieldType.getDisplayString();
+        final tTypeStr = targetFieldType.getDisplayString();
+
+        if (sTypeStr != tTypeStr &&
+            matchingConverter == null &&
+            nestedMapper == null) {
+          for (final useType in uses) {
+            final classElement = useType.element;
+            if (classElement is ClassElement) {
+              final isListMapping =
+                  sourceFieldType.isDartCoreList &&
+                  targetFieldType.isDartCoreList;
+
+              DartType expectedSource = sourceFieldType;
+              DartType expectedTarget = targetFieldType;
+
+              if (isListMapping &&
+                  sourceFieldType is ParameterizedType &&
+                  targetFieldType is ParameterizedType) {
+                expectedSource = (sourceFieldType).typeArguments.first;
+                expectedTarget = (targetFieldType).typeArguments.first;
+              }
+
+              MethodElement? matchingMethod;
+              for (final m in classElement.methods) {
+                if (!m.isStatic && m.formalParameters.length == 1) {
+                  final retStr = m.returnType.getDisplayString().replaceAll(
+                    '?',
+                    '',
+                  );
+                  final tgtStr = expectedTarget.getDisplayString().replaceAll(
+                    '?',
+                    '',
+                  );
+                  final paramStr = m.formalParameters.first.type
+                      .getDisplayString()
+                      .replaceAll('?', '');
+                  final srcStr = expectedSource.getDisplayString().replaceAll(
+                    '?',
+                    '',
+                  );
+
+                  if (retStr == tgtStr && paramStr == srcStr) {
+                    matchingMethod = m;
+                    break;
+                  }
+                }
+              }
+
+              if (matchingMethod != null) {
+                final callerName = classElement.isAbstract
+                    ? '${classElement.name}Impl'
+                    : classElement.name;
+                String caller = '$callerName()';
+
+                if (mapperClass != null) {
+                  String? injectedFieldName;
+                  for (final field in mapperClass.fields) {
+                    if (field.type.element == classElement) {
+                      injectedFieldName = field.name;
+                      break;
+                    }
+                  }
+                  if (injectedFieldName == null) {
+                    for (final getter in mapperClass.getters) {
+                      if (getter.returnType.element == classElement) {
+                        injectedFieldName = getter.name;
+                        break;
+                      }
+                    }
+                  }
+
+                  if (injectedFieldName != null) {
+                    caller = injectedFieldName;
+                  }
+                }
+
+                if (caller == '$callerName()') {
+                  bool hasZeroArgConstructor = false;
+                  for (final constructor in classElement.constructors) {
+                    if (constructor.name == null ||
+                        constructor.name!.isEmpty ||
+                        constructor.name == 'new') {
+                      if (constructor.formalParameters.every(
+                        (p) => p.isOptional,
+                      )) {
+                        hasZeroArgConstructor = true;
+                        break;
+                      }
+                    }
+                  }
+
+                  if (!hasZeroArgConstructor) {
+                    throw InvalidGenerationSourceError(
+                      'The dependency ${classElement.name} requires arguments in its constructor. You must inject it via a field or getter.',
+                      element: elementContext,
+                    );
+                  }
+                }
+
+                final isPathNullable =
+                    sourceFieldType.nullabilitySuffix ==
+                        NullabilitySuffix.question ||
+                    accessString.contains('?.');
+
+                if (isListMapping) {
+                  usesInvocation =
+                      '$accessString${isPathNullable ? '?' : ''}.map((e) => $caller.${matchingMethod.name}(e)).toList()';
+                } else {
+                  if (isPathNullable) {
+                    usesInvocation =
+                        '$accessString != null ? $caller.${matchingMethod.name}(($accessString)!) : null';
+                  } else {
+                    usesInvocation =
+                        '$caller.${matchingMethod.name}($accessString)';
+                  }
+                }
+
+                if (isPathNullable &&
+                    targetFieldType.nullabilitySuffix !=
+                        NullabilitySuffix.question) {
+                  final defaultValue = defaultValues[paramName];
+                  if (defaultValue != null) {
+                    if (isListMapping) {
+                      usesInvocation = '$usesInvocation ?? $defaultValue';
+                    } else {
+                      usesInvocation =
+                          '$accessString != null ? $caller.${matchingMethod.name}(($accessString)!) : $defaultValue';
+                    }
+                  } else {
+                    throw InvalidGenerationSourceError(
+                      'Nullability mismatch for field "$paramName": source path is nullable but target is not, and no default value is provided.',
+                      element: elementContext,
+                    );
+                  }
+                }
+                break;
+              }
+            }
+          }
+        }
+
         if (matchingConverter != null) {
           final converterName = matchingConverter.element?.name;
-          codeBuffer.writeln(
-            '$paramName: const $converterName().convert($accessString),',
-          );
+          if (param.isNamed) {
+            codeBuffer.writeln(
+              '$paramName: const $converterName().convert($accessString),',
+            );
+          } else {
+            codeBuffer.writeln(
+              'const $converterName().convert($accessString),',
+            );
+          }
         } else if (nestedMapper != null) {
-          codeBuffer.writeln(
-            '$paramName: $accessString != null ? ${nestedMapper.name}(($accessString)!) : null,',
-          );
+          if (param.isNamed) {
+            codeBuffer.writeln(
+              '$paramName: $accessString != null ? ${nestedMapper.name}(($accessString)!) : null,',
+            );
+          } else {
+            codeBuffer.writeln(
+              '$accessString != null ? ${nestedMapper.name}(($accessString)!) : null,',
+            );
+          }
+        } else if (usesInvocation != null) {
+          if (param.isNamed) {
+            codeBuffer.writeln('$paramName: $usesInvocation,');
+          } else {
+            codeBuffer.writeln('$usesInvocation,');
+          }
         } else {
-          if (mapperClass == null) {
-            final sourceTypeElement = sourceFieldType.element;
-            final targetTypeElement = param.type.element;
-            if (sourceTypeElement != null &&
-                targetTypeElement != null &&
-                sourceTypeElement != targetTypeElement) {
-              final isPathNullable =
-                  sourceFieldType.nullabilitySuffix ==
-                      NullabilitySuffix.question ||
-                  accessString.contains('?.');
+          final sourceTypeElement = sourceFieldType.element;
+          final targetTypeElement = param.type.element;
+          if (sourceTypeElement != null &&
+              targetTypeElement != null &&
+              sourceTypeElement != targetTypeElement) {
+            final isPathNullable =
+                sourceFieldType.nullabilitySuffix ==
+                    NullabilitySuffix.question ||
+                accessString.contains('?.');
 
-              // Automatic Enum Mapping
-              if (sourceTypeElement is EnumElement &&
-                  targetTypeElement is EnumElement) {
-                final targetEnumName = targetTypeElement.name;
-                if (isPathNullable) {
+            // Automatic Enum Mapping
+            if (sourceTypeElement is EnumElement &&
+                targetTypeElement is EnumElement) {
+              final targetEnumName = targetTypeElement.name;
+              if (isPathNullable) {
+                if (param.isNamed) {
                   codeBuffer.writeln(
                     '$paramName: $accessString != null ? $targetEnumName.values.byName(($accessString)!.name) : null,',
                   );
                 } else {
                   codeBuffer.writeln(
-                    '$paramName: $targetEnumName.values.byName($accessString.name),',
+                    '$accessString != null ? $targetEnumName.values.byName(($accessString)!.name) : null,',
                   );
                 }
-                assignedParams.add(paramName);
-                continue;
+              } else {
+                if (param.isNamed) {
+                  codeBuffer.writeln(
+                    '$paramName: $targetEnumName.values.byName($accessString.name),',
+                  );
+                } else {
+                  codeBuffer.writeln(
+                    '$targetEnumName.values.byName($accessString.name),',
+                  );
+                }
               }
+              assignedParams.add(paramName);
+              continue;
+            }
 
-              // Automatic Nested Mapping
-              if (sourceFieldType.isDartCoreList &&
-                  targetFieldType.isDartCoreList) {
-                // If it's a list, map it
+            // Automatic Nested Mapping
+            if (sourceFieldType.isDartCoreList &&
+                targetFieldType.isDartCoreList) {
+              // If it's a list, map it
+              if (param.isNamed) {
                 codeBuffer.writeln(
                   '$paramName: $accessString${isPathNullable ? '?' : ''}.map((e) => e.$extensionMethodName()).toList(),',
                 );
               } else {
                 codeBuffer.writeln(
-                  '$paramName: $accessString${isPathNullable ? '?' : ''}.$extensionMethodName(),',
+                  '$accessString${isPathNullable ? '?' : ''}.map((e) => e.$extensionMethodName()).toList(),',
                 );
               }
-              assignedParams.add(paramName);
-              continue;
+            } else {
+              if (param.isNamed) {
+                codeBuffer.writeln(
+                  '$paramName: $accessString${isPathNullable ? '?' : ''}.$extensionMethodName(),',
+                );
+              } else {
+                codeBuffer.writeln(
+                  '$accessString${isPathNullable ? '?' : ''}.$extensionMethodName(),',
+                );
+              }
+            }
+            assignedParams.add(paramName);
+            continue;
+          }
+
+          final isPathNullable =
+              sourceFieldType.nullabilitySuffix == NullabilitySuffix.question ||
+              accessString.contains('?.');
+          final targetNullable =
+              targetFieldType.nullabilitySuffix == NullabilitySuffix.question;
+
+          String finalAccess = accessString;
+          if (isPathNullable && !targetNullable) {
+            final defaultValue = defaultValues[paramName];
+            if (defaultValue != null) {
+              finalAccess = '$accessString ?? $defaultValue';
+            } else {
+              throw InvalidGenerationSourceError(
+                'Nullability mismatch for field "$paramName": source path is nullable but target is not, and no default value is provided.',
+                element: elementContext,
+              );
             }
           }
 
           if (param.isNamed) {
-            codeBuffer.writeln('$paramName: $accessString,');
+            codeBuffer.writeln('$paramName: $finalAccess,');
           } else {
-            codeBuffer.writeln('$accessString,');
+            codeBuffer.writeln('$finalAccess,');
           }
         }
         assignedParams.add(paramName);
@@ -378,7 +585,7 @@ class MappingBodyBuilder {
     // After Hook
     if (hookName != null) {
       codeBuffer.writeln(
-        '$hookName().after(${sourceVarNames.first == 'this' ? 'this' : sourceVarNames.first}, target);',
+        'const $hookName().after(${sourceVarNames.first == 'this' ? 'this' : sourceVarNames.first}, target);',
       );
     }
 

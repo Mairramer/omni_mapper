@@ -9,8 +9,8 @@ part of 'subclass_mapping.dart';
 extension VehicleToEntity on Vehicle {
   VehicleDto toEntity() {
     return switch (this) {
-      Car s => s.toCarDto(),
-      Motorcycle s => s.toMotorcycleDto(),
+      final Car s => s.toCarDto(),
+      final Motorcycle s => s.toMotorcycleDto(),
       _ => VehicleDto(
         wheels: wheels,
       ),
@@ -61,11 +61,13 @@ extension MotorcycleToMotorcycleDtoList on Iterable<Motorcycle> {
 }
 
 class VehicleMapperImpl extends VehicleMapper {
+  VehicleMapperImpl();
+
   @override
   VehicleDto toDto(Vehicle vehicle) {
     return switch (vehicle) {
-      Car s => carToDto(s),
-      Motorcycle s => motorcycleToDto(s),
+      final Car s => carToDto(s),
+      final Motorcycle s => motorcycleToDto(s),
       _ => VehicleDto(
         wheels: vehicle.wheels,
       ),

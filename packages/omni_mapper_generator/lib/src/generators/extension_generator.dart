@@ -72,6 +72,7 @@ class ExtensionGenerator {
       defaultValues: config.defaultValues,
       customMappings: config.customMappings,
       converters: config.converters,
+      uses: config.uses,
       strictMode: config.strictMode,
       hookType: config.hookType,
     );
@@ -154,6 +155,7 @@ class ExtensionGenerator {
         customMappings:
             {}, // Reverse mappings don't automatically mirror custom mappings
         converters: config.converters,
+        uses: config.uses,
         strictMode: config.strictMode,
       );
 

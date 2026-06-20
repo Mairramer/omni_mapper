@@ -90,9 +90,10 @@ To make OmniMapper the ultimate solution for the Dart/Flutter ecosystem (similar
 - [x] **Full Freezed/BuiltValue Compatibility:** Flawless support for Factory Constructors.
 - [ ] **Context Passing (`@Context`):** Pass dependencies/state down the mapping tree.
 - [x] **Polymorphic Mapping:** Handle subclasses and inheritance dynamically (`@SubclassMapping`).
-- [ ] **Utilizing other Mappers:** Reference existing injectable mappers (`uses: [OtherMapper]`).
+- [x] **Utilizing other Mappers:** Reference existing injectable mappers (`uses: [OtherMapper]`).
 - [ ] **Collection Update Strategies:** Option to `clear()` and `addAll()` instead of replacing the list reference.
 - [x] **Custom Field Expressions:** Pure Dart code passed as a string for extreme flexibility.
+- [ ] **`@MapFrom` Annotation:** A dedicated annotation for renaming fields to simplify the `fieldMaps` approach.
 
 ## Contributing
 

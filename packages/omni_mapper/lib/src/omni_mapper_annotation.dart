@@ -89,7 +89,7 @@ class OmniMapper {
   ///
   ///  * [MappingRule.defaultValue], which provides an alternative way to specify
   ///    default values.
-  final Map<String, String> defaultValues;
+  final Map<String, Object?> defaultValues;
 
   /// A list of [OmniConverter] types used to handle type mismatches.
   ///
@@ -147,6 +147,12 @@ class OmniMapper {
   /// runtime type of the source object.
   final List<SubclassMapping> subclasses;
 
+  /// A list of other mapper classes to use for mapping complex nested fields.
+  ///
+  /// This instructs the generator to invoke methods from the specified mappers
+  /// when encountering a type mismatch that is handled by one of those mappers.
+  final List<Type> uses;
+
   const OmniMapper({
     this.target,
     this.from,
@@ -164,6 +170,7 @@ class OmniMapper {
     this.reverseMethodName = '',
     this.mappings = const [],
     this.subclasses = const [],
+    this.uses = const [],
   }) : assert(
          !(target != null && from != null),
          'You cannot specify both `target` and `from` in the same annotation. Use multiple @OmniMapper annotations instead.',

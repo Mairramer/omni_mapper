@@ -16,9 +16,15 @@ extension PatchUserModelToEntity on PatchUserModel {
   }
 
   void updatePatchUserEntity(PatchUserEntity target) {
-    if (this.id case final id?) target.id = id;
-    if (this.name case final name?) target.name = name;
-    if (this.bio case final bio?) target.bio = bio;
+    if (id case final id?) {
+      target.id = id;
+    }
+    if (name case final name?) {
+      target.name = name;
+    }
+    if (bio case final bio?) {
+      target.bio = bio;
+    }
   }
 }
 

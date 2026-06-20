@@ -13,9 +13,9 @@ class SwitchBuilder {
     switchBuffer.writeln('return switch ($sourceVarName) {');
     for (final entry in subclasses.entries) {
       if (isExtension) {
-        switchBuffer.writeln('  ${entry.key} s => s.${entry.value}(),');
+        switchBuffer.writeln('  final ${entry.key} s => s.${entry.value}(),');
       } else {
-        switchBuffer.writeln('  ${entry.key} s => ${entry.value}(s),');
+        switchBuffer.writeln('  final ${entry.key} s => ${entry.value}(s),');
       }
     }
 

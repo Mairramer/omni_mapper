@@ -9,13 +9,13 @@ part of 'auto_flattening.dart';
 extension FlattenModelToEntity on FlattenModel {
   FlattenTarget toEntity() {
     return FlattenTarget(
-      userAddressCityName: this.userAddress?.city?.name,
-      profileSettingsThemeId: this.profile.settings.theme?.id,
-    )..profileSettingsThemeMode = this.profile.settings.theme?.mode;
+      userAddressCityName: userAddress?.city?.name,
+      profileSettingsThemeId: profile.settings.theme?.id,
+    )..profileSettingsThemeMode = profile.settings.theme?.mode;
   }
 
   void updateFlattenTarget(FlattenTarget target) {
-    target.profileSettingsThemeMode = this.profile.settings.theme?.mode;
+    target.profileSettingsThemeMode = profile.settings.theme?.mode;
   }
 }
 

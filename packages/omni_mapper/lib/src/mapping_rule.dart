@@ -36,7 +36,7 @@ class MappingRule {
   /// When generating a centralized abstract mapper or handling multiple sources,
   /// you must prefix the expression with the parameter name, such as
   /// `'user.firstName'`.
-  final String? custom;
+  final Object? custom;
 
   /// Whether to entirely ignore this field during mapping.
   ///
@@ -49,7 +49,7 @@ class MappingRule {
   ///
   /// The value must be a valid Dart expression represented as a string. For
   /// example, `'"default_string"'`, `'true'`, or `'const []'`.
-  final String? defaultValue;
+  final Object? defaultValue;
 
   const MappingRule(
     this.target, {
