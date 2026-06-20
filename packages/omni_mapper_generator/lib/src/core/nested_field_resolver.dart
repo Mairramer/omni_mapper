@@ -27,8 +27,9 @@ ResolvedNestedField? resolveNestedField(
     final fieldName = field.name!;
 
     if (fieldName == targetName) {
-      final access =
-          '$currentAccess${needsQuestionMark ? '?.' : '.'}$fieldName';
+      final access = currentAccess.isEmpty
+          ? fieldName
+          : '$currentAccess${needsQuestionMark ? '?.' : '.'}$fieldName';
       return ResolvedNestedField(access, field.returnType);
     }
 
@@ -42,8 +43,9 @@ ResolvedNestedField? resolveNestedField(
         if (fieldTypeElement is ClassElement) {
           final isFieldNullable =
               field.returnType.nullabilitySuffix == NullabilitySuffix.question;
-          final access =
-              '$currentAccess${needsQuestionMark ? '?.' : '.'}$fieldName';
+          final access = currentAccess.isEmpty
+              ? fieldName
+              : '$currentAccess${needsQuestionMark ? '?.' : '.'}$fieldName';
 
           final result = resolveNestedField(
             fieldTypeElement,
@@ -68,8 +70,9 @@ ResolvedNestedField? resolveNestedField(
         if (fieldTypeElement is ClassElement) {
           final isFieldNullable =
               field.returnType.nullabilitySuffix == NullabilitySuffix.question;
-          final access =
-              '$currentAccess${needsQuestionMark ? '?.' : '.'}$fieldName';
+          final access = currentAccess.isEmpty
+              ? fieldName
+              : '$currentAccess${needsQuestionMark ? '?.' : '.'}$fieldName';
 
           final result = resolveNestedField(
             fieldTypeElement,

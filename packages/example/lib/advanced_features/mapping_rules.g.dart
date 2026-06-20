@@ -9,9 +9,9 @@ part of 'mapping_rules.dart';
 extension ModelRuleToTargetRule on ModelRule {
   TargetRule toTargetRule() {
     return TargetRule(
-      fullName: firstName + " " + lastName,
+      fullName: '$firstName $lastName',
       id: userId,
-      status: "active",
+      status: 'active',
     );
   }
 

@@ -35,12 +35,14 @@ class AbstractClassGenerator {
         c.constructors.add(
           Constructor((cb) {
             final cName = constructor.name;
-            cb.name = (cName == null || cName.isEmpty) ? null : cName;
+            cb.name = (cName == null || cName.isEmpty || cName == 'new')
+                ? null
+                : cName;
             for (final param in constructor.formalParameters) {
               final parameterBuilder = Parameter((pb) {
                 pb
                   ..name = param.name ?? ''
-                  ..type = refer(param.type.getDisplayString())
+                  ..toSuper = true
                   ..named = param.isNamed
                   ..required = param.isRequiredNamed;
                 if (param.hasDefaultValue && param.defaultValueCode != null) {
@@ -53,18 +55,6 @@ class AbstractClassGenerator {
                 cb.requiredParameters.add(parameterBuilder);
               }
             }
-            final positionalArgs = constructor.formalParameters
-                .where((p) => p.isPositional)
-                .map((p) => refer(p.name!));
-            final namedArgs = <String, Expression>{
-              for (var p in constructor.formalParameters.where(
-                (p) => p.isNamed && p.name != null && p.name!.isNotEmpty,
-              ))
-                p.name!: refer(p.name!),
-            };
-            cb.initializers.add(
-              refer('super').call(positionalArgs, namedArgs).code,
-            );
           }),
         );
       }

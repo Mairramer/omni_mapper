@@ -100,7 +100,7 @@ class MappingBodyBuilder {
             final nestedField = resolveNestedField(
               sClass,
               rest,
-              sourceVarNames[i] == 'this' ? 'this' : sourceVarNames[i],
+              sourceVarNames[i] == 'this' ? '' : sourceVarNames[i],
             );
             if (nestedField != null) {
               return ResolvedFieldInfo(
@@ -119,7 +119,7 @@ class MappingBodyBuilder {
           final nestedField = resolveNestedField(
             sClass,
             sourceFieldName,
-            varName == 'this' ? 'this' : varName,
+            varName == 'this' ? '' : varName,
           );
           if (nestedField != null) {
             return ResolvedFieldInfo(
@@ -148,7 +148,7 @@ class MappingBodyBuilder {
         final nestedField = resolveNestedField(
           sourceClasses[i],
           sourceFieldName,
-          sourceVarNames[i] == 'this' ? 'this' : sourceVarNames[i],
+          sourceVarNames[i] == 'this' ? '' : sourceVarNames[i],
         );
         if (nestedField != null) {
           nestedMatches.add(
@@ -193,7 +193,7 @@ class MappingBodyBuilder {
     // Before Hook
     if (hookName != null) {
       codeBuffer.writeln(
-        '$hookName().before(${sourceVarNames.first == 'this' ? 'this' : sourceVarNames.first});',
+        'const $hookName().before(${sourceVarNames.first == 'this' ? 'this' : sourceVarNames.first});',
       );
     }
 
@@ -323,7 +323,7 @@ class MappingBodyBuilder {
                   }
 
                   if (injectedFieldName != null) {
-                    caller = 'this.$injectedFieldName';
+                    caller = injectedFieldName;
                   }
                 }
 
@@ -500,7 +500,7 @@ class MappingBodyBuilder {
     // After Hook
     if (hookName != null) {
       codeBuffer.writeln(
-        '$hookName().after(${sourceVarNames.first == 'this' ? 'this' : sourceVarNames.first}, target);',
+        'const $hookName().after(${sourceVarNames.first == 'this' ? 'this' : sourceVarNames.first}, target);',
       );
     }
 

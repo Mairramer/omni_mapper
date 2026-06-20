@@ -7,7 +7,7 @@ part of 'other_mappers_example.dart';
 // **************************************************************************
 
 class AddressMapperImpl extends AddressMapper {
-  AddressMapperImpl.new() : super();
+  AddressMapperImpl();
 
   @override
   AddressEntity toEntity(AddressModel model) {
@@ -27,14 +27,14 @@ class AddressMapperImpl extends AddressMapper {
 }
 
 class UserMapperImpl extends UserMapper {
-  UserMapperImpl.new(AddressMapper addressMapper) : super(addressMapper);
+  UserMapperImpl(super.addressMapper);
 
   @override
   UserEntity toEntity(UserModel model) {
     return UserEntity(
       model.name,
-      this.addressMapper.toEntity(model.address),
-      model.pastAddresses.map((e) => this.addressMapper.toEntity(e)).toList(),
+      addressMapper.toEntity(model.address),
+      model.pastAddresses.map((e) => addressMapper.toEntity(e)).toList(),
     );
   }
 
@@ -42,8 +42,8 @@ class UserMapperImpl extends UserMapper {
   UserModel toModel(UserEntity entity) {
     return UserModel(
       entity.name,
-      this.addressMapper.toModel(entity.address),
-      entity.pastAddresses.map((e) => this.addressMapper.toModel(e)).toList(),
+      addressMapper.toModel(entity.address),
+      entity.pastAddresses.map((e) => addressMapper.toModel(e)).toList(),
     );
   }
 }

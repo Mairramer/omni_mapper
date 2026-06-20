@@ -16,9 +16,9 @@ extension FormModelToEntity on FormModel {
   }
 
   void updateMutableEntity(MutableEntity target) {
-    target.id = this.id;
-    target.name = this.name;
-    target.isActive = this.isActive;
+    target.id = id;
+    target.name = name;
+    target.isActive = isActive;
   }
 }
 

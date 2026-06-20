@@ -24,13 +24,13 @@ extension ContactDtoToEntityList on Iterable<ContactDto> {
 }
 
 class PaymentMethodMapperImpl extends PaymentMethodMapper {
-  PaymentMethodMapperImpl.new() : super();
+  PaymentMethodMapperImpl();
 
   @override
   PaymentMethodEntity toEntity(PaymentMethodDto dto) {
     return switch (dto) {
-      CreditCardDto s => ccToEntity(s),
-      PayPalDto s => ppToEntity(s),
+      final CreditCardDto s => ccToEntity(s),
+      final PayPalDto s => ppToEntity(s),
       _ => throw UnsupportedError(
         'Cannot instantiate abstract class PaymentMethodEntity. Did you forget to map all subclasses?',
       ),
@@ -55,7 +55,7 @@ class PaymentMethodMapperImpl extends PaymentMethodMapper {
 }
 
 class UserMapperImpl extends UserMapper {
-  UserMapperImpl.new(PaymentMethodMapper paymentMapper) : super(paymentMapper);
+  UserMapperImpl(super.paymentMapper);
 
   @override
   UserEntity toEntity(UserDto dto) {
@@ -63,13 +63,13 @@ class UserMapperImpl extends UserMapper {
       dto.username,
       const AccountStatusConverter().convert(dto.status),
       dto.contact.toEntity(),
-      dto.paymentMethods.map((e) => this.paymentMapper.toEntity(e)).toList(),
+      dto.paymentMethods.map((e) => paymentMapper.toEntity(e)).toList(),
     );
   }
 }
 
 class UserProfileMapperImpl extends UserProfileMapper {
-  UserProfileMapperImpl.new() : super();
+  UserProfileMapperImpl();
 
   @override
   UserProfileDocument toDocument(

@@ -34,7 +34,7 @@ class StringDateTimeConverter extends OmniConverter<DateTime, String> {
   OmniMapper(
     target: AdvancedEntity,
     fieldMaps: {'userId': 'id'},
-    defaultValues: {'status': '"active"'},
+    defaultValues: {'status': "'active'"},
     converters: [DateTimeStringConverter],
   ),
   OmniMapper(
