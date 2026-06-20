@@ -151,3 +151,151 @@ class UserMapperConcreteFallbackImpl extends UserMapperConcreteFallback {
 abstract class UserMapperConcreteFallback {
   UserEntity toEntity(UserModel model);
 }
+
+// --- Test 5: Generic wrapper in uses ---
+class Wrapper<T> {
+  final T value;
+  Wrapper(this.value);
+}
+
+class WrapperMapper<T, U> {
+  Wrapper<U> toWrapper(Wrapper<T> source, U Function(T) mapper) {
+    return Wrapper(mapper(source.value));
+  }
+}
+
+// Wait, the uses resolver looks for methods with 1 parameter!
+// Let's make concrete generic mappers that take 1 parameter.
+class IntToStringWrapperMapper {
+  Wrapper<String> toWrapper(Wrapper<int> source) {
+    return Wrapper(source.value.toString());
+  }
+}
+
+class DoubleToBoolWrapperMapper {
+  Wrapper<bool> toWrapper(Wrapper<double> source) {
+    return Wrapper(source.value > 0);
+  }
+}
+
+class GenericSourceModel {
+  final Wrapper<int> intWrapper;
+  final Wrapper<double> doubleWrapper;
+  GenericSourceModel(this.intWrapper, this.doubleWrapper);
+}
+
+class GenericTargetModel {
+  final Wrapper<String> intWrapper;
+  final Wrapper<bool> doubleWrapper;
+  GenericTargetModel(this.intWrapper, this.doubleWrapper);
+}
+
+class GenericMapperImpl extends GenericMapper {
+  GenericMapperImpl(super.intMapper, super.doubleMapper);
+
+  @override
+  GenericTargetModel toTarget(GenericSourceModel model) {
+    return GenericTargetModel(
+      intMapper.toWrapper(model.intWrapper),
+      doubleMapper.toWrapper(model.doubleWrapper),
+    );
+  }
+}
+
+@ShouldGenerate(r'''
+class GenericMapperImpl extends GenericMapper {
+  GenericMapperImpl(super.intMapper, super.doubleMapper);
+
+  @override
+  GenericTargetModel toTarget(GenericSourceModel model) {
+    return GenericTargetModel(
+      intMapper.toWrapper(model.intWrapper),
+      doubleMapper.toWrapper(model.doubleWrapper),
+    );
+  }
+}
+''')
+@OmniMapper(uses: [IntToStringWrapperMapper, DoubleToBoolWrapperMapper])
+abstract class GenericMapper {
+  final IntToStringWrapperMapper intMapper;
+  final DoubleToBoolWrapperMapper doubleMapper;
+
+  GenericMapper(this.intMapper, this.doubleMapper);
+
+  GenericTargetModel toTarget(GenericSourceModel model);
+}
+
+// --- Test 6: Uses with nullable source and default value ---
+class ConcreteNullableMapper {
+  String toEntity(String source) => 'Mapped $source';
+}
+
+class UsesNullableSourceModel {
+  final String? optionalString;
+  UsesNullableSourceModel(this.optionalString);
+}
+
+class UsesNonNullableTargetModel {
+  final String optionalString;
+  UsesNonNullableTargetModel(this.optionalString);
+}
+
+@ShouldGenerate(r'''
+class UsesNullableMapperImpl extends UsesNullableMapper {
+  UsesNullableMapperImpl();
+
+  @override
+  UsesNonNullableTargetModel toTarget(UsesNullableSourceModel model) {
+    return UsesNonNullableTargetModel(
+      model.optionalString != null
+          ? ConcreteNullableMapper().toEntity((model.optionalString)!)
+          : 'default',
+    );
+  }
+}
+''')
+@OmniMapper(
+  uses: [ConcreteNullableMapper],
+  defaultValues: {'optionalString': 'default'}
+)
+abstract class UsesNullableMapper {
+  UsesNonNullableTargetModel toTarget(UsesNullableSourceModel model);
+}
+
+// --- Test 7: Uses with nullable source list and default value ---
+class ConcreteListNullableMapper {
+  String toEntity(String source) => 'Mapped $source';
+}
+
+class UsesNullableListSourceModel {
+  final List<String>? optionalList;
+  UsesNullableListSourceModel(this.optionalList);
+}
+
+class UsesNonNullableListTargetModel {
+  final List<String> optionalList;
+  UsesNonNullableListTargetModel(this.optionalList);
+}
+
+@ShouldGenerate(r'''
+class UsesNullableListMapperImpl extends UsesNullableListMapper {
+  UsesNullableListMapperImpl();
+
+  @override
+  UsesNonNullableListTargetModel toTarget(UsesNullableListSourceModel model) {
+    return UsesNonNullableListTargetModel(
+      model.optionalList
+              ?.map((e) => ConcreteListNullableMapper().toEntity(e))
+              .toList() ??
+          const [],
+    );
+  }
+}
+''')
+@OmniMapper(
+  uses: [ConcreteListNullableMapper],
+  defaultValues: {'optionalList': []}
+)
+abstract class UsesNullableListMapper {
+  UsesNonNullableListTargetModel toTarget(UsesNullableListSourceModel model);
+}

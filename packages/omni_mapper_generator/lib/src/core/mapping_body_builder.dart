@@ -258,9 +258,12 @@ class MappingBodyBuilder {
               sourceTypeElement != targetTypeElement) {
             for (final m in mapperClass.methods) {
               if (m.isAbstract && m.formalParameters.length == 1) {
-                if (m.returnType.element == targetTypeElement &&
-                    m.formalParameters.first.type.element ==
-                        sourceTypeElement) {
+                final retStr = m.returnType.getDisplayString(withNullability: false);
+                final tgtStr = targetFieldType.getDisplayString(withNullability: false);
+                final paramStr = m.formalParameters.first.type.getDisplayString(withNullability: false);
+                final srcStr = sourceFieldType.getDisplayString(withNullability: false);
+
+                if (retStr == tgtStr && paramStr == srcStr) {
                   nestedMapper = m;
                   break;
                 }
@@ -293,9 +296,12 @@ class MappingBodyBuilder {
               MethodElement? matchingMethod;
               for (final m in classElement.methods) {
                 if (!m.isStatic && m.formalParameters.length == 1) {
-                  if (m.returnType.element == expectedTarget.element &&
-                      m.formalParameters.first.type.element ==
-                          expectedSource.element) {
+                  final retStr = m.returnType.getDisplayString(withNullability: false);
+                  final tgtStr = expectedTarget.getDisplayString(withNullability: false);
+                  final paramStr = m.formalParameters.first.type.getDisplayString(withNullability: false);
+                  final srcStr = expectedSource.getDisplayString(withNullability: false);
+
+                  if (retStr == tgtStr && paramStr == srcStr) {
                     matchingMethod = m;
                     break;
                   }
@@ -345,6 +351,25 @@ class MappingBodyBuilder {
                   } else {
                     usesInvocation =
                         '$caller.${matchingMethod.name}($accessString)';
+                  }
+                }
+
+                if (isPathNullable &&
+                    targetFieldType.nullabilitySuffix !=
+                        NullabilitySuffix.question) {
+                  final defaultValue = defaultValues[paramName];
+                  if (defaultValue != null) {
+                    if (isListMapping) {
+                      usesInvocation = '$usesInvocation ?? $defaultValue';
+                    } else {
+                      usesInvocation =
+                          '$accessString != null ? $caller.${matchingMethod.name}(($accessString)!) : $defaultValue';
+                    }
+                  } else {
+                    throw InvalidGenerationSourceError(
+                      'Nullability mismatch for field "$paramName": source path is nullable but target is not, and no default value is provided.',
+                      element: elementContext,
+                    );
                   }
                 }
                 break;
