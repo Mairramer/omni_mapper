@@ -40,14 +40,14 @@ abstract class AddressMapper {
 
 @ShouldGenerate(r'''
 class UserMapperDIImpl extends UserMapperDI {
-  UserMapperDIImpl.new(AddressMapper addressMapper) : super(addressMapper);
+  UserMapperDIImpl(super.addressMapper);
 
   @override
   UserEntity toEntity(UserModel model) {
     return UserEntity(
       model.name,
-      this.addressMapper.toEntity(model.address),
-      model.pastAddresses.map((e) => this.addressMapper.toEntity(e)).toList(),
+      addressMapper.toEntity(model.address),
+      model.pastAddresses.map((e) => addressMapper.toEntity(e)).toList(),
     );
   }
 }
@@ -64,7 +64,7 @@ abstract class UserMapperDI {
 
 @ShouldGenerate(r'''
 class UserMapperFallbackImpl extends UserMapperFallback {
-  UserMapperFallbackImpl.new() : super();
+  UserMapperFallbackImpl();
 
   @override
   UserEntity toEntity(UserModel model) {

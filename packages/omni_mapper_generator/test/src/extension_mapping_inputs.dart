@@ -73,8 +73,8 @@ extension ModelEToMutableEntityE on ModelE {
   }
 
   void updateMutableEntityE(MutableEntityE target) {
-    target.id = this.id;
-    target.name = this.name;
+    target.id = id;
+    target.name = name;
   }
 }
 
