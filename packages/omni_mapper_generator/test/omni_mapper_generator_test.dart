@@ -11,6 +11,7 @@ Future<void> main() async {
     'strict_mode_inputs.dart',
     'error_inputs.dart',
     'uses_inputs.dart',
+    'default_values_inputs.dart',
   ];
 
   for (final file in testFiles) {

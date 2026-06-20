@@ -89,7 +89,7 @@ class OmniMapper {
   ///
   ///  * [MappingRule.defaultValue], which provides an alternative way to specify
   ///    default values.
-  final Map<String, String> defaultValues;
+  final Map<String, Object?> defaultValues;
 
   /// A list of [OmniConverter] types used to handle type mismatches.
   ///

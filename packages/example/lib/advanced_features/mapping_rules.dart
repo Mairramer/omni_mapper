@@ -22,7 +22,7 @@ class TargetRule {
   mappings: [
     MappingRule('fullName', custom: r"'$firstName $lastName'"),
     MappingRule('id', source: 'userId'),
-    MappingRule('status', defaultValue: "'active'"),
+    MappingRule('status', defaultValue: 'active'),
     MappingRule('ignoredField', ignore: true),
   ],
 )
