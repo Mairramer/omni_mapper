@@ -1,3 +1,10 @@
+## 0.4.0
+
+- **Feat**: Introduced the `uses` property to `@OmniMapper` for robust dependency injection and nested mapper integration.
+- **Feat**: Added support for polymorphic subclass mapping via `@SubclassMapping`.
+- **Feat**: Implemented `MappingRule` custom field expressions.
+- **Feat**: Supported evaluating literal default values during code generation.
+
 ## 0.3.0
 
 - **Feat**: Support for mapping from multiple source objects into a single target.

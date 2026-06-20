@@ -1,3 +1,13 @@
+## 0.4.0
+
+- **Feat**: Code generation logic for the new `uses` property (dependency injection).
+- **Feat**: Code generation for polymorphic subclass mapping (`@SubclassMapping`).
+- **Feat**: Support for evaluating literal default values in `defaultValues`.
+- **Fix**: Correctly invoke named constructors (e.g., `super.named()`) when using `uses` instead of the unnamed constructor.
+- **Fix**: Fixed target field shadowing issue when mapping nested fields (`target.name`).
+- **Fix**: Replaced silent null returns with `InvalidGenerationSourceError` during unparseable annotation elements.
+- **Fix**: Added validation to throw an error when a fallback dependency requires constructor arguments without explicit injection.
+
 ## 0.3.0
 
 - **Feat**: Code generation support for multiple sources in mapper methods.
