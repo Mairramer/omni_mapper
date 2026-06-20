@@ -38,21 +38,29 @@ class AnnotationParser {
       }
     }
     if (reader.isList) {
-      final items = reader.listValue.map(_parseValue).where((e) => e != null);
+      final items = reader.listValue.map((e) {
+        final parsed = _parseValue(e);
+        if (parsed == null) {
+          throw InvalidGenerationSourceError(
+            'Could not parse list item $e. Ensure it is a supported constant type.',
+          );
+        }
+        return parsed;
+      });
       return 'const [${items.join(', ')}]';
     }
 
     if (reader.isMap) {
-      final entries = reader.mapValue.entries
-          .map((e) {
-            final key = _parseValue(e.key);
-            final value = _parseValue(e.value);
-            if (key == null || value == null) {
-              return null;
-            }
-            return '$key: $value';
-          })
-          .where((e) => e != null);
+      final entries = reader.mapValue.entries.map((e) {
+        final key = _parseValue(e.key);
+        final value = _parseValue(e.value);
+        if (key == null || value == null) {
+          throw InvalidGenerationSourceError(
+            'Could not parse map entry key or value. Key: ${e.key}, Value: ${e.value}. Ensure they are supported constant types.',
+          );
+        }
+        return '$key: $value';
+      });
       return 'const {${entries.join(', ')}}';
     }
 
@@ -64,12 +72,27 @@ class AnnotationParser {
         final constructorName = accessor.isNotEmpty ? '.$accessor' : '';
 
         final positional = revived.positionalArguments
-            .map(_parseValue)
-            .where((e) => e != null)
+            .map((e) {
+              final parsed = _parseValue(e);
+              if (parsed == null) {
+                throw InvalidGenerationSourceError(
+                  'Could not parse positional argument $e for $className. Ensure it is a supported constant type.',
+                );
+              }
+              return parsed;
+            })
             .join(', ');
 
         final named = revived.namedArguments.entries
-            .map((e) => '${e.key}: ${_parseValue(e.value)}')
+            .map((e) {
+              final parsed = _parseValue(e.value);
+              if (parsed == null) {
+                throw InvalidGenerationSourceError(
+                  'Could not parse named argument ${e.key}: ${e.value} for $className. Ensure it is a supported constant type.',
+                );
+              }
+              return '${e.key}: $parsed';
+            })
             .join(', ');
 
         final args = [

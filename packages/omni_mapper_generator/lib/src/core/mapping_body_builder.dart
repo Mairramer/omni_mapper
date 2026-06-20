@@ -354,8 +354,12 @@ class MappingBodyBuilder {
                 if (caller == '$callerName()') {
                   bool hasZeroArgConstructor = false;
                   for (final constructor in classElement.constructors) {
-                    if (constructor.name == null || constructor.name!.isEmpty || constructor.name == 'new') {
-                      if (constructor.formalParameters.every((p) => p.isOptional)) {
+                    if (constructor.name == null ||
+                        constructor.name!.isEmpty ||
+                        constructor.name == 'new') {
+                      if (constructor.formalParameters.every(
+                        (p) => p.isOptional,
+                      )) {
                         hasZeroArgConstructor = true;
                         break;
                       }

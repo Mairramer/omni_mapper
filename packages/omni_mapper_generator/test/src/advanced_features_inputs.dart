@@ -518,8 +518,6 @@ class NestedTargetShadowModel {
   NestedTargetShadowModel(this.val);
 }
 
-
-
 class TargetShadowTarget {
   String val;
   TargetShadowTarget(this.val);

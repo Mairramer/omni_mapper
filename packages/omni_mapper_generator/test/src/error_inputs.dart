@@ -59,7 +59,8 @@ class DependencyWithArgsTarget {
 class DependencyWithArgsMapper {
   final int someArg;
   DependencyWithArgsMapper(this.someArg);
-  DependencyWithArgsTarget toTarget(DependencyWithArgs model) => throw UnimplementedError();
+  DependencyWithArgsTarget toTarget(DependencyWithArgs model) =>
+      throw UnimplementedError();
 }
 
 class ParentSource {
@@ -78,4 +79,30 @@ class ParentTarget {
 @OmniMapper(uses: [DependencyWithArgsMapper])
 abstract class MissingInjectionMapper {
   ParentTarget toTarget(ParentSource model);
+}
+
+// --- Unparseable Annotation Value Error ---
+class UnparseableSource {
+  final String id;
+  UnparseableSource(this.id);
+}
+
+class UnparseableTarget {
+  final String id;
+  UnparseableTarget(this.id);
+}
+
+void someFunction() {}
+
+@ShouldThrow(
+  'Could not parse list item Type (String). Ensure it is a supported constant type.',
+  element: false,
+)
+@OmniMapper(
+  mappings: [
+    MappingRule('id', custom: [String]),
+  ],
+)
+abstract class UnparseableAnnotationMapper {
+  UnparseableTarget toTarget(UnparseableSource model);
 }
