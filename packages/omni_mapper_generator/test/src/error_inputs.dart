@@ -43,3 +43,39 @@ abstract class AbstractMapperInvalid {
   @SubclassMapping(source: DummyModel, target: DummyTarget)
   DummyTarget toTarget(InvalidSubclassMappingSource source);
 }
+
+// --- Missing Injection Constructor Error ---
+class DependencyWithArgs {
+  final int id;
+  DependencyWithArgs(this.id);
+}
+
+class DependencyWithArgsTarget {
+  final int id;
+  DependencyWithArgsTarget(this.id);
+}
+
+@OmniMapper()
+class DependencyWithArgsMapper {
+  final int someArg;
+  DependencyWithArgsMapper(this.someArg);
+  DependencyWithArgsTarget toTarget(DependencyWithArgs model) => throw UnimplementedError();
+}
+
+class ParentSource {
+  final DependencyWithArgs child;
+  ParentSource(this.child);
+}
+
+class ParentTarget {
+  final DependencyWithArgsTarget child;
+  ParentTarget(this.child);
+}
+
+@ShouldThrow(
+  'The dependency DependencyWithArgsMapper requires arguments in its constructor. You must inject it via a field or getter.',
+)
+@OmniMapper(uses: [DependencyWithArgsMapper])
+abstract class MissingInjectionMapper {
+  ParentTarget toTarget(ParentSource model);
+}

@@ -351,6 +351,25 @@ class MappingBodyBuilder {
                   }
                 }
 
+                if (caller == '$callerName()') {
+                  bool hasZeroArgConstructor = false;
+                  for (final constructor in classElement.constructors) {
+                    if (constructor.name == null || constructor.name!.isEmpty || constructor.name == 'new') {
+                      if (constructor.formalParameters.every((p) => p.isOptional)) {
+                        hasZeroArgConstructor = true;
+                        break;
+                      }
+                    }
+                  }
+
+                  if (!hasZeroArgConstructor) {
+                    throw InvalidGenerationSourceError(
+                      'The dependency ${classElement.name} requires arguments in its constructor. You must inject it via a field or getter.',
+                      element: elementContext,
+                    );
+                  }
+                }
+
                 final isPathNullable =
                     sourceFieldType.nullabilitySuffix ==
                         NullabilitySuffix.question ||
