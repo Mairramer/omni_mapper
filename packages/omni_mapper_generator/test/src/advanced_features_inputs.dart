@@ -511,3 +511,44 @@ class DummyModel {
   final int id;
   DummyModel(this.id);
 }
+
+// --- Nested Target Shadowing Update Method Test ---
+class NestedTargetShadowModel {
+  final String val;
+  NestedTargetShadowModel(this.val);
+}
+
+
+
+class TargetShadowTarget {
+  String val;
+  TargetShadowTarget(this.val);
+}
+
+@ShouldGenerate(r'''
+extension TargetShadowSourceToEntity on TargetShadowSource {
+  TargetShadowTarget toEntity() {
+    return TargetShadowTarget(target.val);
+  }
+
+  void updateTargetShadowTarget(TargetShadowTarget target) {
+    target.val = this.target.val;
+  }
+}
+
+extension TargetShadowSourceToEntityList on Iterable<TargetShadowSource> {
+  List<TargetShadowTarget> toEntityList() {
+    return map((e) => e.toEntity()).toList();
+  }
+}
+''')
+@OmniMapper(
+  target: TargetShadowTarget,
+  mappings: [
+    MappingRule('val', source: 'target.val'),
+  ],
+)
+class TargetShadowSource {
+  final NestedTargetShadowModel target;
+  TargetShadowSource(this.target);
+}

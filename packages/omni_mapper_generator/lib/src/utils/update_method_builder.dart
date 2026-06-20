@@ -84,11 +84,15 @@ class UpdateMethodBuilder {
       if (hasSourceField) {
         final sourceFieldType =
             nestedField?.type ?? sourceFieldTypes[sourceFieldName];
-        final accessString = nestedField != null
-            ? nestedField.path
-            : (sourceFieldName == 'target'
-                  ? 'this.$sourceFieldName'
-                  : sourceFieldName);
+        String accessString;
+        if (nestedField != null) {
+          accessString = nestedField.path;
+          if (accessString.startsWith('target.') || accessString.startsWith('target?.')) {
+            accessString = 'this.$accessString';
+          }
+        } else {
+          accessString = sourceFieldName == 'target' ? 'this.$sourceFieldName' : sourceFieldName;
+        }
         final targetFieldType = field.type;
         final sourceTypeElement = sourceFieldType?.element;
         final targetTypeElement = targetFieldType.element;
