@@ -171,7 +171,7 @@ class AbstractClassGenerator {
             if (name != null) {
               if (config.fieldMaps.values.contains(fieldName)) {
                 throw InvalidGenerationSourceError(
-                  'Conflict: The field "$fieldName" is mapped in both @OmniField and fieldMaps. Please remove one of the definitions.',
+                  'Conflict: The field "$fieldName" is mapped in both @OmniField and mappings. Please remove one of the definitions.',
                   element: field,
                 );
               }
@@ -200,7 +200,7 @@ class AbstractClassGenerator {
               if (name != null) {
                 if (config.fieldMaps.containsKey(fieldName)) {
                   throw InvalidGenerationSourceError(
-                    'Conflict: The field "$fieldName" is mapped in both @OmniField and fieldMaps. Please remove one of the definitions.',
+                    'Conflict: The field "$fieldName" is mapped in both @OmniField and mappings. Please remove one of the definitions.',
                     element: field,
                   );
                 }

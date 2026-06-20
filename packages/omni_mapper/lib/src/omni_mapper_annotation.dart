@@ -1,4 +1,5 @@
 /// @docImport 'omni_converter.dart';
+/// @docImport 'omni_field.dart';
 /// @docImport 'omni_hook.dart';
 library;
 
@@ -71,15 +72,6 @@ class OmniMapper {
   ///  * [MappingRule.ignore], which can also be used to ignore fields.
   final List<String> ignoreFields;
 
-  /// Custom mappings from a source field name to a target field name.
-  ///
-  /// For example, `{'user_id': 'id'}` maps `source.user_id` to `target.id`.
-  ///
-  /// See also:
-  ///
-  ///  * [MappingRule.source], which provides an alternative way to map fields.
-  final Map<String, String> fieldMaps;
-
   /// Default values for target fields that are missing in the source.
   ///
   /// The values in this map must be valid Dart code snippets, such as `'true'`
@@ -137,7 +129,7 @@ class OmniMapper {
 
   /// A list of rules that configure mapping behaviors on a per-field basis.
   ///
-  /// This property provides a declarative alternative to [fieldMaps],
+  /// This property provides a declarative alternative to [OmniField],
   /// [ignoreFields], and [defaultValues], and allows for custom Dart expressions.
   final List<MappingRule> mappings;
 
@@ -158,7 +150,6 @@ class OmniMapper {
     this.from,
     this.methodName = 'toEntity',
     this.ignoreFields = const [],
-    this.fieldMaps = const {},
     this.defaultValues = const {},
     this.converters = const [],
     this.generateListMapper = true,

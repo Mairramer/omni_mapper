@@ -1,3 +1,6 @@
+/// @docImport 'omni_mapper_annotation.dart';
+library;
+
 /// An annotation used to configure mapping behaviors on a per-field basis.
 ///
 /// Use this annotation directly on the fields of a class annotated with

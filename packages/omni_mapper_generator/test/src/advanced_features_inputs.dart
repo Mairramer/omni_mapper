@@ -34,7 +34,9 @@ extension ModelDToEntityList on Iterable<ModelD> {
 ''')
 @OmniMapper(
   target: EntityD,
-  fieldMaps: {'userId': 'id'},
+  mappings: [
+    MappingRule('id', source: 'userId'),
+  ],
   defaultValues: {'status': '"active"'},
   converters: [StringDateConverter],
 )
@@ -261,7 +263,9 @@ extension TargetLToModelLList on Iterable<TargetL> {
   methodName: 'toTargetL',
   generateReverse: true,
   reverseMethodName: 'toModelL',
-  fieldMaps: {'userId': 'id'},
+  mappings: [
+    MappingRule('id', source: 'userId'),
+  ],
   defaultValues: {'status': '"active"'},
 )
 class ModelL {

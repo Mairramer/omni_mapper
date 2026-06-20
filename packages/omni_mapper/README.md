@@ -109,12 +109,31 @@ class UserModel { ... }
 
 ### Custom Field Mapping
 
-When source and target have different property names:
+When source and target have different property names, you have two options depending on your control over the classes:
+
+#### Option 1: `@OmniField` (Recommended when you own the class)
+
+Place `@OmniField` directly on the property. This is the most ergonomic approach because the mapping rule stays right next to the variable declaration.
+
+```dart
+@OmniMapper(target: UserEntity)
+class UserModel {
+  @OmniField(name: 'id') // Maps 'userId' to 'id'
+  final int userId;
+  // ...
+}
+```
+
+#### Option 2: `mappings` with `MappingRule` (Recommended for external classes)
+
+If you cannot modify the class (e.g., it belongs to a third-party package or is generated code), or if you need advanced custom expressions, use `MappingRule` inside `@OmniMapper`.
 
 ```dart
 @OmniMapper(
   target: UserEntity,
-  fieldMaps: {'userId': 'id'}, // source.userId → target.id
+  mappings: [
+    MappingRule('id', source: 'userId'), // source.userId → target.id
+  ],
 )
 class UserModel {
   final int userId;

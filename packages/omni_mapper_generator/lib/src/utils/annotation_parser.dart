@@ -126,60 +126,8 @@ class AnnotationParser {
             .toList() ??
         [];
 
-    final fieldMapsObj = annotation.peek('fieldMaps')?.mapValue;
     final fieldMaps = <String, String>{};
-    if (fieldMapsObj != null) {
-      for (final entry in fieldMapsObj.entries) {
-        final key = entry.key?.toStringValue();
-        final value = entry.value?.toStringValue();
-        if (key != null && value != null) {
-          fieldMaps[key] = value;
-        }
-      }
-    }
 
-    if (classElement != null) {
-      final target = annotation.peek('target')?.typeValue;
-      final isSource = target != null;
-
-      for (final field in classElement.fields) {
-        final fieldName = field.name;
-        if (fieldName == null) {
-          continue;
-        }
-
-        for (final metadata in field.metadata.annotations) {
-          final element = metadata.element;
-          if (element is ConstructorElement &&
-              element.enclosingElement.name == 'OmniField') {
-            final obj = metadata.computeConstantValue();
-            if (obj != null) {
-              final reader = ConstantReader(obj);
-              final name = reader.peek('name')?.stringValue;
-              if (name != null) {
-                if (isSource) {
-                  if (fieldMaps.containsKey(fieldName)) {
-                    throw InvalidGenerationSourceError(
-                      'Conflict: The field "$fieldName" is mapped in both @OmniField and fieldMaps. Please remove one of the definitions.',
-                      element: field,
-                    );
-                  }
-                  fieldMaps[fieldName] = name;
-                } else {
-                  if (fieldMaps.values.contains(fieldName)) {
-                    throw InvalidGenerationSourceError(
-                      'Conflict: The field "$fieldName" is mapped in both @OmniField and fieldMaps. Please remove one of the definitions.',
-                      element: field,
-                    );
-                  }
-                  fieldMaps[name] = fieldName;
-                }
-              }
-            }
-          }
-        }
-      }
-    }
 
     final defaultValuesObj = annotation.peek('defaultValues')?.mapValue;
     final defaultValues = <String, String>{};
@@ -232,6 +180,49 @@ class AnnotationParser {
           final parsed = _parseValue(defaultValueObj);
           if (parsed != null && parsed != 'null') {
             defaultValues[target] = parsed;
+          }
+        }
+      }
+    }
+
+    if (classElement != null) {
+      final target = annotation.peek('target')?.typeValue;
+      final isSource = target != null;
+
+      for (final field in classElement.fields) {
+        final fieldName = field.name;
+        if (fieldName == null) {
+          continue;
+        }
+
+        for (final metadata in field.metadata.annotations) {
+          final element = metadata.element;
+          if (element is ConstructorElement &&
+              element.enclosingElement.name == 'OmniField') {
+            final obj = metadata.computeConstantValue();
+            if (obj != null) {
+              final reader = ConstantReader(obj);
+              final name = reader.peek('name')?.stringValue;
+              if (name != null) {
+                if (isSource) {
+                  if (fieldMaps.containsKey(fieldName)) {
+                    throw InvalidGenerationSourceError(
+                      'Conflict: The field "$fieldName" is mapped in both @OmniField and mappings. Please remove one of the definitions.',
+                      element: field,
+                    );
+                  }
+                  fieldMaps[fieldName] = name;
+                } else {
+                  if (fieldMaps.values.contains(fieldName)) {
+                    throw InvalidGenerationSourceError(
+                      'Conflict: The field "$fieldName" is mapped in both @OmniField and mappings. Please remove one of the definitions.',
+                      element: field,
+                    );
+                  }
+                  fieldMaps[name] = fieldName;
+                }
+              }
+            }
           }
         }
       }
