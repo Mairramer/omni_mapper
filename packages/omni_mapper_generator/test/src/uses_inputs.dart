@@ -256,7 +256,7 @@ class UsesNullableMapperImpl extends UsesNullableMapper {
 ''')
 @OmniMapper(
   uses: [ConcreteNullableMapper],
-  defaultValues: {'optionalString': 'default'}
+  defaultValues: {'optionalString': 'default'},
 )
 abstract class UsesNullableMapper {
   UsesNonNullableTargetModel toTarget(UsesNullableSourceModel model);
@@ -294,7 +294,7 @@ class UsesNullableListMapperImpl extends UsesNullableListMapper {
 ''')
 @OmniMapper(
   uses: [ConcreteListNullableMapper],
-  defaultValues: {'optionalList': []}
+  defaultValues: {'optionalList': []},
 )
 abstract class UsesNullableListMapper {
   UsesNonNullableListTargetModel toTarget(UsesNullableListSourceModel model);

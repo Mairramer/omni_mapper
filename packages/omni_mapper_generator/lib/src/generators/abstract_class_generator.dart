@@ -38,6 +38,10 @@ class AbstractClassGenerator {
             cb.name = (cName == null || cName.isEmpty || cName == 'new')
                 ? null
                 : cName;
+
+            if (cb.name != null) {
+              cb.initializers.add(Code('super.${cb.name}()'));
+            }
             for (final param in constructor.formalParameters) {
               final parameterBuilder = Parameter((pb) {
                 pb

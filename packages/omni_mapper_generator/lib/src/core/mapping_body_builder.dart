@@ -258,10 +258,11 @@ class MappingBodyBuilder {
               sourceTypeElement != targetTypeElement) {
             for (final m in mapperClass.methods) {
               if (m.isAbstract && m.formalParameters.length == 1) {
-                final retStr = m.returnType.getDisplayString(withNullability: false);
-                final tgtStr = targetFieldType.getDisplayString(withNullability: false);
-                final paramStr = m.formalParameters.first.type.getDisplayString(withNullability: false);
-                final srcStr = sourceFieldType.getDisplayString(withNullability: false);
+                final retStr = m.returnType.getDisplayString();
+                final tgtStr = targetFieldType.getDisplayString();
+                final paramStr = m.formalParameters.first.type
+                    .getDisplayString();
+                final srcStr = sourceFieldType.getDisplayString();
 
                 if (retStr == tgtStr && paramStr == srcStr) {
                   nestedMapper = m;
@@ -273,7 +274,10 @@ class MappingBodyBuilder {
         }
 
         String? usesInvocation;
-        if (sourceFieldType != targetFieldType &&
+        final sTypeStr = sourceFieldType.getDisplayString();
+        final tTypeStr = targetFieldType.getDisplayString();
+
+        if (sTypeStr != tTypeStr &&
             matchingConverter == null &&
             nestedMapper == null) {
           for (final useType in uses) {
@@ -296,10 +300,21 @@ class MappingBodyBuilder {
               MethodElement? matchingMethod;
               for (final m in classElement.methods) {
                 if (!m.isStatic && m.formalParameters.length == 1) {
-                  final retStr = m.returnType.getDisplayString(withNullability: false);
-                  final tgtStr = expectedTarget.getDisplayString(withNullability: false);
-                  final paramStr = m.formalParameters.first.type.getDisplayString(withNullability: false);
-                  final srcStr = expectedSource.getDisplayString(withNullability: false);
+                  final retStr = m.returnType.getDisplayString().replaceAll(
+                    '?',
+                    '',
+                  );
+                  final tgtStr = expectedTarget.getDisplayString().replaceAll(
+                    '?',
+                    '',
+                  );
+                  final paramStr = m.formalParameters.first.type
+                      .getDisplayString()
+                      .replaceAll('?', '');
+                  final srcStr = expectedSource.getDisplayString().replaceAll(
+                    '?',
+                    '',
+                  );
 
                   if (retStr == tgtStr && paramStr == srcStr) {
                     matchingMethod = m;
@@ -473,10 +488,29 @@ class MappingBodyBuilder {
             continue;
           }
 
+          final isPathNullable =
+              sourceFieldType.nullabilitySuffix == NullabilitySuffix.question ||
+              accessString.contains('?.');
+          final targetNullable =
+              targetFieldType.nullabilitySuffix == NullabilitySuffix.question;
+
+          String finalAccess = accessString;
+          if (isPathNullable && !targetNullable) {
+            final defaultValue = defaultValues[paramName];
+            if (defaultValue != null) {
+              finalAccess = '$accessString ?? $defaultValue';
+            } else {
+              throw InvalidGenerationSourceError(
+                'Nullability mismatch for field "$paramName": source path is nullable but target is not, and no default value is provided.',
+                element: elementContext,
+              );
+            }
+          }
+
           if (param.isNamed) {
-            codeBuffer.writeln('$paramName: $accessString,');
+            codeBuffer.writeln('$paramName: $finalAccess,');
           } else {
-            codeBuffer.writeln('$accessString,');
+            codeBuffer.writeln('$finalAccess,');
           }
         }
         assignedParams.add(paramName);

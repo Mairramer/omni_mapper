@@ -88,3 +88,36 @@ class FreezedMapperImpl extends FreezedMapper {
 abstract class FreezedMapper {
   FreezedLikeModel toFreezed(SourceFreezed source);
 }
+
+// --- Test 5: Named constructors in abstract class ---
+class NamedConstructorModel {
+  final String val;
+  NamedConstructorModel(this.val);
+}
+
+class NamedConstructorEntity {
+  final String val;
+  NamedConstructorEntity(this.val);
+}
+
+@ShouldGenerate(r'''
+class NamedConstructorMapperImpl extends NamedConstructorMapper {
+  NamedConstructorMapperImpl.named(super.prefix) : super.named();
+
+  @override
+  NamedConstructorEntity toEntity(NamedConstructorModel model) {
+    return NamedConstructorEntity(prefix + model.val);
+  }
+}
+''')
+@OmniMapper(
+  mappings: [
+    MappingRule('val', custom: 'prefix + model.val'),
+  ],
+)
+abstract class NamedConstructorMapper {
+  final String prefix;
+  NamedConstructorMapper.named(this.prefix);
+
+  NamedConstructorEntity toEntity(NamedConstructorModel model);
+}
