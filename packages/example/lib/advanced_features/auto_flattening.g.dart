@@ -13,10 +13,6 @@ extension FlattenModelToEntity on FlattenModel {
       profileSettingsThemeId: profile.settings.theme?.id,
     )..profileSettingsThemeMode = profile.settings.theme?.mode;
   }
-
-  void updateFlattenTarget(FlattenTarget target) {
-    target.profileSettingsThemeMode = profile.settings.theme?.mode;
-  }
 }
 
 extension FlattenModelToEntityList on Iterable<FlattenModel> {

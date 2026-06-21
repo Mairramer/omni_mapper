@@ -15,8 +15,6 @@ extension ModelFToTargetF on ModelF {
   TargetF toTargetF() {
     return TargetF(id: id);
   }
-
-  void updateTargetF(TargetF target) {}
 }
 
 extension ModelFToTargetFList on Iterable<ModelF> {
@@ -40,7 +38,7 @@ class TargetG {
 
 @ShouldThrow(
   'Strict mode is enabled, but the following target properties are unmapped: unmapped.\n'
-  'To fix this, map them from the source, provide a defaultValue, or add them to ignoreFields.',
+  'To fix this, map them from the source, provide a defaultValue, or ignore them using @OmniField or mappings.',
 )
 @OmniMapper(target: TargetG, strictMode: true, methodName: 'toTargetG')
 class ModelG {

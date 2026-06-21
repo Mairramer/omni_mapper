@@ -33,14 +33,18 @@ class StringDateTimeConverter extends OmniConverter<DateTime, String> {
 @OmniMappers([
   OmniMapper(
     target: AdvancedEntity,
-    fieldMaps: {'userId': 'id'},
-    defaultValues: {'status': 'active'},
+    mappings: [
+      MappingRule('id', source: 'userId'),
+      MappingRule('status', defaultValue: '"active"'),
+    ],
     converters: [DateTimeStringConverter],
   ),
   OmniMapper(
     from: AdvancedEntity,
     methodName: 'toModel',
-    fieldMaps: {'id': 'userId'},
+    mappings: [
+      MappingRule('userId', source: 'id'),
+    ],
     converters: [StringDateTimeConverter],
   ),
 ])

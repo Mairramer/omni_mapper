@@ -1,4 +1,5 @@
 /// @docImport 'omni_converter.dart';
+/// @docImport 'omni_field.dart';
 /// @docImport 'omni_hook.dart';
 library;
 
@@ -69,16 +70,12 @@ class OmniMapper {
   /// See also:
   ///
   ///  * [MappingRule.ignore], which can also be used to ignore fields.
+  @Deprecated(
+    'Use mappings with MappingRule instead or field level @OmniField(ignore: true). '
+    'Deprecated to unify mapping configurations into a single declarative list. '
+    'This feature was deprecated after v0.4.0.',
+  )
   final List<String> ignoreFields;
-
-  /// Custom mappings from a source field name to a target field name.
-  ///
-  /// For example, `{'user_id': 'id'}` maps `source.user_id` to `target.id`.
-  ///
-  /// See also:
-  ///
-  ///  * [MappingRule.source], which provides an alternative way to map fields.
-  final Map<String, String> fieldMaps;
 
   /// Default values for target fields that are missing in the source.
   ///
@@ -89,6 +86,11 @@ class OmniMapper {
   ///
   ///  * [MappingRule.defaultValue], which provides an alternative way to specify
   ///    default values.
+  @Deprecated(
+    'Use mappings with MappingRule instead or field level @OmniField(defaultValue: ...). '
+    'Deprecated to unify mapping configurations into a single declarative list. '
+    'This feature was deprecated after v0.4.0.',
+  )
   final Map<String, Object?> defaultValues;
 
   /// A list of [OmniConverter] types used to handle type mismatches.
@@ -106,7 +108,7 @@ class OmniMapper {
   /// Whether to generate a method that updates an existing target object.
   ///
   /// If true, generates a method (e.g., `updateEntity`) that mutates an existing
-  /// instance with values from the source. Defaults to true.
+  /// instance with values from the source. Defaults to false.
   final bool generateUpdateMethod;
 
   /// Whether to enforce mapping of all target fields.
@@ -137,8 +139,8 @@ class OmniMapper {
 
   /// A list of rules that configure mapping behaviors on a per-field basis.
   ///
-  /// This property provides a declarative alternative to [fieldMaps],
-  /// [ignoreFields], and [defaultValues], and allows for custom Dart expressions.
+  /// This property provides a declarative alternative to [OmniField]
+  /// and allows for custom Dart expressions.
   final List<MappingRule> mappings;
 
   /// A list of polymorphic mappings for decentralized extensions.
@@ -157,12 +159,21 @@ class OmniMapper {
     this.target,
     this.from,
     this.methodName = 'toEntity',
+    @Deprecated(
+      'Use mappings with MappingRule instead or field level @OmniField(ignore: true). '
+      'Deprecated to unify mapping configurations into a single declarative list. '
+      'This feature was deprecated after v0.4.0.',
+    )
     this.ignoreFields = const [],
-    this.fieldMaps = const {},
+    @Deprecated(
+      'Use mappings with MappingRule instead or field level @OmniField(defaultValue: ...). '
+      'Deprecated to unify mapping configurations into a single declarative list. '
+      'This feature was deprecated after v0.4.0.',
+    )
     this.defaultValues = const {},
     this.converters = const [],
     this.generateListMapper = true,
-    this.generateUpdateMethod = true,
+    this.generateUpdateMethod = false,
     this.strictMode = false,
     this.ignoreIfNull = false,
     this.hook,

@@ -97,8 +97,6 @@ extension ExtSourceToEntity on ExtSource {
       pastAddresses.map((e) => AddressMapperImpl().toEntity(e)).toList(),
     );
   }
-
-  void updateExtTarget(ExtTarget target) {}
 }
 
 extension ExtSourceToEntityList on Iterable<ExtSource> {
@@ -256,7 +254,9 @@ class UsesNullableMapperImpl extends UsesNullableMapper {
 ''')
 @OmniMapper(
   uses: [ConcreteNullableMapper],
-  defaultValues: {'optionalString': 'default'},
+  mappings: [
+    MappingRule('optionalString', defaultValue: 'default'),
+  ],
 )
 abstract class UsesNullableMapper {
   UsesNonNullableTargetModel toTarget(UsesNullableSourceModel model);
@@ -294,7 +294,9 @@ class UsesNullableListMapperImpl extends UsesNullableListMapper {
 ''')
 @OmniMapper(
   uses: [ConcreteListNullableMapper],
-  defaultValues: {'optionalList': []},
+  mappings: [
+    MappingRule('optionalList', defaultValue: []),
+  ],
 )
 abstract class UsesNullableListMapper {
   UsesNonNullableListTargetModel toTarget(UsesNullableListSourceModel model);

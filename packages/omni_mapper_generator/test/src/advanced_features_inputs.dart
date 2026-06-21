@@ -24,8 +24,6 @@ extension ModelDToEntity on ModelD {
       createdAt: const StringDateConverter().convert(createdAt),
     );
   }
-
-  void updateEntityD(EntityD target) {}
 }
 
 extension ModelDToEntityList on Iterable<ModelD> {
@@ -36,8 +34,10 @@ extension ModelDToEntityList on Iterable<ModelD> {
 ''')
 @OmniMapper(
   target: EntityD,
-  fieldMaps: {'userId': 'id'},
-  defaultValues: {'status': '"active"'},
+  mappings: [
+    MappingRule('id', source: 'userId'),
+    MappingRule('status', defaultValue: '"active"'),
+  ],
   converters: [StringDateConverter],
 )
 class ModelD {
@@ -73,7 +73,12 @@ extension ModelHToTargetHList on Iterable<ModelH> {
   }
 }
 ''')
-@OmniMapper(target: TargetH, ignoreIfNull: true, methodName: 'toTargetH')
+@OmniMapper(
+  target: TargetH,
+  generateUpdateMethod: true,
+  ignoreIfNull: true,
+  methodName: 'toTargetH',
+)
 class ModelH {
   final int? id; // Nullable
   final String name; // Non-nullable
@@ -102,8 +107,6 @@ extension ModelIToTargetI on ModelI {
     const MyHook().after(this, target);
     return target;
   }
-
-  void updateTargetI(TargetI target) {}
 }
 
 extension ModelIToTargetIList on Iterable<ModelI> {
@@ -154,7 +157,11 @@ extension ModelJToTargetJList on Iterable<ModelJ> {
   }
 }
 ''')
-@OmniMapper(target: TargetJ, methodName: 'toTargetJ')
+@OmniMapper(
+  target: TargetJ,
+  generateUpdateMethod: true,
+  methodName: 'toTargetJ',
+)
 class ModelJ {
   final SourceEnum status;
   final SourceEnum? optionalStatus;
@@ -219,7 +226,11 @@ extension ModelKToTargetKList on Iterable<ModelK> {
   }
 }
 ''')
-@OmniMapper(target: TargetK, methodName: 'toTargetK')
+@OmniMapper(
+  target: TargetK,
+  generateUpdateMethod: true,
+  methodName: 'toTargetK',
+)
 class ModelK {
   final AddressK? userAddress;
   final ProfileK profile;
@@ -240,8 +251,6 @@ extension ModelLToTargetL on ModelL {
   TargetL toTargetL() {
     return TargetL(id: userId, title: title, status: '"active"');
   }
-
-  void updateTargetL(TargetL target) {}
 }
 
 extension ModelLToTargetLList on Iterable<ModelL> {
@@ -254,8 +263,6 @@ extension TargetLToModelL on TargetL {
   ModelL toModelL() {
     return ModelL(userId: id, title: title);
   }
-
-  void updateModelL(ModelL target) {}
 }
 
 extension TargetLToModelLList on Iterable<TargetL> {
@@ -269,8 +276,10 @@ extension TargetLToModelLList on Iterable<TargetL> {
   methodName: 'toTargetL',
   generateReverse: true,
   reverseMethodName: 'toModelL',
-  fieldMaps: {'userId': 'id'},
-  defaultValues: {'status': '"active"'},
+  mappings: [
+    MappingRule('id', source: 'userId'),
+    MappingRule('status', defaultValue: '"active"'),
+  ],
 )
 class ModelL {
   final int userId;
@@ -302,8 +311,6 @@ extension ModelMToTargetM on ModelM {
       status: '"active"',
     );
   }
-
-  void updateTargetM(TargetM target) {}
 }
 
 extension ModelMToTargetMList on Iterable<ModelM> {
@@ -415,8 +422,6 @@ extension VehicleBaseToEntity on VehicleBase {
       _ => VehicleEntity(wheels),
     };
   }
-
-  void updateVehicleEntity(VehicleEntity target) {}
 }
 
 extension VehicleBaseToEntityList on Iterable<VehicleBase> {
@@ -496,8 +501,6 @@ extension DummyModelToHookTarget on DummyModel {
     const DummyHook().after(this, target);
     return target;
   }
-
-  void updateHookTarget(HookTarget target) {}
 }
 
 extension DummyModelToHookTargetList on Iterable<DummyModel> {
@@ -542,6 +545,7 @@ extension TargetShadowSourceToEntityList on Iterable<TargetShadowSource> {
 ''')
 @OmniMapper(
   target: TargetShadowTarget,
+  generateUpdateMethod: true,
   mappings: [
     MappingRule('val', source: 'target.val'),
   ],

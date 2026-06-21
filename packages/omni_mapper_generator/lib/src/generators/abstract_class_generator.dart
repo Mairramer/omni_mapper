@@ -154,6 +154,11 @@ class AbstractClassGenerator {
       }
     }
 
+    AnnotationParser.parseOmniFields(targetClass, config, isSource: false);
+    for (final sClass in sourceClasses) {
+      AnnotationParser.parseOmniFields(sClass, config, isSource: true);
+    }
+
     var codeBody = MappingBodyBuilder.build(
       sourceClasses: sourceClasses,
       targetClass: targetClass,

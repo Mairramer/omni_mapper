@@ -113,42 +113,37 @@ class AnnotationParser {
     return null;
   }
 
-  static MapperConfig parse(ConstantReader annotation) {
-    final ignoreFields =
-        annotation
-            .peek('ignoreFields')
-            ?.listValue
-            .map((e) => e.toStringValue() ?? '')
-            .where((e) => e.isNotEmpty)
-            .toList() ??
-        [];
-
-    final fieldMapsObj = annotation.peek('fieldMaps')?.mapValue;
-    final fieldMaps = <String, String>{};
-    if (fieldMapsObj != null) {
-      for (final entry in fieldMapsObj.entries) {
-        final key = entry.key?.toStringValue();
-        final value = entry.value?.toStringValue();
-        if (key != null && value != null) {
-          fieldMaps[key] = value;
+  static MapperConfig parse(
+    ConstantReader annotation, {
+    ClassElement? classElement,
+  }) {
+    final ignoreFields = <String>[];
+    final ignoreFieldsList = annotation.peek('ignoreFields')?.listValue;
+    if (ignoreFieldsList != null) {
+      for (final item in ignoreFieldsList) {
+        final val = item.toStringValue();
+        if (val != null) {
+          ignoreFields.add(val);
         }
       }
     }
 
+    final fieldMaps = <String, String>{};
+
     final defaultValuesObj = annotation.peek('defaultValues')?.mapValue;
-    final defaultValues = <String, String>{};
+    final defaultValues = <String, DefaultValueConfig>{};
     if (defaultValuesObj != null) {
       for (final entry in defaultValuesObj.entries) {
         final key = entry.key?.toStringValue();
-        if (key != null) {
-          final parsed = _parseValue(entry.value);
+        final value = entry.value;
+        if (key != null && value != null) {
+          final parsed = _parseValue(value);
           if (parsed != null && parsed != 'null') {
-            defaultValues[key] = parsed;
+            defaultValues[key] = DefaultValueConfig(parsed, value.type);
           }
         }
       }
     }
-
     final customMappings = <String, String>{};
     final mappingsList = annotation.peek('mappings')?.listValue;
     if (mappingsList != null) {
@@ -185,7 +180,10 @@ class AnnotationParser {
         if (defaultValueObj != null && !defaultValueObj.isNull) {
           final parsed = _parseValue(defaultValueObj);
           if (parsed != null && parsed != 'null') {
-            defaultValues[target] = parsed;
+            defaultValues[target] = DefaultValueConfig(
+              parsed,
+              defaultValueObj.type,
+            );
           }
         }
       }
@@ -223,7 +221,7 @@ class AnnotationParser {
         annotation.peek('reverseMethodName')?.stringValue ?? '';
     final methodName = annotation.peek('methodName')?.stringValue ?? 'toEntity';
 
-    return MapperConfig(
+    final config = MapperConfig(
       ignoreFields: ignoreFields,
       fieldMaps: fieldMaps,
       defaultValues: defaultValues,
@@ -239,5 +237,107 @@ class AnnotationParser {
       reverseMethodName: reverseMethodNameRaw,
       methodName: methodName,
     );
+
+    if (classElement != null) {
+      final target = annotation.peek('target')?.typeValue;
+      final isSource = target != null;
+      parseOmniFields(classElement, config, isSource: isSource);
+    }
+
+    return config;
+  }
+
+  static void parseOmniFields(
+    ClassElement classElement,
+    MapperConfig config, {
+    required bool isSource,
+  }) {
+    for (final field in classElement.fields) {
+      final fieldName = field.name;
+      if (fieldName == null) {
+        continue;
+      }
+
+      for (final metadata in field.metadata.annotations) {
+        final element = metadata.element;
+        if (element is ConstructorElement &&
+            element.enclosingElement.name == 'OmniField') {
+          final obj = metadata.computeConstantValue();
+          if (obj != null) {
+            final reader = ConstantReader(obj);
+            final name = reader.peek('name')?.stringValue;
+
+            if (name != null) {
+              if (isSource) {
+                if (config.fieldMaps.containsKey(fieldName)) {
+                  throw InvalidGenerationSourceError(
+                    'Conflict: The field "$fieldName" is mapped in both @OmniField and mappings. Please remove one of the definitions.',
+                    element: field,
+                  );
+                }
+                config.fieldMaps[fieldName] = name;
+              } else {
+                if (config.fieldMaps.values.contains(fieldName)) {
+                  throw InvalidGenerationSourceError(
+                    'Conflict: The field "$fieldName" is mapped in both @OmniField and mappings. Please remove one of the definitions.',
+                    element: field,
+                  );
+                }
+                config.fieldMaps[name] = fieldName;
+              }
+            }
+
+            final targetName = isSource ? (name ?? fieldName) : fieldName;
+
+            final ignore = reader.peek('ignore')?.boolValue ?? false;
+            if (ignore) {
+              if (config.ignoreFields.contains(targetName)) {
+                throw InvalidGenerationSourceError(
+                  'Conflict: The field "$targetName" is ignored in both @OmniField and mappings. Please remove one of the definitions.',
+                  element: field,
+                );
+              }
+              config.ignoreFields.add(targetName);
+            }
+
+            final customObj = reader.peek('custom')?.objectValue;
+            if (customObj != null && !customObj.isNull) {
+              if (config.customMappings.containsKey(targetName)) {
+                throw InvalidGenerationSourceError(
+                  'Conflict: The field "$targetName" has a custom mapping in both @OmniField and mappings. Please remove one of the definitions.',
+                  element: field,
+                );
+              }
+              final customReader = ConstantReader(customObj);
+              if (customReader.isString) {
+                config.customMappings[targetName] = customReader.stringValue;
+              } else {
+                final parsed = _parseValue(customObj);
+                if (parsed != null && parsed != 'null') {
+                  config.customMappings[targetName] = parsed;
+                }
+              }
+            }
+
+            final defaultValueObj = reader.peek('defaultValue')?.objectValue;
+            if (defaultValueObj != null && !defaultValueObj.isNull) {
+              if (config.defaultValues.containsKey(targetName)) {
+                throw InvalidGenerationSourceError(
+                  'Conflict: The field "$targetName" has a default value in both @OmniField and mappings. Please remove one of the definitions.',
+                  element: field,
+                );
+              }
+              final parsed = _parseValue(defaultValueObj);
+              if (parsed != null && parsed != 'null') {
+                config.defaultValues[targetName] = DefaultValueConfig(
+                  parsed,
+                  defaultValueObj.type,
+                );
+              }
+            }
+          }
+        }
+      }
+    }
   }
 }

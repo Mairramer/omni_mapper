@@ -21,8 +21,6 @@ extension ModelAToTargetA on ModelA {
   TargetA toTargetA() {
     return TargetA(status: 'active', count: 42, ratio: 3.14, isValid: true);
   }
-
-  void updateTargetA(TargetA target) {}
 }
 
 extension ModelAToTargetAList on Iterable<ModelA> {
@@ -34,12 +32,12 @@ extension ModelAToTargetAList on Iterable<ModelA> {
 @OmniMapper(
   target: TargetA,
   methodName: 'toTargetA',
-  defaultValues: {
-    'status': 'active',
-    'count': 42,
-    'ratio': 3.14,
-    'isValid': true,
-  },
+  mappings: [
+    MappingRule('status', defaultValue: 'active'),
+    MappingRule('count', defaultValue: 42),
+    MappingRule('ratio', defaultValue: 3.14),
+    MappingRule('isValid', defaultValue: true),
+  ],
 )
 class ModelA {
   ModelA();
@@ -63,8 +61,6 @@ extension ModelBToTargetB on ModelB {
   TargetB toTargetB() {
     return TargetB(enumValue: ExampleEnum.value2, fallbackStr: 'default_str');
   }
-
-  void updateTargetB(TargetB target) {}
 }
 
 extension ModelBToTargetBList on Iterable<ModelB> {

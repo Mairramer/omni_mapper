@@ -18,6 +18,7 @@ class PatchUserEntity {
 @OmniMapper(
   target: PatchUserEntity,
   ignoreIfNull: true,
+  generateUpdateMethod: true,
 )
 class PatchUserModel {
   final int? id;

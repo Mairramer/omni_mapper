@@ -11,12 +11,10 @@ extension AdvancedModelToEntity on AdvancedModel {
     return AdvancedEntity(
       id: userId,
       title: title,
-      status: 'active',
+      status: '"active"',
       createdAt: const DateTimeStringConverter().convert(createdAt),
     );
   }
-
-  void updateAdvancedEntity(AdvancedEntity target) {}
 }
 
 extension AdvancedModelToEntityList on Iterable<AdvancedModel> {
@@ -33,8 +31,6 @@ extension AdvancedEntityToModel on AdvancedEntity {
       createdAt: const StringDateTimeConverter().convert(createdAt),
     );
   }
-
-  void updateAdvancedModel(AdvancedModel target) {}
 }
 
 extension AdvancedEntityToModelList on Iterable<AdvancedEntity> {

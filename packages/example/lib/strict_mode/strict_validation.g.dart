@@ -13,8 +13,6 @@ extension StrictUserModelToEntity on StrictUserModel {
       name: name,
     );
   }
-
-  void updateStrictUserEntity(StrictUserEntity target) {}
 }
 
 extension StrictUserModelToEntityList on Iterable<StrictUserModel> {

@@ -59,7 +59,9 @@ class UserProfileHook extends OmniHook<User, UserProfile> {
 }
 
 @OmniMapper(
-  ignoreFields: ['fullAddress'],
+  mappings: [
+    MappingRule('fullAddress', ignore: true),
+  ],
   hook: UserProfileHook,
 )
 abstract class UserProfileMapper {

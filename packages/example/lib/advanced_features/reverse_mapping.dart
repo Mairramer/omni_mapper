@@ -21,10 +21,14 @@ class DtoModel {
   methodName: 'toDto',
   generateReverse: true,
   reverseMethodName: 'toEntity',
-  fieldMaps: {'userId': 'id', 'fullName': 'name'},
-  defaultValues: {
-    'status': 'active',
-  }, // default values are ignored in reverse
+  mappings: [
+    MappingRule('id', source: 'userId'),
+    MappingRule('name', source: 'fullName'),
+    MappingRule(
+      'status',
+      defaultValue: 'active',
+    ), // default values are ignored in reverse
+  ],
 )
 class EntityModel {
   final String userId;

@@ -13,8 +13,6 @@ extension ModelBToEntity on ModelB {
       title: title,
     );
   }
-
-  void updateEntityB(EntityB target) {}
 }
 
 extension ModelBToEntityList on Iterable<ModelB> {
@@ -30,8 +28,6 @@ extension ModelBToEntityB2 on ModelB {
       title: title,
     );
   }
-
-  void updateEntityB2(EntityB2 target) {}
 }
 
 extension ModelBToEntityB2List on Iterable<ModelB> {

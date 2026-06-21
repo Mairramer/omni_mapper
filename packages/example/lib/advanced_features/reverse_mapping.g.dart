@@ -15,8 +15,6 @@ extension EntityModelToDto on EntityModel {
       status: 'active',
     );
   }
-
-  void updateDtoModel(DtoModel target) {}
 }
 
 extension EntityModelToDtoList on Iterable<EntityModel> {
@@ -33,8 +31,6 @@ extension DtoModelToEntity on DtoModel {
       age: age,
     );
   }
-
-  void updateEntityModel(EntityModel target) {}
 }
 
 extension DtoModelToEntityList on Iterable<DtoModel> {

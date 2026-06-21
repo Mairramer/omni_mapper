@@ -21,8 +21,8 @@ class StrictUserEntity {
 @OmniMapper(
   target: StrictUserEntity,
   strictMode: true,
-  ignoreFields: [
-    'unmappedField',
+  mappings: [
+    MappingRule('unmappedField', ignore: true),
   ], // We must ignore it or map it to prevent generation error
 )
 class StrictUserModel {
