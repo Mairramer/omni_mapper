@@ -13,7 +13,10 @@ class AnnotationParser {
 
     final reader = ConstantReader(obj);
     if (reader.isString) {
-      final escaped = reader.stringValue.replaceAll(r'\', r'\\').replaceAll("'", r"\'").replaceAll(r'$', r'\$');
+      final escaped = reader.stringValue
+          .replaceAll(r'\', r'\\')
+          .replaceAll("'", r"\'")
+          .replaceAll(r'$', r'\$');
       return "'$escaped'";
     }
     if (reader.isInt) {
@@ -177,26 +180,45 @@ class AnnotationParser {
         if (defaultValueObj != null && !defaultValueObj.isNull) {
           final parsed = _parseValue(defaultValueObj);
           if (parsed != null && parsed != 'null') {
-            defaultValues[target] = DefaultValueConfig(parsed, defaultValueObj.type);
+            defaultValues[target] = DefaultValueConfig(
+              parsed,
+              defaultValueObj.type,
+            );
           }
         }
       }
     }
 
     final converters =
-        annotation.peek('converters')?.listValue.map((e) => e.toTypeValue()).whereType<DartType>().toList() ?? const [];
+        annotation
+            .peek('converters')
+            ?.listValue
+            .map((e) => e.toTypeValue())
+            .whereType<DartType>()
+            .toList() ??
+        const [];
 
     final strictMode = annotation.peek('strictMode')?.boolValue ?? false;
     final hookType = annotation.peek('hook')?.typeValue;
 
     final uses =
-        annotation.peek('uses')?.listValue.map((e) => e.toTypeValue()).whereType<DartType>().toList() ?? const [];
+        annotation
+            .peek('uses')
+            ?.listValue
+            .map((e) => e.toTypeValue())
+            .whereType<DartType>()
+            .toList() ??
+        const [];
 
-    final generateListMapper = annotation.peek('generateListMapper')?.boolValue ?? true;
-    final generateUpdateMethod = annotation.peek('generateUpdateMethod')?.boolValue ?? true;
+    final generateListMapper =
+        annotation.peek('generateListMapper')?.boolValue ?? true;
+    final generateUpdateMethod =
+        annotation.peek('generateUpdateMethod')?.boolValue ?? true;
     final ignoreIfNull = annotation.peek('ignoreIfNull')?.boolValue ?? false;
-    final generateReverse = annotation.peek('generateReverse')?.boolValue ?? false;
-    final reverseMethodNameRaw = annotation.peek('reverseMethodName')?.stringValue ?? '';
+    final generateReverse =
+        annotation.peek('generateReverse')?.boolValue ?? false;
+    final reverseMethodNameRaw =
+        annotation.peek('reverseMethodName')?.stringValue ?? '';
     final methodName = annotation.peek('methodName')?.stringValue ?? 'toEntity';
 
     final config = MapperConfig(
@@ -238,7 +260,8 @@ class AnnotationParser {
 
       for (final metadata in field.metadata.annotations) {
         final element = metadata.element;
-        if (element is ConstructorElement && element.enclosingElement.name == 'OmniField') {
+        if (element is ConstructorElement &&
+            element.enclosingElement.name == 'OmniField') {
           final obj = metadata.computeConstantValue();
           if (obj != null) {
             final reader = ConstantReader(obj);
@@ -306,14 +329,15 @@ class AnnotationParser {
               }
               final parsed = _parseValue(defaultValueObj);
               if (parsed != null && parsed != 'null') {
-                config.defaultValues[targetName] = DefaultValueConfig(parsed, defaultValueObj.type);
+                config.defaultValues[targetName] = DefaultValueConfig(
+                  parsed,
+                  defaultValueObj.type,
+                );
               }
             }
           }
         }
       }
     }
-
-
-}
+  }
 }

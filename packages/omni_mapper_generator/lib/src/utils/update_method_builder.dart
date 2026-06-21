@@ -22,7 +22,9 @@ class UpdateMethodBuilder {
     final sourceFieldTypes = <String, DartType>{};
     final typesToCheck = <InterfaceElement>[
       sourceClass,
-      ...sourceClass.allSupertypes.map((t) => t.element).whereType<InterfaceElement>(),
+      ...sourceClass.allSupertypes
+          .map((t) => t.element)
+          .whereType<InterfaceElement>(),
     ];
     for (final element in typesToCheck) {
       if (element.name == 'Object') {
@@ -48,7 +50,10 @@ class UpdateMethodBuilder {
 
     for (final field in targetClass.fields) {
       final fieldName = field.name;
-      if (fieldName == null || field.isStatic || field.isFinal || field.setter == null) {
+      if (fieldName == null ||
+          field.isStatic ||
+          field.isFinal ||
+          field.setter == null) {
         continue;
       }
       if (ignoreFields.contains(fieldName)) {
@@ -78,22 +83,27 @@ class UpdateMethodBuilder {
       }
 
       if (hasSourceField) {
-        final sourceFieldType = nestedField?.type ?? sourceFieldTypes[sourceFieldName];
+        final sourceFieldType =
+            nestedField?.type ?? sourceFieldTypes[sourceFieldName];
         String accessString;
         if (nestedField != null) {
           accessString = nestedField.path;
-          if (accessString.startsWith('target.') || accessString.startsWith('target?.')) {
+          if (accessString.startsWith('target.') ||
+              accessString.startsWith('target?.')) {
             accessString = 'this.$accessString';
           }
         } else {
-          accessString = sourceFieldName == 'target' ? 'this.$sourceFieldName' : sourceFieldName;
+          accessString = sourceFieldName == 'target'
+              ? 'this.$sourceFieldName'
+              : sourceFieldName;
         }
         final targetFieldType = field.type;
         final sourceTypeElement = sourceFieldType?.element;
         final targetTypeElement = targetFieldType.element;
 
         final isNullable =
-            sourceFieldType?.nullabilitySuffix == NullabilitySuffix.question || accessString.contains('?.');
+            sourceFieldType?.nullabilitySuffix == NullabilitySuffix.question ||
+            accessString.contains('?.');
 
         if (sourceTypeElement is EnumElement &&
             targetTypeElement is EnumElement &&

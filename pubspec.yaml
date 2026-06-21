@@ -7,6 +7,7 @@ environment:
 workspace:
   - packages/omni_mapper
   - packages/omni_mapper_generator
+  - packages/omni_mapper_generator/example
   - packages/example
 dev_dependencies:
   lints: ^3.0.0

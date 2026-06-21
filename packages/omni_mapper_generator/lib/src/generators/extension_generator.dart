@@ -37,7 +37,9 @@ class ExtensionGenerator {
     // Ensure unique name by combining Source class and capitalized method name
     final extensionName = '${sourceClass.name}$capitalizedMethodName';
 
-    final reverseMethodName = config.reverseMethodName.isEmpty ? 'to${sourceClass.name}' : config.reverseMethodName;
+    final reverseMethodName = config.reverseMethodName.isEmpty
+        ? 'to${sourceClass.name}'
+        : config.reverseMethodName;
 
     final subclassesList = annotation.peek('subclasses')?.listValue ?? [];
     final subclasses = <String, String>{};
@@ -154,7 +156,8 @@ class ExtensionGenerator {
         extensionMethodName: reverseMethodName,
         ignoreFields: reverseIgnoreFields,
         fieldMaps: reverseFieldMaps,
-        customMappings: {}, // Reverse mappings don't automatically mirror custom mappings
+        customMappings:
+            {}, // Reverse mappings don't automatically mirror custom mappings
         converters: config.converters,
         uses: config.uses,
         strictMode: config.strictMode,
@@ -185,7 +188,10 @@ class ExtensionGenerator {
               fieldMaps: reverseFieldMaps,
               ignoreFields: reverseIgnoreFields,
               defaultValues:
-                  <String, DefaultValueConfig>{}, // Reverse mappings don't automatically mirror default values
+                  <
+                    String,
+                    DefaultValueConfig
+                  >{}, // Reverse mappings don't automatically mirror default values
               ignoreIfNull: config.ignoreIfNull,
             ),
           );

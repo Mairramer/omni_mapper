@@ -59,7 +59,8 @@ class DependencyWithArgsTarget {
 class DependencyWithArgsMapper {
   final int someArg;
   DependencyWithArgsMapper(this.someArg);
-  DependencyWithArgsTarget toTarget(DependencyWithArgs model) => throw UnimplementedError();
+  DependencyWithArgsTarget toTarget(DependencyWithArgs model) =>
+      throw UnimplementedError();
 }
 
 class ParentSource {

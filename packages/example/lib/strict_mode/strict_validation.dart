@@ -5,7 +5,8 @@ part 'strict_validation.g.dart';
 class StrictUserEntity {
   final int id;
   final String name;
-  final String? unmappedField; // optional, so it doesn't fail the required check
+  final String?
+  unmappedField; // optional, so it doesn't fail the required check
 
   StrictUserEntity({
     required this.id,
