@@ -205,7 +205,7 @@ class MappingBodyBuilder {
       }
 
       final defaultValue = defaultValues[paramName];
-      if (defaultValue != null && defaultValue.type != null) {
+      if (defaultValue != null && defaultValue.type != null && !defaultValue.type!.isDartCoreString) {
         if (!targetClass.library.typeSystem.isAssignableTo(defaultValue.type!, param.type)) {
           throw InvalidGenerationSourceError(
             'Type mismatch for default value of "$paramName": expected ${param.type.getDisplayString()} but got ${defaultValue.type!.getDisplayString()}.',
