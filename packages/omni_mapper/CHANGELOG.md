@@ -1,3 +1,7 @@
+## 0.5.1
+
+* Bumps `omni_mapper` to `0.5.1`.
+
 ## 0.5.0
 
 * Introduces `@OmniField` annotation for fine-grained field-level configuration directly on class properties.

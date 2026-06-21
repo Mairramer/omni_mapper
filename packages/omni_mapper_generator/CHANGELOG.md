@@ -1,3 +1,7 @@
+## 0.5.1
+
+* Adds support for empty collection inference (`const []` and `const {}`) in `defaultValue` properties, bypassing strict type-validation and allowing Dart to infer generic types (e.g. `List<String>`).
+
 ## 0.5.0
 
 * Adds code generation support for `@OmniField` annotation (`name`, `ignore`, `custom`, `defaultValue`).

@@ -8,8 +8,8 @@ environment:
 resolution: workspace
 
 dependencies:
-  omni_mapper: ^0.5.0
+  omni_mapper: ^0.5.1
 
 dev_dependencies:
-  build_runner: ^2.4.0
-  omni_mapper_generator: ^0.5.0
+  build_runner: ^2.4.14
+  omni_mapper_generator: ^0.5.1
