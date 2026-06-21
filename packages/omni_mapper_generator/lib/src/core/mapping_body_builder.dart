@@ -214,8 +214,8 @@ class MappingBodyBuilder {
       if (defaultValue != null &&
           defaultValue.type != null &&
           !defaultValue.type!.isDartCoreString) {
-        final isEmptyCollection = (param.type.isDartCoreList &&
-                defaultValue.code == 'const []') ||
+        final isEmptyCollection =
+            (param.type.isDartCoreList && defaultValue.code == 'const []') ||
             (param.type.isDartCoreMap && defaultValue.code == 'const {}') ||
             (param.type.isDartCoreSet && defaultValue.code == 'const {}');
 
@@ -586,8 +586,8 @@ class MappingBodyBuilder {
       if (defaultValue != null &&
           defaultValue.type != null &&
           !defaultValue.type!.isDartCoreString) {
-        final isEmptyCollection = (field.type.isDartCoreList &&
-                defaultValue.code == 'const []') ||
+        final isEmptyCollection =
+            (field.type.isDartCoreList && defaultValue.code == 'const []') ||
             (field.type.isDartCoreMap && defaultValue.code == 'const {}') ||
             (field.type.isDartCoreSet && defaultValue.code == 'const {}');
 
