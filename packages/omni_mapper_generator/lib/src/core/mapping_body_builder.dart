@@ -214,10 +214,16 @@ class MappingBodyBuilder {
       if (defaultValue != null &&
           defaultValue.type != null &&
           !defaultValue.type!.isDartCoreString) {
-        if (!targetClass.library.typeSystem.isAssignableTo(
-          defaultValue.type!,
-          param.type,
-        )) {
+        final isEmptyCollection = (param.type.isDartCoreList &&
+                defaultValue.code == 'const []') ||
+            (param.type.isDartCoreMap && defaultValue.code == 'const {}') ||
+            (param.type.isDartCoreSet && defaultValue.code == 'const {}');
+
+        if (!isEmptyCollection &&
+            !targetClass.library.typeSystem.isAssignableTo(
+              defaultValue.type!,
+              param.type,
+            )) {
           throw InvalidGenerationSourceError(
             'Type mismatch for default value of "$paramName": expected ${param.type.getDisplayString()} but got ${defaultValue.type!.getDisplayString()}.',
             element: elementContext,
@@ -580,10 +586,16 @@ class MappingBodyBuilder {
       if (defaultValue != null &&
           defaultValue.type != null &&
           !defaultValue.type!.isDartCoreString) {
-        if (!targetClass.library.typeSystem.isAssignableTo(
-          defaultValue.type!,
-          field.type,
-        )) {
+        final isEmptyCollection = (field.type.isDartCoreList &&
+                defaultValue.code == 'const []') ||
+            (field.type.isDartCoreMap && defaultValue.code == 'const {}') ||
+            (field.type.isDartCoreSet && defaultValue.code == 'const {}');
+
+        if (!isEmptyCollection &&
+            !targetClass.library.typeSystem.isAssignableTo(
+              defaultValue.type!,
+              field.type,
+            )) {
           throw InvalidGenerationSourceError(
             'Type mismatch for default value of "$fieldName": expected ${field.type.getDisplayString()} but got ${defaultValue.type!.getDisplayString()}.',
             element: elementContext,
