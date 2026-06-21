@@ -295,7 +295,7 @@ class UsesNullableListMapperImpl extends UsesNullableListMapper {
 @OmniMapper(
   uses: [ConcreteListNullableMapper],
   mappings: [
-    MappingRule('optionalList', defaultValue: []),
+    MappingRule('optionalList', defaultValue: <String>[]),
   ],
 )
 abstract class UsesNullableListMapper {
