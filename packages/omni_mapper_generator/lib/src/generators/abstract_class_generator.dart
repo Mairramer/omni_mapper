@@ -146,60 +146,9 @@ class AbstractClassGenerator {
       }
     }
 
-    for (final field in targetClass.fields) {
-      final fieldName = field.name;
-      if (fieldName == null) {
-        continue;
-      }
-
-      for (final metadata in field.metadata.annotations) {
-        final element = metadata.element;
-        if (element is ConstructorElement && element.enclosingElement.name == 'OmniField') {
-          final obj = metadata.computeConstantValue();
-          if (obj != null) {
-            final reader = ConstantReader(obj);
-            final name = reader.peek('name')?.stringValue;
-            if (name != null) {
-              if (config.fieldMaps.values.contains(fieldName)) {
-                throw InvalidGenerationSourceError(
-                  'Conflict: The field "$fieldName" is mapped in both @OmniField and mappings. Please remove one of the definitions.',
-                  element: field,
-                );
-              }
-              config.fieldMaps[name] = fieldName;
-            }
-          }
-        }
-      }
-    }
-
+    AnnotationParser.parseOmniFields(targetClass, config, isSource: false);
     for (final sClass in sourceClasses) {
-      for (final field in sClass.fields) {
-        final fieldName = field.name;
-        if (fieldName == null) {
-          continue;
-        }
-
-        for (final metadata in field.metadata.annotations) {
-          final element = metadata.element;
-          if (element is ConstructorElement && element.enclosingElement.name == 'OmniField') {
-            final obj = metadata.computeConstantValue();
-            if (obj != null) {
-              final reader = ConstantReader(obj);
-              final name = reader.peek('name')?.stringValue;
-              if (name != null) {
-                if (config.fieldMaps.containsKey(fieldName)) {
-                  throw InvalidGenerationSourceError(
-                    'Conflict: The field "$fieldName" is mapped in both @OmniField and mappings. Please remove one of the definitions.',
-                    element: field,
-                  );
-                }
-                config.fieldMaps[fieldName] = name;
-              }
-            }
-          }
-        }
-      }
+      AnnotationParser.parseOmniFields(sClass, config, isSource: true);
     }
 
     var codeBody = MappingBodyBuilder.build(

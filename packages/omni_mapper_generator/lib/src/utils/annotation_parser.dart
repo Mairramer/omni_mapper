@@ -183,95 +183,6 @@ class AnnotationParser {
       }
     }
 
-    if (classElement != null) {
-      final target = annotation.peek('target')?.typeValue;
-      final isSource = target != null;
-
-      for (final field in classElement.fields) {
-        final fieldName = field.name;
-        if (fieldName == null) {
-          continue;
-        }
-
-        for (final metadata in field.metadata.annotations) {
-          final element = metadata.element;
-          if (element is ConstructorElement && element.enclosingElement.name == 'OmniField') {
-            final obj = metadata.computeConstantValue();
-            if (obj != null) {
-              final reader = ConstantReader(obj);
-              final name = reader.peek('name')?.stringValue;
-
-              if (name != null) {
-                if (isSource) {
-                  if (fieldMaps.containsKey(fieldName)) {
-                    throw InvalidGenerationSourceError(
-                      'Conflict: The field "$fieldName" is mapped in both @OmniField and mappings. Please remove one of the definitions.',
-                      element: field,
-                    );
-                  }
-                  fieldMaps[fieldName] = name;
-                } else {
-                  if (fieldMaps.values.contains(fieldName)) {
-                    throw InvalidGenerationSourceError(
-                      'Conflict: The field "$fieldName" is mapped in both @OmniField and mappings. Please remove one of the definitions.',
-                      element: field,
-                    );
-                  }
-                  fieldMaps[name] = fieldName;
-                }
-              }
-
-              final targetName = isSource ? (name ?? fieldName) : fieldName;
-
-              final ignore = reader.peek('ignore')?.boolValue ?? false;
-              if (ignore) {
-                if (ignoreFields.contains(targetName)) {
-                  throw InvalidGenerationSourceError(
-                    'Conflict: The field "$targetName" is ignored in both @OmniField and mappings. Please remove one of the definitions.',
-                    element: field,
-                  );
-                }
-                ignoreFields.add(targetName);
-              }
-
-              final customObj = reader.peek('custom')?.objectValue;
-              if (customObj != null && !customObj.isNull) {
-                if (customMappings.containsKey(targetName)) {
-                  throw InvalidGenerationSourceError(
-                    'Conflict: The field "$targetName" has a custom mapping in both @OmniField and mappings. Please remove one of the definitions.',
-                    element: field,
-                  );
-                }
-                final customReader = ConstantReader(customObj);
-                if (customReader.isString) {
-                  customMappings[targetName] = customReader.stringValue;
-                } else {
-                  final parsed = _parseValue(customObj);
-                  if (parsed != null && parsed != 'null') {
-                    customMappings[targetName] = parsed;
-                  }
-                }
-              }
-
-              final defaultValueObj = reader.peek('defaultValue')?.objectValue;
-              if (defaultValueObj != null && !defaultValueObj.isNull) {
-                if (defaultValues.containsKey(targetName)) {
-                  throw InvalidGenerationSourceError(
-                    'Conflict: The field "$targetName" has a default value in both @OmniField and mappings. Please remove one of the definitions.',
-                    element: field,
-                  );
-                }
-                final parsed = _parseValue(defaultValueObj);
-                if (parsed != null && parsed != 'null') {
-                  defaultValues[targetName] = DefaultValueConfig(parsed, defaultValueObj.type);
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-
     final converters =
         annotation.peek('converters')?.listValue.map((e) => e.toTypeValue()).whereType<DartType>().toList() ?? const [];
 
@@ -288,7 +199,7 @@ class AnnotationParser {
     final reverseMethodNameRaw = annotation.peek('reverseMethodName')?.stringValue ?? '';
     final methodName = annotation.peek('methodName')?.stringValue ?? 'toEntity';
 
-    return MapperConfig(
+    final config = MapperConfig(
       ignoreFields: ignoreFields,
       fieldMaps: fieldMaps,
       defaultValues: defaultValues,
@@ -304,5 +215,105 @@ class AnnotationParser {
       reverseMethodName: reverseMethodNameRaw,
       methodName: methodName,
     );
+
+    if (classElement != null) {
+      final target = annotation.peek('target')?.typeValue;
+      final isSource = target != null;
+      parseOmniFields(classElement, config, isSource: isSource);
+    }
+
+    return config;
   }
+
+  static void parseOmniFields(
+    ClassElement classElement,
+    MapperConfig config, {
+    required bool isSource,
+  }) {
+    for (final field in classElement.fields) {
+      final fieldName = field.name;
+      if (fieldName == null) {
+        continue;
+      }
+
+      for (final metadata in field.metadata.annotations) {
+        final element = metadata.element;
+        if (element is ConstructorElement && element.enclosingElement.name == 'OmniField') {
+          final obj = metadata.computeConstantValue();
+          if (obj != null) {
+            final reader = ConstantReader(obj);
+            final name = reader.peek('name')?.stringValue;
+
+            if (name != null) {
+              if (isSource) {
+                if (config.fieldMaps.containsKey(fieldName)) {
+                  throw InvalidGenerationSourceError(
+                    'Conflict: The field "$fieldName" is mapped in both @OmniField and mappings. Please remove one of the definitions.',
+                    element: field,
+                  );
+                }
+                config.fieldMaps[fieldName] = name;
+              } else {
+                if (config.fieldMaps.values.contains(fieldName)) {
+                  throw InvalidGenerationSourceError(
+                    'Conflict: The field "$fieldName" is mapped in both @OmniField and mappings. Please remove one of the definitions.',
+                    element: field,
+                  );
+                }
+                config.fieldMaps[name] = fieldName;
+              }
+            }
+
+            final targetName = isSource ? (name ?? fieldName) : fieldName;
+
+            final ignore = reader.peek('ignore')?.boolValue ?? false;
+            if (ignore) {
+              if (config.ignoreFields.contains(targetName)) {
+                throw InvalidGenerationSourceError(
+                  'Conflict: The field "$targetName" is ignored in both @OmniField and mappings. Please remove one of the definitions.',
+                  element: field,
+                );
+              }
+              config.ignoreFields.add(targetName);
+            }
+
+            final customObj = reader.peek('custom')?.objectValue;
+            if (customObj != null && !customObj.isNull) {
+              if (config.customMappings.containsKey(targetName)) {
+                throw InvalidGenerationSourceError(
+                  'Conflict: The field "$targetName" has a custom mapping in both @OmniField and mappings. Please remove one of the definitions.',
+                  element: field,
+                );
+              }
+              final customReader = ConstantReader(customObj);
+              if (customReader.isString) {
+                config.customMappings[targetName] = customReader.stringValue;
+              } else {
+                final parsed = _parseValue(customObj);
+                if (parsed != null && parsed != 'null') {
+                  config.customMappings[targetName] = parsed;
+                }
+              }
+            }
+
+            final defaultValueObj = reader.peek('defaultValue')?.objectValue;
+            if (defaultValueObj != null && !defaultValueObj.isNull) {
+              if (config.defaultValues.containsKey(targetName)) {
+                throw InvalidGenerationSourceError(
+                  'Conflict: The field "$targetName" has a default value in both @OmniField and mappings. Please remove one of the definitions.',
+                  element: field,
+                );
+              }
+              final parsed = _parseValue(defaultValueObj);
+              if (parsed != null && parsed != 'null') {
+                config.defaultValues[targetName] = DefaultValueConfig(parsed, defaultValueObj.type);
+              }
+            }
+          }
+        }
+      }
+    }
+
+
+}
 }
