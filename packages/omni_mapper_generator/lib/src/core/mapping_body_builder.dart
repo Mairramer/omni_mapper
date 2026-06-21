@@ -535,7 +535,7 @@ class MappingBodyBuilder {
       }
 
       final defaultValue = defaultValues[fieldName];
-      if (defaultValue != null && defaultValue.type != null) {
+      if (defaultValue != null && defaultValue.type != null && !defaultValue.type!.isDartCoreString) {
         if (!targetClass.library.typeSystem.isAssignableTo(defaultValue.type!, field.type)) {
           throw InvalidGenerationSourceError(
             'Type mismatch for default value of "$fieldName": expected ${field.type.getDisplayString()} but got ${defaultValue.type!.getDisplayString()}.',
