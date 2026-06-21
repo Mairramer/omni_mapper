@@ -1,9 +1,19 @@
 import 'package:analyzer/dart/element/type.dart';
 
+class DefaultValueConfig {
+  final String code;
+  final DartType? type;
+
+  DefaultValueConfig(this.code, this.type);
+
+  @override
+  String toString() => code;
+}
+
 class MapperConfig {
   final List<String> ignoreFields;
   final Map<String, String> fieldMaps;
-  final Map<String, String> defaultValues;
+  final Map<String, DefaultValueConfig> defaultValues;
   final Map<String, String> customMappings;
   final List<DartType> converters;
   final bool strictMode;

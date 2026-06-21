@@ -24,10 +24,7 @@ class DtoModel {
   mappings: [
     MappingRule('id', source: 'userId'),
     MappingRule('name', source: 'fullName'),
-    MappingRule(
-      'status',
-      defaultValue: '"active"',
-    ), // default values are ignored in reverse
+    MappingRule('status', defaultValue: 'active'), // default values are ignored in reverse
   ],
 )
 class EntityModel {

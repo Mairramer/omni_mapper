@@ -3,6 +3,7 @@ import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:source_gen/source_gen.dart';
 
+import 'mapper_config.dart';
 import 'nested_field_resolver.dart';
 
 /// Information about a resolved field used during mapping generation.
@@ -25,7 +26,7 @@ class MappingBodyBuilder {
     String extensionMethodName = 'toEntity',
     List<String> ignoreFields = const [],
     Map<String, String> fieldMaps = const {},
-    Map<String, String> defaultValues = const {},
+    Map<String, DefaultValueConfig> defaultValues = const {},
     Map<String, String> customMappings = const {},
     List<DartType> converters = const [],
     List<DartType> uses = const [],
@@ -368,6 +369,13 @@ class MappingBodyBuilder {
                 if (isPathNullable && targetFieldType.nullabilitySuffix != NullabilitySuffix.question) {
                   final defaultValue = defaultValues[paramName];
                   if (defaultValue != null) {
+                    if (defaultValue.type != null &&
+                        !targetClass.library.typeSystem.isAssignableTo(defaultValue.type!, targetFieldType)) {
+                      throw InvalidGenerationSourceError(
+                        'Type mismatch for default value of "$paramName": expected ${targetFieldType.getDisplayString()} but got ${defaultValue.type!.getDisplayString()}.',
+                        element: elementContext,
+                      );
+                    }
                     if (isListMapping) {
                       usesInvocation = '$usesInvocation ?? $defaultValue';
                     } else {
@@ -484,6 +492,13 @@ class MappingBodyBuilder {
           if (isPathNullable && !targetNullable) {
             final defaultValue = defaultValues[paramName];
             if (defaultValue != null) {
+              if (defaultValue.type != null &&
+                  !targetClass.library.typeSystem.isAssignableTo(defaultValue.type!, targetFieldType)) {
+                throw InvalidGenerationSourceError(
+                  'Type mismatch for default value of "$paramName": expected ${targetFieldType.getDisplayString()} but got ${defaultValue.type!.getDisplayString()}.',
+                  element: elementContext,
+                );
+              }
               finalAccess = '$accessString ?? $defaultValue';
             } else {
               throw InvalidGenerationSourceError(
@@ -503,7 +518,15 @@ class MappingBodyBuilder {
       } else {
         // Fallback to default values
         if (defaultValues.containsKey(paramName)) {
-          codeBuffer.writeln('$paramName: ${defaultValues[paramName]},');
+          final defaultValue = defaultValues[paramName]!;
+          if (defaultValue.type != null &&
+              !targetClass.library.typeSystem.isAssignableTo(defaultValue.type!, param.type)) {
+            throw InvalidGenerationSourceError(
+              'Type mismatch for default value of "$paramName": expected ${param.type.getDisplayString()} but got ${defaultValue.type!.getDisplayString()}.',
+              element: elementContext,
+            );
+          }
+          codeBuffer.writeln('$paramName: $defaultValue,');
           assignedParams.add(paramName);
         } else if (param.isRequired) {
           throw InvalidGenerationSourceError(

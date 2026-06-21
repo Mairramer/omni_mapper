@@ -21,7 +21,7 @@ class StrictUserEntity {
   target: StrictUserEntity,
   strictMode: true,
   mappings: [
-    MappingRule('unmappedField', defaultValue: false),
+    MappingRule('unmappedField', ignore: true),
   ], // We must ignore it or map it to prevent generation error
 )
 class StrictUserModel {

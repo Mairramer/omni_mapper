@@ -128,7 +128,7 @@ class AnnotationParser {
     final fieldMaps = <String, String>{};
 
     final defaultValuesObj = annotation.peek('defaultValues')?.mapValue;
-    final defaultValues = <String, String>{};
+    final defaultValues = <String, DefaultValueConfig>{};
     if (defaultValuesObj != null) {
       for (final entry in defaultValuesObj.entries) {
         final key = entry.key?.toStringValue();
@@ -136,7 +136,7 @@ class AnnotationParser {
         if (key != null && value != null) {
           final parsed = _parseValue(value);
           if (parsed != null && parsed != 'null') {
-            defaultValues[key] = parsed;
+            defaultValues[key] = DefaultValueConfig(parsed, value.type);
           }
         }
       }
@@ -177,7 +177,7 @@ class AnnotationParser {
         if (defaultValueObj != null && !defaultValueObj.isNull) {
           final parsed = _parseValue(defaultValueObj);
           if (parsed != null && parsed != 'null') {
-            defaultValues[target] = parsed;
+            defaultValues[target] = DefaultValueConfig(parsed, defaultValueObj.type);
           }
         }
       }
@@ -263,7 +263,7 @@ class AnnotationParser {
                 }
                 final parsed = _parseValue(defaultValueObj);
                 if (parsed != null && parsed != 'null') {
-                  defaultValues[targetName] = parsed;
+                  defaultValues[targetName] = DefaultValueConfig(parsed, defaultValueObj.type);
                 }
               }
             }

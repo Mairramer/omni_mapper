@@ -3,6 +3,7 @@ import 'package:analyzer/dart/element/type.dart';
 import 'package:code_builder/code_builder.dart';
 import 'package:source_gen/source_gen.dart';
 
+import '../core/mapper_config.dart';
 import '../core/mapping_body_builder.dart';
 import '../utils/annotation_parser.dart';
 import '../utils/switch_builder.dart';
@@ -183,7 +184,8 @@ class ExtensionGenerator {
               methodName: 'update${sourceClass.name}',
               fieldMaps: reverseFieldMaps,
               ignoreFields: reverseIgnoreFields,
-              defaultValues: {}, // Reverse mappings don't automatically mirror default values
+              defaultValues:
+                  <String, DefaultValueConfig>{}, // Reverse mappings don't automatically mirror default values
               ignoreIfNull: config.ignoreIfNull,
             ),
           );

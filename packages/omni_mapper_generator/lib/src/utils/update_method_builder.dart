@@ -3,6 +3,7 @@ import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:code_builder/code_builder.dart';
 
+import '../core/mapper_config.dart';
 import '../core/nested_field_resolver.dart';
 
 class UpdateMethodBuilder {
@@ -12,7 +13,7 @@ class UpdateMethodBuilder {
     required String methodName,
     required Map<String, String> fieldMaps,
     required List<String> ignoreFields,
-    required Map<String, String> defaultValues,
+    required Map<String, DefaultValueConfig> defaultValues,
     required bool ignoreIfNull,
   }) {
     final updateBodyBuffer = StringBuffer();
