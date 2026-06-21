@@ -27,9 +27,7 @@ ResolvedNestedField? resolveNestedField(
     final fieldName = field.name!;
 
     if (fieldName == targetName) {
-      final access = currentAccess.isEmpty
-          ? fieldName
-          : '$currentAccess${needsQuestionMark ? '?.' : '.'}$fieldName';
+      final access = currentAccess.isEmpty ? fieldName : '$currentAccess${needsQuestionMark ? '?.' : '.'}$fieldName';
       return ResolvedNestedField(access, field.returnType);
     }
 
@@ -41,8 +39,7 @@ ResolvedNestedField? resolveNestedField(
       if (fieldName == firstPart) {
         final fieldTypeElement = field.returnType.element;
         if (fieldTypeElement is ClassElement) {
-          final isFieldNullable =
-              field.returnType.nullabilitySuffix == NullabilitySuffix.question;
+          final isFieldNullable = field.returnType.nullabilitySuffix == NullabilitySuffix.question;
           final access = currentAccess.isEmpty
               ? fieldName
               : '$currentAccess${needsQuestionMark ? '?.' : '.'}$fieldName';
@@ -60,16 +57,13 @@ ResolvedNestedField? resolveNestedField(
       }
     }
 
-    if (targetName.startsWith(fieldName) &&
-        targetName.length > fieldName.length) {
+    if (targetName.startsWith(fieldName) && targetName.length > fieldName.length) {
       final nextChar = targetName[fieldName.length];
       if (nextChar == nextChar.toUpperCase()) {
-        final remainingName =
-            nextChar.toLowerCase() + targetName.substring(fieldName.length + 1);
+        final remainingName = nextChar.toLowerCase() + targetName.substring(fieldName.length + 1);
         final fieldTypeElement = field.returnType.element;
         if (fieldTypeElement is ClassElement) {
-          final isFieldNullable =
-              field.returnType.nullabilitySuffix == NullabilitySuffix.question;
+          final isFieldNullable = field.returnType.nullabilitySuffix == NullabilitySuffix.question;
           final access = currentAccess.isEmpty
               ? fieldName
               : '$currentAccess${needsQuestionMark ? '?.' : '.'}$fieldName';

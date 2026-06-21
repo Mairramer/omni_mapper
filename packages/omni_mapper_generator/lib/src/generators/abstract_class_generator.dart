@@ -12,32 +12,25 @@ class AbstractClassGenerator {
     required ClassElement element,
     required ConstantReader annotation,
   }) {
-    final constructors = element.constructors
-        .where((c) => !c.isFactory)
-        .toList();
+    final constructors = element.constructors.where((c) => !c.isFactory).toList();
 
     final classBuilder = Class((c) {
       c
         ..name = '${element.name}Impl'
         ..extend = refer(element.name ?? '')
         ..methods.addAll(
-          element.methods
-              .where((m) => m.isAbstract)
-              .map((m) => _generateMethod(m, element, annotation)),
+          element.methods.where((m) => m.isAbstract).map((m) => _generateMethod(m, element, annotation)),
         );
 
       for (final constructor in constructors) {
-        if ((constructor.name == null || constructor.name!.isEmpty) &&
-            constructor.formalParameters.isEmpty) {
+        if ((constructor.name == null || constructor.name!.isEmpty) && constructor.formalParameters.isEmpty) {
           continue;
         }
 
         c.constructors.add(
           Constructor((cb) {
             final cName = constructor.name;
-            cb.name = (cName == null || cName.isEmpty || cName == 'new')
-                ? null
-                : cName;
+            cb.name = (cName == null || cName.isEmpty || cName == 'new') ? null : cName;
 
             if (cb.name != null) {
               cb.initializers.add(Code('super.${cb.name}()'));
@@ -128,8 +121,7 @@ class AbstractClassGenerator {
             for (final m in mapperClass.methods) {
               if (m.isAbstract && m.formalParameters.length == 1) {
                 if (m.returnType.element == tTypeDart?.element &&
-                    m.formalParameters.first.type.element ==
-                        sTypeDart?.element) {
+                    m.formalParameters.first.type.element == sTypeDart?.element) {
                   foundMethod = m.name;
                   break;
                 }
@@ -162,8 +154,7 @@ class AbstractClassGenerator {
 
       for (final metadata in field.metadata.annotations) {
         final element = metadata.element;
-        if (element is ConstructorElement &&
-            element.enclosingElement.name == 'OmniField') {
+        if (element is ConstructorElement && element.enclosingElement.name == 'OmniField') {
           final obj = metadata.computeConstantValue();
           if (obj != null) {
             final reader = ConstantReader(obj);
@@ -191,8 +182,7 @@ class AbstractClassGenerator {
 
         for (final metadata in field.metadata.annotations) {
           final element = metadata.element;
-          if (element is ConstructorElement &&
-              element.enclosingElement.name == 'OmniField') {
+          if (element is ConstructorElement && element.enclosingElement.name == 'OmniField') {
             final obj = metadata.computeConstantValue();
             if (obj != null) {
               final reader = ConstantReader(obj);

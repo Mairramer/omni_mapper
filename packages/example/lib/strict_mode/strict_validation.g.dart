@@ -11,6 +11,7 @@ extension StrictUserModelToEntity on StrictUserModel {
     return StrictUserEntity(
       id: id,
       name: name,
+      unmappedField: false,
     );
   }
 }

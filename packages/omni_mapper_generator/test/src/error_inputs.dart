@@ -59,8 +59,7 @@ class DependencyWithArgsTarget {
 class DependencyWithArgsMapper {
   final int someArg;
   DependencyWithArgsMapper(this.someArg);
-  DependencyWithArgsTarget toTarget(DependencyWithArgs model) =>
-      throw UnimplementedError();
+  DependencyWithArgsTarget toTarget(DependencyWithArgs model) => throw UnimplementedError();
 }
 
 class ParentSource {
@@ -112,9 +111,12 @@ abstract class UnparseableAnnotationMapper {
   'Conflict: The field "id" is mapped in both @OmniField and mappings. Please remove one of the definitions.',
   element: false,
 )
-@OmniMapper(target: DummyTarget, mappings: [
+@OmniMapper(
+  target: DummyTarget,
+  mappings: [
     MappingRule('id2', source: 'id'),
-  ])
+  ],
+)
 class ConflictSource {
   @OmniField(name: 'id3')
   final int id;

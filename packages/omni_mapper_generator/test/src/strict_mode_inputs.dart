@@ -38,7 +38,7 @@ class TargetG {
 
 @ShouldThrow(
   'Strict mode is enabled, but the following target properties are unmapped: unmapped.\n'
-  'To fix this, map them from the source, provide a defaultValue, or add them to ignoreFields.',
+  'To fix this, map them from the source, provide a defaultValue, or ignore them using @OmniField or mappings.',
 )
 @OmniMapper(target: TargetG, strictMode: true, methodName: 'toTargetG')
 class ModelG {

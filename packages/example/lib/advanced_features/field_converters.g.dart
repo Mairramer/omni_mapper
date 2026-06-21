@@ -11,7 +11,7 @@ extension AdvancedModelToEntity on AdvancedModel {
     return AdvancedEntity(
       id: userId,
       title: title,
-      status: 'active',
+      status: '"active"',
       createdAt: const DateTimeStringConverter().convert(createdAt),
     );
   }

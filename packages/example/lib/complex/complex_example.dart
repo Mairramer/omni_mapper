@@ -73,9 +73,12 @@ class UserProfileDocument {
 // --- 3. Sources (DTOs) & Mappers ---
 
 // Feature: Decentralized Extension Mapper & fieldMaps (renaming)
-@OmniMapper(target: ContactEntity, mappings: [
+@OmniMapper(
+  target: ContactEntity,
+  mappings: [
     MappingRule('zipCode', source: 'zip_code'),
-  ])
+  ],
+)
 class ContactDto {
   final String phone;
   // ignore: non_constant_identifier_names

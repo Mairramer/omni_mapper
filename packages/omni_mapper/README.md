@@ -145,10 +145,22 @@ class UserModel {
 
 Provide fallback values for target fields missing in the source:
 
+#### Option 1: `@OmniField`
+```dart
+class UserModel {
+  @OmniField(defaultValue: '"active"')
+  final String status;
+}
+```
+
+#### Option 2: `mappings`
 ```dart
 @OmniMapper(
   target: UserEntity,
-  defaultValues: {'status': '"active"', 'createdAt': 'DateTime.now()'},
+  mappings: [
+    MappingRule('status', defaultValue: '"active"'),
+    MappingRule('createdAt', defaultValue: 'DateTime.now()'),
+  ],
 )
 ```
 
@@ -201,8 +213,22 @@ formModel.updateUserEntity(existingEntity);
 
 Skip specific fields during mapping:
 
+#### Option 1: `@OmniField`
 ```dart
-@OmniMapper(target: UserEntity, ignoreFields: ['passwordHash'])
+class UserModel {
+  @OmniField(ignore: true)
+  final String passwordHash;
+}
+```
+
+#### Option 2: `mappings`
+```dart
+@OmniMapper(
+  target: UserEntity,
+  mappings: [
+    MappingRule('passwordHash', ignore: true),
+  ],
+)
 ```
 
 ## Recommended `build.yaml`

@@ -36,8 +36,8 @@ extension ModelDToEntityList on Iterable<ModelD> {
   target: EntityD,
   mappings: [
     MappingRule('id', source: 'userId'),
+    MappingRule('status', defaultValue: '"active"'),
   ],
-  defaultValues: {'status': '"active"'},
   converters: [StringDateConverter],
 )
 class ModelD {
@@ -73,7 +73,12 @@ extension ModelHToTargetHList on Iterable<ModelH> {
   }
 }
 ''')
-@OmniMapper(target: TargetH, generateUpdateMethod: true, ignoreIfNull: true, methodName: 'toTargetH')
+@OmniMapper(
+  target: TargetH,
+  generateUpdateMethod: true,
+  ignoreIfNull: true,
+  methodName: 'toTargetH',
+)
 class ModelH {
   final int? id; // Nullable
   final String name; // Non-nullable
@@ -152,7 +157,11 @@ extension ModelJToTargetJList on Iterable<ModelJ> {
   }
 }
 ''')
-@OmniMapper(target: TargetJ, generateUpdateMethod: true, methodName: 'toTargetJ')
+@OmniMapper(
+  target: TargetJ,
+  generateUpdateMethod: true,
+  methodName: 'toTargetJ',
+)
 class ModelJ {
   final SourceEnum status;
   final SourceEnum? optionalStatus;
@@ -217,7 +226,11 @@ extension ModelKToTargetKList on Iterable<ModelK> {
   }
 }
 ''')
-@OmniMapper(target: TargetK, generateUpdateMethod: true, methodName: 'toTargetK')
+@OmniMapper(
+  target: TargetK,
+  generateUpdateMethod: true,
+  methodName: 'toTargetK',
+)
 class ModelK {
   final AddressK? userAddress;
   final ProfileK profile;
@@ -265,8 +278,8 @@ extension TargetLToModelLList on Iterable<TargetL> {
   reverseMethodName: 'toModelL',
   mappings: [
     MappingRule('id', source: 'userId'),
+    MappingRule('status', defaultValue: '"active"'),
   ],
-  defaultValues: {'status': '"active"'},
 )
 class ModelL {
   final int userId;

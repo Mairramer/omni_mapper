@@ -28,12 +28,12 @@ class DeviceEntity {
 
 @OmniMapper(
   target: DeviceEntity,
-  defaultValues: {
-    'type': DeviceType.web,
-    'isActive': true,
-    'loginCount': 0,
-    'version': 1.0,
-  },
+  mappings: [
+    MappingRule('type', defaultValue: DeviceType.web),
+    MappingRule('isActive', defaultValue: true),
+    MappingRule('loginCount', defaultValue: 0),
+    MappingRule('version', defaultValue: 1.0),
+  ],
 )
 class DeviceModel {
   final String deviceId;

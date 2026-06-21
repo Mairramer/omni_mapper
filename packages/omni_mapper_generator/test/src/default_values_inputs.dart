@@ -32,12 +32,12 @@ extension ModelAToTargetAList on Iterable<ModelA> {
 @OmniMapper(
   target: TargetA,
   methodName: 'toTargetA',
-  defaultValues: {
-    'status': 'active',
-    'count': 42,
-    'ratio': 3.14,
-    'isValid': true,
-  },
+  mappings: [
+    MappingRule('status', defaultValue: 'active'),
+    MappingRule('count', defaultValue: 42),
+    MappingRule('ratio', defaultValue: 3.14),
+    MappingRule('isValid', defaultValue: true),
+  ],
 )
 class ModelA {
   ModelA();

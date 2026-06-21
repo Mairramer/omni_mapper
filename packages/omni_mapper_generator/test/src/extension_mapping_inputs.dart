@@ -80,7 +80,11 @@ extension ModelEToMutableEntityEList on Iterable<ModelE> {
   }
 }
 ''')
-@OmniMapper(target: MutableEntityE, generateUpdateMethod: true, methodName: 'toMutableEntityE')
+@OmniMapper(
+  target: MutableEntityE,
+  generateUpdateMethod: true,
+  methodName: 'toMutableEntityE',
+)
 class ModelE {
   final int id;
   final String name;

@@ -13,10 +13,7 @@ class AnnotationParser {
 
     final reader = ConstantReader(obj);
     if (reader.isString) {
-      final escaped = reader.stringValue
-          .replaceAll(r'\', r'\\')
-          .replaceAll("'", r"\'")
-          .replaceAll(r'$', r'\$');
+      final escaped = reader.stringValue.replaceAll(r'\', r'\\').replaceAll("'", r"\'").replaceAll(r'$', r'\$');
       return "'$escaped'";
     }
     if (reader.isInt) {
@@ -117,32 +114,33 @@ class AnnotationParser {
     ConstantReader annotation, {
     ClassElement? classElement,
   }) {
-    final ignoreFields =
-        annotation
-            .peek('ignoreFields')
-            ?.listValue
-            .map((e) => e.toStringValue() ?? '')
-            .where((e) => e.isNotEmpty)
-            .toList() ??
-        [];
+    final ignoreFields = <String>[];
+    final ignoreFieldsList = annotation.peek('ignoreFields')?.listValue;
+    if (ignoreFieldsList != null) {
+      for (final item in ignoreFieldsList) {
+        final val = item.toStringValue();
+        if (val != null) {
+          ignoreFields.add(val);
+        }
+      }
+    }
 
     final fieldMaps = <String, String>{};
-
 
     final defaultValuesObj = annotation.peek('defaultValues')?.mapValue;
     final defaultValues = <String, String>{};
     if (defaultValuesObj != null) {
       for (final entry in defaultValuesObj.entries) {
         final key = entry.key?.toStringValue();
-        if (key != null) {
-          final parsed = _parseValue(entry.value);
+        final value = entry.value;
+        if (key != null && value != null) {
+          final parsed = _parseValue(value);
           if (parsed != null && parsed != 'null') {
             defaultValues[key] = parsed;
           }
         }
       }
     }
-
     final customMappings = <String, String>{};
     final mappingsList = annotation.peek('mappings')?.listValue;
     if (mappingsList != null) {
@@ -197,12 +195,12 @@ class AnnotationParser {
 
         for (final metadata in field.metadata.annotations) {
           final element = metadata.element;
-          if (element is ConstructorElement &&
-              element.enclosingElement.name == 'OmniField') {
+          if (element is ConstructorElement && element.enclosingElement.name == 'OmniField') {
             final obj = metadata.computeConstantValue();
             if (obj != null) {
               final reader = ConstantReader(obj);
               final name = reader.peek('name')?.stringValue;
+
               if (name != null) {
                 if (isSource) {
                   if (fieldMaps.containsKey(fieldName)) {
@@ -222,6 +220,52 @@ class AnnotationParser {
                   fieldMaps[name] = fieldName;
                 }
               }
+
+              final targetName = isSource ? (name ?? fieldName) : fieldName;
+
+              final ignore = reader.peek('ignore')?.boolValue ?? false;
+              if (ignore) {
+                if (ignoreFields.contains(targetName)) {
+                  throw InvalidGenerationSourceError(
+                    'Conflict: The field "$targetName" is ignored in both @OmniField and mappings. Please remove one of the definitions.',
+                    element: field,
+                  );
+                }
+                ignoreFields.add(targetName);
+              }
+
+              final customObj = reader.peek('custom')?.objectValue;
+              if (customObj != null && !customObj.isNull) {
+                if (customMappings.containsKey(targetName)) {
+                  throw InvalidGenerationSourceError(
+                    'Conflict: The field "$targetName" has a custom mapping in both @OmniField and mappings. Please remove one of the definitions.',
+                    element: field,
+                  );
+                }
+                final customReader = ConstantReader(customObj);
+                if (customReader.isString) {
+                  customMappings[targetName] = customReader.stringValue;
+                } else {
+                  final parsed = _parseValue(customObj);
+                  if (parsed != null && parsed != 'null') {
+                    customMappings[targetName] = parsed;
+                  }
+                }
+              }
+
+              final defaultValueObj = reader.peek('defaultValue')?.objectValue;
+              if (defaultValueObj != null && !defaultValueObj.isNull) {
+                if (defaultValues.containsKey(targetName)) {
+                  throw InvalidGenerationSourceError(
+                    'Conflict: The field "$targetName" has a default value in both @OmniField and mappings. Please remove one of the definitions.',
+                    element: field,
+                  );
+                }
+                final parsed = _parseValue(defaultValueObj);
+                if (parsed != null && parsed != 'null') {
+                  defaultValues[targetName] = parsed;
+                }
+              }
             }
           }
         }
@@ -229,35 +273,19 @@ class AnnotationParser {
     }
 
     final converters =
-        annotation
-            .peek('converters')
-            ?.listValue
-            .map((e) => e.toTypeValue())
-            .whereType<DartType>()
-            .toList() ??
-        const [];
+        annotation.peek('converters')?.listValue.map((e) => e.toTypeValue()).whereType<DartType>().toList() ?? const [];
 
     final strictMode = annotation.peek('strictMode')?.boolValue ?? false;
     final hookType = annotation.peek('hook')?.typeValue;
 
     final uses =
-        annotation
-            .peek('uses')
-            ?.listValue
-            .map((e) => e.toTypeValue())
-            .whereType<DartType>()
-            .toList() ??
-        const [];
+        annotation.peek('uses')?.listValue.map((e) => e.toTypeValue()).whereType<DartType>().toList() ?? const [];
 
-    final generateListMapper =
-        annotation.peek('generateListMapper')?.boolValue ?? true;
-    final generateUpdateMethod =
-        annotation.peek('generateUpdateMethod')?.boolValue ?? true;
+    final generateListMapper = annotation.peek('generateListMapper')?.boolValue ?? true;
+    final generateUpdateMethod = annotation.peek('generateUpdateMethod')?.boolValue ?? true;
     final ignoreIfNull = annotation.peek('ignoreIfNull')?.boolValue ?? false;
-    final generateReverse =
-        annotation.peek('generateReverse')?.boolValue ?? false;
-    final reverseMethodNameRaw =
-        annotation.peek('reverseMethodName')?.stringValue ?? '';
+    final generateReverse = annotation.peek('generateReverse')?.boolValue ?? false;
+    final reverseMethodNameRaw = annotation.peek('reverseMethodName')?.stringValue ?? '';
     final methodName = annotation.peek('methodName')?.stringValue ?? 'toEntity';
 
     return MapperConfig(

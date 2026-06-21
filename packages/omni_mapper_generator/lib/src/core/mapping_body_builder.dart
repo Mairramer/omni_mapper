@@ -47,17 +47,13 @@ class MappingBodyBuilder {
         final access = getAccess(name);
         if (!addedAccesses.contains(access)) {
           addedAccesses.add(access);
-          availableSourceFields
-              .putIfAbsent(name, () => [])
-              .add(ResolvedFieldInfo(type, access, sClass));
+          availableSourceFields.putIfAbsent(name, () => []).add(ResolvedFieldInfo(type, access, sClass));
         }
       }
 
       final typesToCheck = <InterfaceElement>[
         sClass,
-        ...sClass.allSupertypes
-            .map((t) => t.element)
-            .whereType<InterfaceElement>(),
+        ...sClass.allSupertypes.map((t) => t.element).whereType<InterfaceElement>(),
       ];
 
       for (final element in typesToCheck) {
@@ -179,9 +175,7 @@ class MappingBodyBuilder {
     }
 
     final targetConstructor =
-        targetClass.constructors
-            .where((c) => (c.name == null || c.name!.isEmpty) && !c.isPrivate)
-            .firstOrNull ??
+        targetClass.constructors.where((c) => (c.name == null || c.name!.isEmpty) && !c.isPrivate).firstOrNull ??
         targetClass.constructors.where((c) => !c.isPrivate).firstOrNull ??
         targetClass.constructors.first;
 
@@ -236,12 +230,10 @@ class MappingBodyBuilder {
               final omniConverter = classElement.allSupertypes
                   .where((t) => t.element.name == 'OmniConverter')
                   .firstOrNull;
-              if (omniConverter != null &&
-                  omniConverter.typeArguments.length == 2) {
+              if (omniConverter != null && omniConverter.typeArguments.length == 2) {
                 final sType = omniConverter.typeArguments[0];
                 final tType = omniConverter.typeArguments[1];
-                if (sType.element == sourceFieldType.element &&
-                    tType.element == targetFieldType.element) {
+                if (sType.element == sourceFieldType.element && tType.element == targetFieldType.element) {
                   matchingConverter = converter;
                   break;
                 }
@@ -253,15 +245,12 @@ class MappingBodyBuilder {
         if (mapperClass != null) {
           final sourceTypeElement = sourceFieldType.element;
           final targetTypeElement = param.type.element;
-          if (sourceTypeElement != null &&
-              targetTypeElement != null &&
-              sourceTypeElement != targetTypeElement) {
+          if (sourceTypeElement != null && targetTypeElement != null && sourceTypeElement != targetTypeElement) {
             for (final m in mapperClass.methods) {
               if (m.isAbstract && m.formalParameters.length == 1) {
                 final retStr = m.returnType.getDisplayString();
                 final tgtStr = targetFieldType.getDisplayString();
-                final paramStr = m.formalParameters.first.type
-                    .getDisplayString();
+                final paramStr = m.formalParameters.first.type.getDisplayString();
                 final srcStr = sourceFieldType.getDisplayString();
 
                 if (retStr == tgtStr && paramStr == srcStr) {
@@ -277,22 +266,16 @@ class MappingBodyBuilder {
         final sTypeStr = sourceFieldType.getDisplayString();
         final tTypeStr = targetFieldType.getDisplayString();
 
-        if (sTypeStr != tTypeStr &&
-            matchingConverter == null &&
-            nestedMapper == null) {
+        if (sTypeStr != tTypeStr && matchingConverter == null && nestedMapper == null) {
           for (final useType in uses) {
             final classElement = useType.element;
             if (classElement is ClassElement) {
-              final isListMapping =
-                  sourceFieldType.isDartCoreList &&
-                  targetFieldType.isDartCoreList;
+              final isListMapping = sourceFieldType.isDartCoreList && targetFieldType.isDartCoreList;
 
               DartType expectedSource = sourceFieldType;
               DartType expectedTarget = targetFieldType;
 
-              if (isListMapping &&
-                  sourceFieldType is ParameterizedType &&
-                  targetFieldType is ParameterizedType) {
+              if (isListMapping && sourceFieldType is ParameterizedType && targetFieldType is ParameterizedType) {
                 expectedSource = (sourceFieldType).typeArguments.first;
                 expectedTarget = (targetFieldType).typeArguments.first;
               }
@@ -308,9 +291,7 @@ class MappingBodyBuilder {
                     '?',
                     '',
                   );
-                  final paramStr = m.formalParameters.first.type
-                      .getDisplayString()
-                      .replaceAll('?', '');
+                  final paramStr = m.formalParameters.first.type.getDisplayString().replaceAll('?', '');
                   final srcStr = expectedSource.getDisplayString().replaceAll(
                     '?',
                     '',
@@ -324,9 +305,7 @@ class MappingBodyBuilder {
               }
 
               if (matchingMethod != null) {
-                final callerName = classElement.isAbstract
-                    ? '${classElement.name}Impl'
-                    : classElement.name;
+                final callerName = classElement.isAbstract ? '${classElement.name}Impl' : classElement.name;
                 String caller = '$callerName()';
 
                 if (mapperClass != null) {
@@ -354,9 +333,7 @@ class MappingBodyBuilder {
                 if (caller == '$callerName()') {
                   bool hasZeroArgConstructor = false;
                   for (final constructor in classElement.constructors) {
-                    if (constructor.name == null ||
-                        constructor.name!.isEmpty ||
-                        constructor.name == 'new') {
+                    if (constructor.name == null || constructor.name!.isEmpty || constructor.name == 'new') {
                       if (constructor.formalParameters.every(
                         (p) => p.isOptional,
                       )) {
@@ -375,26 +352,20 @@ class MappingBodyBuilder {
                 }
 
                 final isPathNullable =
-                    sourceFieldType.nullabilitySuffix ==
-                        NullabilitySuffix.question ||
-                    accessString.contains('?.');
+                    sourceFieldType.nullabilitySuffix == NullabilitySuffix.question || accessString.contains('?.');
 
                 if (isListMapping) {
                   usesInvocation =
                       '$accessString${isPathNullable ? '?' : ''}.map((e) => $caller.${matchingMethod.name}(e)).toList()';
                 } else {
                   if (isPathNullable) {
-                    usesInvocation =
-                        '$accessString != null ? $caller.${matchingMethod.name}(($accessString)!) : null';
+                    usesInvocation = '$accessString != null ? $caller.${matchingMethod.name}(($accessString)!) : null';
                   } else {
-                    usesInvocation =
-                        '$caller.${matchingMethod.name}($accessString)';
+                    usesInvocation = '$caller.${matchingMethod.name}($accessString)';
                   }
                 }
 
-                if (isPathNullable &&
-                    targetFieldType.nullabilitySuffix !=
-                        NullabilitySuffix.question) {
+                if (isPathNullable && targetFieldType.nullabilitySuffix != NullabilitySuffix.question) {
                   final defaultValue = defaultValues[paramName];
                   if (defaultValue != null) {
                     if (isListMapping) {
@@ -446,17 +417,12 @@ class MappingBodyBuilder {
         } else {
           final sourceTypeElement = sourceFieldType.element;
           final targetTypeElement = param.type.element;
-          if (sourceTypeElement != null &&
-              targetTypeElement != null &&
-              sourceTypeElement != targetTypeElement) {
+          if (sourceTypeElement != null && targetTypeElement != null && sourceTypeElement != targetTypeElement) {
             final isPathNullable =
-                sourceFieldType.nullabilitySuffix ==
-                    NullabilitySuffix.question ||
-                accessString.contains('?.');
+                sourceFieldType.nullabilitySuffix == NullabilitySuffix.question || accessString.contains('?.');
 
             // Automatic Enum Mapping
-            if (sourceTypeElement is EnumElement &&
-                targetTypeElement is EnumElement) {
+            if (sourceTypeElement is EnumElement && targetTypeElement is EnumElement) {
               final targetEnumName = targetTypeElement.name;
               if (isPathNullable) {
                 if (param.isNamed) {
@@ -484,8 +450,7 @@ class MappingBodyBuilder {
             }
 
             // Automatic Nested Mapping
-            if (sourceFieldType.isDartCoreList &&
-                targetFieldType.isDartCoreList) {
+            if (sourceFieldType.isDartCoreList && targetFieldType.isDartCoreList) {
               // If it's a list, map it
               if (param.isNamed) {
                 codeBuffer.writeln(
@@ -512,10 +477,8 @@ class MappingBodyBuilder {
           }
 
           final isPathNullable =
-              sourceFieldType.nullabilitySuffix == NullabilitySuffix.question ||
-              accessString.contains('?.');
-          final targetNullable =
-              targetFieldType.nullabilitySuffix == NullabilitySuffix.question;
+              sourceFieldType.nullabilitySuffix == NullabilitySuffix.question || accessString.contains('?.');
+          final targetNullable = targetFieldType.nullabilitySuffix == NullabilitySuffix.question;
 
           String finalAccess = accessString;
           if (isPathNullable && !targetNullable) {
@@ -603,15 +566,10 @@ class MappingBodyBuilder {
 
       for (final field in targetClass.fields) {
         final fieldName = field.name;
-        if (fieldName == null ||
-            field.isStatic ||
-            field.isFinal ||
-            field.setter == null) {
+        if (fieldName == null || field.isStatic || field.isFinal || field.setter == null) {
           continue;
         }
-        if (!assignedParams.contains(fieldName) &&
-            !ignoreFields.contains(fieldName) &&
-            !field.hasInitializer) {
+        if (!assignedParams.contains(fieldName) && !ignoreFields.contains(fieldName) && !field.hasInitializer) {
           unmappedFields.add(fieldName);
         }
       }
@@ -619,7 +577,7 @@ class MappingBodyBuilder {
       if (unmappedFields.isNotEmpty) {
         throw InvalidGenerationSourceError(
           'Strict mode is enabled, but the following target properties are unmapped: ${unmappedFields.join(', ')}.\n'
-          'To fix this, map them from the source, provide a defaultValue, or add them to ignoreFields.',
+          'To fix this, map them from the source, provide a defaultValue, or ignore them using @OmniField or mappings.',
           element: elementContext,
         );
       }
