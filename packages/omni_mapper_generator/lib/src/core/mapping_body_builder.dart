@@ -204,6 +204,16 @@ class MappingBodyBuilder {
         continue;
       }
 
+      final defaultValue = defaultValues[paramName];
+      if (defaultValue != null && defaultValue.type != null) {
+        if (!targetClass.library.typeSystem.isAssignableTo(defaultValue.type!, param.type)) {
+          throw InvalidGenerationSourceError(
+            'Type mismatch for default value of "$paramName": expected ${param.type.getDisplayString()} but got ${defaultValue.type!.getDisplayString()}.',
+            element: elementContext,
+          );
+        }
+      }
+
       if (customMappings.containsKey(paramName)) {
         if (param.isNamed) {
           codeBuffer.writeln('$paramName: ${customMappings[paramName]},');
@@ -367,26 +377,11 @@ class MappingBodyBuilder {
                 }
 
                 if (isPathNullable && targetFieldType.nullabilitySuffix != NullabilitySuffix.question) {
-                  final defaultValue = defaultValues[paramName];
-                  if (defaultValue != null) {
-                    if (defaultValue.type != null &&
-                        !targetClass.library.typeSystem.isAssignableTo(defaultValue.type!, targetFieldType)) {
-                      throw InvalidGenerationSourceError(
-                        'Type mismatch for default value of "$paramName": expected ${targetFieldType.getDisplayString()} but got ${defaultValue.type!.getDisplayString()}.',
-                        element: elementContext,
-                      );
-                    }
-                    if (isListMapping) {
-                      usesInvocation = '$usesInvocation ?? $defaultValue';
-                    } else {
-                      usesInvocation =
-                          '$accessString != null ? $caller.${matchingMethod.name}(($accessString)!) : $defaultValue';
-                    }
+                  if (isListMapping) {
+                    usesInvocation = '$usesInvocation ?? $defaultValue';
                   } else {
-                    throw InvalidGenerationSourceError(
-                      'Nullability mismatch for field "$paramName": source path is nullable but target is not, and no default value is provided.',
-                      element: elementContext,
-                    );
+                    usesInvocation =
+                        '$accessString != null ? $caller.${matchingMethod.name}(($accessString)!) : $defaultValue';
                   }
                 }
                 break;
@@ -492,13 +487,6 @@ class MappingBodyBuilder {
           if (isPathNullable && !targetNullable) {
             final defaultValue = defaultValues[paramName];
             if (defaultValue != null) {
-              if (defaultValue.type != null &&
-                  !targetClass.library.typeSystem.isAssignableTo(defaultValue.type!, targetFieldType)) {
-                throw InvalidGenerationSourceError(
-                  'Type mismatch for default value of "$paramName": expected ${targetFieldType.getDisplayString()} but got ${defaultValue.type!.getDisplayString()}.',
-                  element: elementContext,
-                );
-              }
               finalAccess = '$accessString ?? $defaultValue';
             } else {
               throw InvalidGenerationSourceError(
@@ -519,13 +507,6 @@ class MappingBodyBuilder {
         // Fallback to default values
         if (defaultValues.containsKey(paramName)) {
           final defaultValue = defaultValues[paramName]!;
-          if (defaultValue.type != null &&
-              !targetClass.library.typeSystem.isAssignableTo(defaultValue.type!, param.type)) {
-            throw InvalidGenerationSourceError(
-              'Type mismatch for default value of "$paramName": expected ${param.type.getDisplayString()} but got ${defaultValue.type!.getDisplayString()}.',
-              element: elementContext,
-            );
-          }
           codeBuffer.writeln('$paramName: $defaultValue,');
           assignedParams.add(paramName);
         } else if (param.isRequired) {
@@ -551,6 +532,16 @@ class MappingBodyBuilder {
           assignedParams.contains(fieldName) ||
           ignoreFields.contains(fieldName)) {
         continue;
+      }
+
+      final defaultValue = defaultValues[fieldName];
+      if (defaultValue != null && defaultValue.type != null) {
+        if (!targetClass.library.typeSystem.isAssignableTo(defaultValue.type!, field.type)) {
+          throw InvalidGenerationSourceError(
+            'Type mismatch for default value of "$fieldName": expected ${field.type.getDisplayString()} but got ${defaultValue.type!.getDisplayString()}.',
+            element: elementContext,
+          );
+        }
       }
 
       if (customMappings.containsKey(fieldName)) {

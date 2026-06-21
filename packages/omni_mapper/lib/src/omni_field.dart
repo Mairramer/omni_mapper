@@ -39,10 +39,10 @@ class OmniField {
   /// A custom Dart expression used to map this field.
   ///
   /// For example: `custom: 'source.age.toString()'`
-  final dynamic custom;
+  final Object? custom;
 
   /// A default value to use if the source field is null or missing.
   ///
-  /// For example: `defaultValue: '"active"'`
-  final dynamic defaultValue;
+  /// For example: `defaultValue: 'active'`
+  final Object? defaultValue;
 }
