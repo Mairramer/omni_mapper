@@ -207,7 +207,32 @@ formModel.updateUserEntity(existingEntity);
 ```
 
 > Disabled by default. Enable with `generateUpdateMethod: true`.
-> Works with mutable fields only (non-`final`).
+> Works with mutable fields only (non-`final`), unless using a `CollectionUpdateStrategy` that mutates the collection in-place.
+
+#### Collection Update Strategies
+
+When `generateUpdateMethod: true`, you can configure how collections (`List`, `Set`, `Map`) are updated using `collectionUpdateStrategy` globally or per field:
+
+- **`replace`** (Default): Assigns the new collection reference to the target field (`target.tags = tags;`).
+- **`clearAndAddAll`**: Clears the existing collection and adds all items from the source (`target.tags.clear(); target.tags.addAll(tags);`). Works perfectly with `final` collections!
+- **`append`**: Appends elements to the existing collection without clearing it first. For Maps, this acts as a merge, updating existing keys and adding new ones.
+
+**Example (Global):**
+```dart
+@OmniMapper(
+  target: UserEntity,
+  generateUpdateMethod: true,
+  collectionUpdateStrategy: CollectionUpdateStrategy.clearAndAddAll,
+)
+```
+
+**Example (Per-Field overrides):**
+```dart
+class UserModel {
+  @OmniField(collectionUpdateStrategy: CollectionUpdateStrategy.append)
+  final List<String> tags;
+}
+```
 
 ### Ignoring Fields
 

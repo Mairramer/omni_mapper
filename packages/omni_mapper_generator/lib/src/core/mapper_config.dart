@@ -25,6 +25,8 @@ class MapperConfig {
   final bool generateReverse;
   final String reverseMethodName;
   final String methodName;
+  final String globalCollectionUpdateStrategy;
+  final Map<String, String> fieldCollectionUpdateStrategies;
 
   MapperConfig({
     required this.ignoreFields,
@@ -41,5 +43,7 @@ class MapperConfig {
     this.generateReverse = false,
     this.reverseMethodName = '',
     this.methodName = 'toEntity',
+    this.globalCollectionUpdateStrategy = 'CollectionUpdateStrategy.replace',
+    this.fieldCollectionUpdateStrategies = const {},
   });
 }

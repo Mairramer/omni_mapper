@@ -7,6 +7,7 @@ Future<void> main() async {
   final testFiles = [
     'abstract_class_inputs.dart',
     'extension_mapping_inputs.dart',
+    'collection_update_strategy_inputs.dart',
     'advanced_features_inputs.dart',
     'strict_mode_inputs.dart',
     'error_inputs.dart',

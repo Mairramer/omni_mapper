@@ -15,6 +15,8 @@ class UpdateMethodBuilder {
     required List<String> ignoreFields,
     required Map<String, DefaultValueConfig> defaultValues,
     required bool ignoreIfNull,
+    required String globalCollectionUpdateStrategy,
+    required Map<String, String> fieldCollectionUpdateStrategies,
   }) {
     final updateBodyBuffer = StringBuffer();
 
@@ -50,12 +52,19 @@ class UpdateMethodBuilder {
 
     for (final field in targetClass.fields) {
       final fieldName = field.name;
-      if (fieldName == null ||
-          field.isStatic ||
-          field.isFinal ||
-          field.setter == null) {
+      if (fieldName == null || field.isStatic) {
         continue;
       }
+      
+      final targetFieldType = field.type;
+      final isCollection = targetFieldType.isDartCoreList || targetFieldType.isDartCoreSet || targetFieldType.isDartCoreMap;
+      final strategyStr = fieldCollectionUpdateStrategies[fieldName] ?? globalCollectionUpdateStrategy;
+      final isMutatingCollection = isCollection && (strategyStr == 'CollectionUpdateStrategy.clearAndAddAll' || strategyStr == 'CollectionUpdateStrategy.append');
+
+      if ((field.isFinal || field.setter == null) && !isMutatingCollection) {
+        continue;
+      }
+      
       if (ignoreFields.contains(fieldName)) {
         continue;
       }
@@ -104,6 +113,13 @@ class UpdateMethodBuilder {
         final isNullable =
             sourceFieldType?.nullabilitySuffix == NullabilitySuffix.question ||
             accessString.contains('?.');
+        final targetNullable =
+            targetFieldType.nullabilitySuffix == NullabilitySuffix.question;
+
+        final isCollection = targetFieldType.isDartCoreList || targetFieldType.isDartCoreSet || targetFieldType.isDartCoreMap;
+        final strategyStr = fieldCollectionUpdateStrategies[fieldName] ?? globalCollectionUpdateStrategy;
+        final isClearAndAddAll = isCollection && strategyStr == 'CollectionUpdateStrategy.clearAndAddAll';
+        final isAppend = isCollection && strategyStr == 'CollectionUpdateStrategy.append';
 
         if (sourceTypeElement is EnumElement &&
             targetTypeElement is EnumElement &&
@@ -120,6 +136,22 @@ class UpdateMethodBuilder {
           } else {
             updateBodyBuffer.writeln(
               'target.$fieldName = $targetEnumName.values.byName($accessString.name);',
+            );
+          }
+        } else if (isClearAndAddAll || isAppend) {
+          final targetAccess = targetNullable ? 'target.$fieldName?' : 'target.$fieldName';
+          final clearCall = isClearAndAddAll ? '  $targetAccess.clear();\n' : '';
+          if (ignoreIfNull && isNullable) {
+            updateBodyBuffer.writeln(
+              'if ($accessString case final $fieldName?) {\n$clearCall  $targetAccess.addAll($fieldName);\n}',
+            );
+          } else if (isNullable) {
+            updateBodyBuffer.writeln(
+              'if ($accessString != null) {\n$clearCall  $targetAccess.addAll($accessString!);\n}',
+            );
+          } else {
+            updateBodyBuffer.writeln(
+              '$clearCall  $targetAccess.addAll($accessString);',
             );
           }
         } else {

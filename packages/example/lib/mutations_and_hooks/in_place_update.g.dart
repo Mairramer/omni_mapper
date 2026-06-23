@@ -12,6 +12,7 @@ extension FormModelToEntity on FormModel {
       id: id,
       name: name,
       isActive: isActive,
+      tags: tags,
     );
   }
 
@@ -19,6 +20,8 @@ extension FormModelToEntity on FormModel {
     target.id = id;
     target.name = name;
     target.isActive = isActive;
+    target.tags.clear();
+    target.tags.addAll(tags);
   }
 }
 

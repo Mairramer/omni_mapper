@@ -129,6 +129,7 @@ class AnnotationParser {
     }
 
     final fieldMaps = <String, String>{};
+    final fieldCollectionUpdateStrategies = <String, String>{};
 
     final defaultValuesObj = annotation.peek('defaultValues')?.mapValue;
     final defaultValues = <String, DefaultValueConfig>{};
@@ -186,6 +187,14 @@ class AnnotationParser {
             );
           }
         }
+
+        final collectionUpdateStrategyObj = mapping.getField('collectionUpdateStrategy');
+        if (collectionUpdateStrategyObj != null && !collectionUpdateStrategyObj.isNull) {
+          final parsed = _parseValue(collectionUpdateStrategyObj);
+          if (parsed != null && parsed != 'null') {
+            fieldCollectionUpdateStrategies[target] = parsed;
+          }
+        }
       }
     }
 
@@ -221,6 +230,15 @@ class AnnotationParser {
         annotation.peek('reverseMethodName')?.stringValue ?? '';
     final methodName = annotation.peek('methodName')?.stringValue ?? 'toEntity';
 
+    String globalCollectionUpdateStrategy = 'CollectionUpdateStrategy.replace';
+    final globalCollectionUpdateStrategyObj = annotation.peek('collectionUpdateStrategy')?.objectValue;
+    if (globalCollectionUpdateStrategyObj != null && !globalCollectionUpdateStrategyObj.isNull) {
+      final parsed = _parseValue(globalCollectionUpdateStrategyObj);
+      if (parsed != null && parsed != 'null') {
+        globalCollectionUpdateStrategy = parsed;
+      }
+    }
+
     final config = MapperConfig(
       ignoreFields: ignoreFields,
       fieldMaps: fieldMaps,
@@ -236,6 +254,8 @@ class AnnotationParser {
       generateReverse: generateReverse,
       reverseMethodName: reverseMethodNameRaw,
       methodName: methodName,
+      globalCollectionUpdateStrategy: globalCollectionUpdateStrategy,
+      fieldCollectionUpdateStrategies: fieldCollectionUpdateStrategies,
     );
 
     if (classElement != null) {
@@ -333,6 +353,20 @@ class AnnotationParser {
                   parsed,
                   defaultValueObj.type,
                 );
+              }
+            }
+
+            final collectionUpdateStrategyObj = reader.peek('collectionUpdateStrategy')?.objectValue;
+            if (collectionUpdateStrategyObj != null && !collectionUpdateStrategyObj.isNull) {
+              if (config.fieldCollectionUpdateStrategies.containsKey(targetName)) {
+                throw InvalidGenerationSourceError(
+                  'Conflict: The field "$targetName" has a collectionUpdateStrategy in both @OmniField and mappings. Please remove one of the definitions.',
+                  element: field,
+                );
+              }
+              final parsed = _parseValue(collectionUpdateStrategyObj);
+              if (parsed != null && parsed != 'null') {
+                config.fieldCollectionUpdateStrategies[targetName] = parsed;
               }
             }
           }

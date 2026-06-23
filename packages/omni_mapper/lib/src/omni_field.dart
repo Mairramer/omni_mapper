@@ -1,6 +1,8 @@
 /// @docImport 'omni_mapper_annotation.dart';
 library;
 
+import 'collection_update_strategy.dart';
+
 /// An annotation used to configure mapping behaviors on a per-field basis.
 ///
 /// Use this annotation directly on the fields of a class annotated with
@@ -20,9 +22,10 @@ class OmniField {
     this.ignore = false,
     this.custom,
     this.defaultValue,
+    this.collectionUpdateStrategy,
   });
 
-  /// The alias name for this field in the target or source class.
+  /// Defines the alias name for this field in the target or source class.
   ///
   /// If the class containing this field is configured as the target
   /// (mapping from another class), this specifies the name of the source field.
@@ -36,13 +39,19 @@ class OmniField {
   /// If `true`, this field will not be mapped to the target.
   final bool ignore;
 
-  /// A custom Dart expression used to map this field.
+  /// Defines a custom Dart expression used to map this field.
   ///
   /// For example: `custom: 'source.age.toString()'`
   final Object? custom;
 
-  /// A default value to use if the source field is null or missing.
+  /// Defines a default value to use if the source field is null or missing.
   ///
   /// For example: `defaultValue: 'active'`
   final Object? defaultValue;
+
+  /// Overrides the global collection update strategy for this specific field.
+  ///
+  /// If provided, this strategy will be used when [OmniMapper.generateUpdateMethod]
+  /// is true and this field is a collection type.
+  final CollectionUpdateStrategy? collectionUpdateStrategy;
 }

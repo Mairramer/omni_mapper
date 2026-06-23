@@ -3,6 +3,7 @@
 /// @docImport 'omni_hook.dart';
 library;
 
+import 'collection_update_strategy.dart';
 import 'mapping_rule.dart';
 import 'subclass_mapping.dart';
 
@@ -48,24 +49,24 @@ import 'subclass_mapping.dart';
 ///  * [MappingRule], which provides fine-grained control over how individual
 ///    fields are mapped.
 class OmniMapper {
-  /// The type to which the annotated class is converted.
+  /// Specifies the type to which the annotated class is converted.
   ///
   /// This defines the return type of the generated extension method.
   final Type? target;
 
-  /// The type from which the annotated class is converted.
+  /// Specifies the type from which the annotated class is converted.
   ///
   /// When this is provided, the extension is generated on this type instead of
   /// the annotated class, and the method will return an instance of the
   /// annotated class.
   final Type? from;
 
-  /// The name of the generated method.
+  /// Specifies the name of the generated method.
   ///
   /// Defaults to 'toEntity'.
   final String methodName;
 
-  /// A list of field names to ignore during mapping.
+  /// Specifies a list of field names to ignore during mapping.
   ///
   /// See also:
   ///
@@ -77,7 +78,7 @@ class OmniMapper {
   )
   final List<String> ignoreFields;
 
-  /// Default values for target fields that are missing in the source.
+  /// Specifies default values for target fields that are missing in the source.
   ///
   /// The values in this map must be valid Dart code snippets, such as `'true'`
   /// or `'"active"'`.
@@ -93,7 +94,7 @@ class OmniMapper {
   )
   final Map<String, Object?> defaultValues;
 
-  /// A list of [OmniConverter] types used to handle type mismatches.
+  /// Specifies a list of [OmniConverter] types used to handle type mismatches.
   ///
   /// The generator automatically applies these converters when the source and
   /// target field types do not match.
@@ -123,7 +124,7 @@ class OmniMapper {
   /// values in the target object during an update. Defaults to false.
   final bool ignoreIfNull;
 
-  /// The [OmniHook] used to inject custom logic before and after the mapping.
+  /// Specifies the [OmniHook] used to inject custom logic before and after the mapping.
   final Type? hook;
 
   /// Whether to automatically generate a reverse mapping extension.
@@ -132,24 +133,30 @@ class OmniMapper {
   /// to the source. Defaults to false.
   final bool generateReverse;
 
-  /// The name of the generated reverse mapping method.
+  /// Specifies the name of the generated reverse mapping method.
   ///
   /// If empty, defaults to `to${SourceClassName}`.
   final String reverseMethodName;
 
-  /// A list of rules that configure mapping behaviors on a per-field basis.
+  /// Specifies a list of rules that configure mapping behaviors on a per-field basis.
   ///
   /// This property provides a declarative alternative to [OmniField]
   /// and allows for custom Dart expressions.
   final List<MappingRule> mappings;
 
-  /// A list of polymorphic mappings for decentralized extensions.
+  /// Specifies the strategy to use when updating collection fields.
+  ///
+  /// Only applies when [generateUpdateMethod] is true. Defaults to
+  /// [CollectionUpdateStrategy.replace].
+  final CollectionUpdateStrategy collectionUpdateStrategy;
+
+  /// Specifies a list of polymorphic mappings for decentralized extensions.
   ///
   /// This instructs the generator to output dynamic routing based on the
   /// runtime type of the source object.
   final List<SubclassMapping> subclasses;
 
-  /// A list of other mapper classes to use for mapping complex nested fields.
+  /// Specifies a list of other mapper classes to use for mapping complex nested fields.
   ///
   /// This instructs the generator to invoke methods from the specified mappers
   /// when encountering a type mismatch that is handled by one of those mappers.
@@ -180,6 +187,7 @@ class OmniMapper {
     this.generateReverse = false,
     this.reverseMethodName = '',
     this.mappings = const [],
+    this.collectionUpdateStrategy = CollectionUpdateStrategy.replace,
     this.subclasses = const [],
     this.uses = const [],
   }) : assert(

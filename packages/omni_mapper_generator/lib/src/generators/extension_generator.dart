@@ -113,6 +113,8 @@ class ExtensionGenerator {
             ignoreFields: config.ignoreFields,
             defaultValues: config.defaultValues,
             ignoreIfNull: config.ignoreIfNull,
+            globalCollectionUpdateStrategy: config.globalCollectionUpdateStrategy,
+            fieldCollectionUpdateStrategies: config.fieldCollectionUpdateStrategies,
           ),
         );
       }
@@ -193,6 +195,8 @@ class ExtensionGenerator {
                     DefaultValueConfig
                   >{}, // Reverse mappings don't automatically mirror default values
               ignoreIfNull: config.ignoreIfNull,
+              globalCollectionUpdateStrategy: config.globalCollectionUpdateStrategy,
+              fieldCollectionUpdateStrategies: config.fieldCollectionUpdateStrategies,
             ),
           );
         }

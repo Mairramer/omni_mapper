@@ -1,5 +1,6 @@
 library;
 
+export 'src/collection_update_strategy.dart';
 export 'src/mapping_rule.dart';
 export 'src/omni_converter.dart';
 export 'src/omni_field.dart';

@@ -1,6 +1,8 @@
 /// @docImport 'omni_mapper_annotation.dart';
 library;
 
+import 'collection_update_strategy.dart';
+
 /// A rule that configures how a specific target field is mapped.
 ///
 /// This class provides fine-grained control over individual fields during the
@@ -12,20 +14,20 @@ library;
 ///  * [OmniMapper.mappings], which takes a list of these rules to configure
 ///    the mapping behavior.
 class MappingRule {
-  /// The name of the field in the target object.
+  /// Defines the name of the field in the target object.
   ///
   /// This must match the exact name of the property or constructor parameter
   /// in the destination class.
   final String target;
 
-  /// The name of the source field or a path to nested source properties.
+  /// Defines the name of the source field or a path to nested source properties.
   ///
   /// For example, `'user_id'` or `'user.name'`. When provided, the generator
   /// will use this source field instead of looking for a field with the same
   /// name as [target].
   final String? source;
 
-  /// A pure Dart expression evaluated to map the field.
+  /// Defines a pure Dart expression evaluated to map the field.
   ///
   /// This allows injecting custom logic into the generated mapping method.
   ///
@@ -45,11 +47,17 @@ class MappingRule {
   /// ignoring it may result in invalid generated code.
   final bool? ignore;
 
-  /// The default value to use if the field is missing from the source.
+  /// Defines the default value to use if the field is missing from the source.
   ///
   /// The value must be a valid Dart expression represented as a string. For
   /// example, `'"default_string"'`, `'true'`, or `'const []'`.
   final Object? defaultValue;
+
+  /// Overrides the global collection update strategy for this specific field.
+  ///
+  /// If provided, this strategy will be used when [OmniMapper.generateUpdateMethod]
+  /// is true and this field is a collection type.
+  final CollectionUpdateStrategy? collectionUpdateStrategy;
 
   const MappingRule(
     this.target, {
@@ -57,5 +65,6 @@ class MappingRule {
     this.custom,
     this.ignore,
     this.defaultValue,
+    this.collectionUpdateStrategy,
   });
 }
